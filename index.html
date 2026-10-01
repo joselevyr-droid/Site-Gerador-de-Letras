@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSS Console</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+
+            background: #151515;
+            color: white;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            display: flex;
+        }
+
+        /* =========================================
+           LADO ESQUERDO
+           ========================================= */
+
+        .left-panel {
+            width: 35%;
+            height: 100vh;
+
+            padding: 30px;
+
+            position: relative;
+
+            background: #111;
+
+            border-right: 1px solid #292929;
+
+            overflow: hidden;
+        }
+
+       /* =========================================
+   ÁREA DOS RETÂNGULOS
+   ========================================= */
+
+/* =========================================
+   WRAPPER DO POPUP
+   ========================================= */
+
+.popup-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+/* =========================================
+   ÁREA DOS RETÂNGULOS
+   ========================================= */
+
+.popup-area {
+    width: 100%;
+    height: 100%;
+
+    position: relative;
+
+    padding-top: 55px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scrollbar-width: none;
+
+    overscroll-behavior: contain;
+
+    scroll-behavior: auto;
+}
+
+
+/* Chrome / Edge / Safari */
+
+.popup-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* =========================================
+   BARRA DE ROLAGEM PERSONALIZADA
+   ========================================= */
+
+.custom-scrollbar {
+    position: absolute;
+
+    top: 55px;
+    right: 4px;
+
+    width: 6px;
+    height: calc(100% - 55px);
+
+    pointer-events: none;
+
+    opacity: 1;
+
+    z-index: 50;
+}
+
+
+/* =========================================
+   CILINDRO
+   ========================================= */
+
+.custom-scrollbar-thumb {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 5px;
+    min-height: 38px;
+
+    background: rgba(255, 255, 255, 0.30);
+
+    border-radius: 999px;
+
+    cursor: grab;
+
+    pointer-events: auto;
+
+    user-select: none;
+    touch-action: none;
+}
+
+
+/* Mouse sobre o cilindro */
+
+.custom-scrollbar-thumb:hover {
+    width: 6px;
+    background: rgba(255, 255, 255, 0.45);
+}
+
+
+/* Arrastando */
+
+.custom-scrollbar-thumb:active {
+    width: 6px;
+    background: rgba(255, 255, 255, 0.60);
+    cursor: grabbing;
+}
+
+
+        /* =========================================
+           BOTÃO +
+           ========================================= */
+
+        .add-button {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 42px;
+            height: 42px;
+
+            z-index: 100;
+
+            background: #1f1f1f;
+
+            border: 1px solid #353535;
+            border-radius: 7px;
+
+            color: #ffffff;
+
+            font-size: 25px;
+            font-weight: 300;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            transition:
+                background 0.15s,
+                border-color 0.15s,
+                transform 0.15s;
+        }
+
+        .add-button:hover {
+            background: #292929;
+            border-color: #505050;
+
+            transform: translateY(-1px);
+        }
+
+        .add-button:active {
+            transform: scale(0.95);
+        }
+
+        /* =========================================
+           RETÂNGULOS DOS TRECHOS
+           ========================================= */
+
+        .lyric-item {
+            position: relative;
+
+            width: 100%;
+            min-height: 115px;
+
+            margin-bottom: 12px;
+
+            padding: 18px 150px 18px 18px;
+
+            background: #181818;
+
+            border: 1px solid #303030;
+            border-radius: 9px;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.18);
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+        .lyric-item:focus-within {
+            border-color: #454545;
+            background: #1b1b1b;
+        }
+
+        /* =========================================
+           ÁREA DO TRECHO
+           ========================================= */
+
+        .lyric-text {
+            width: 100%;
+            min-height: 78px;
+
+            resize: none;
+
+            background: transparent;
+
+            border: none;
+            outline: none;
+
+            color: #eeeeee;
+
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            padding: 4px;
+
+            overflow-y: auto;
+        }
+
+        .lyric-text::placeholder {
+            color: #666;
+        }
+
+        /* =========================================
+           BOTÃO X
+           ========================================= */
+
+        .delete-button {
+            position: absolute;
+
+            top: 8px;
+            right: 9px;
+
+            width: 25px;
+            height: 25px;
+
+            padding: 0;
+
+            background: transparent;
+
+            color: #777;
+
+            border: none;
+
+            font-size: 17px;
+            font-weight: normal;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            border-radius: 5px;
+
+            transition:
+                background 0.15s,
+                color 0.15s;
+        }
+
+        .delete-button:hover {
+            background: #2d2d2d;
+            color: #ff5f56;
+        }
+
+        /* =========================================
+           BLOQUINHOS NUMÉRICOS
+           ========================================= */
+
+        .number-fields {
+            position: absolute;
+
+            right: 14px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 115px;
+
+            display: grid;
+
+            grid-template-columns: repeat(4, 1fr);
+
+            gap: 5px;
+        }
+
+        .number-field {
+            width: 25px;
+            height: 32px;
+
+            padding: 0;
+
+            background: #101010;
+
+            border: 1px solid #343434;
+            border-radius: 5px;
+
+            color: #eeeeee;
+
+            text-align: center;
+
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+
+            outline: none;
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+        .number-field:focus {
+            background: #151515;
+            border-color: #626262;
+        }
+
+        /* Remove setinhas dos inputs number */
+
+        .number-field::-webkit-inner-spin-button,
+        .number-field::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .number-field {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+
+        /* =========================================
+           LADO DIREITO
+           ========================================= */
+
+        .right-panel {
+            width: 65%;
+            height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 40px;
+
+            background: #1b1b1b;
+        }
+
+
+        /* =========================================
+           QUADRADO BRANCO
+           ========================================= */
+
+        .console-container {
+            width: min(700px, 90%);
+            aspect-ratio: 1 / 1;
+
+            background: white;
+
+            padding: 18px;
+
+            border-radius: 8px;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.45);
+
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+
+        /* =========================================
+           BARRA SUPERIOR
+           ========================================= */
+
+        .console-header {
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            color: #111;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .console-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status {
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            background: #27c93f;
+
+            box-shadow: 0 0 8px rgba(39, 201, 63, 0.6);
+        }
+
+
+        /* =========================================
+           BOTÕES
+           ========================================= */
+
+        .buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        button {
+            border: none;
+
+            padding: 7px 12px;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+            font-weight: bold;
+
+            transition: 0.15s;
+        }
+
+        #runButton {
+            background: #111;
+            color: white;
+        }
+
+        #runButton:hover {
+            background: #333;
+        }
+
+        #clearButton {
+            background: #e9e9e9;
+            color: #111;
+        }
+
+        #clearButton:hover {
+            background: #d5d5d5;
+        }
+
+
+        /* =========================================
+           CONSOLE
+           ========================================= */
+
+        #console {
+            flex: 1;
+            min-height: 0;
+
+            background: #050505;
+
+            border-radius: 5px;
+
+            padding: 16px;
+
+            color: white;
+
+            font-family:
+                "SFMono-Regular",
+                Consolas,
+                "Liberation Mono",
+                monospace;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            overflow-y: auto;
+
+            white-space: pre-wrap;
+
+            word-break: break-word;
+
+            display: flex;
+            flex-direction: column;
+
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+        }
+
+        .console-line {
+            margin-bottom: 3px;
+        }
+
+        .console-log {
+            color: #ffffff;
+        }
+
+        .console-info {
+            color: #62b0ff;
+        }
+
+        .console-warn {
+            color: #ffd166;
+        }
+
+        .console-error {
+            color: #ff5f56;
+        }
+
+        .console-success {
+            color: #55efc4;
+        }
+
+
+        /* =========================================
+           RESPONSIVO
+           ========================================= */
+
+        @media (max-width: 800px) {
+
+            body {
+                flex-direction: column;
+                overflow: auto;
+            }
+
+            .left-panel {
+                width: 100%;
+                height: 35vh;
+
+                border-right: none;
+                border-bottom: 1px solid #292929;
+            }
+
+            .right-panel {
+                width: 100%;
+                height: 65vh;
+
+                padding: 20px;
+            }
+
+            .console-container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================================
+         ESQUERDA
+         ========================================= -->
+
+    <section class="left-panel">
+
+<div class="popup-wrapper">
+
+    <button
+        class="add-button"
+        id="addButton"
+        title="Adicionar trecho"
+    >
+        +
+    </button>
+
+    <div class="popup-area" id="popupArea">
+
+        <div id="lyricList"></div>
+
+    </div>
+
+    <div
+        class="custom-scrollbar"
+        id="customScrollbar"
+    >
+        <div
+            class="custom-scrollbar-thumb"
+            id="customScrollbarThumb"
+        ></div>
+    </div>
+
+</div>
+
+    </section>
+
+
+    <!-- =========================================
+         DIREITA
+         ========================================= -->
+
+    <section class="right-panel">
+
+        <div class="console-container">
+
+            <div class="console-header">
+
+                <div class="console-title">
+                    <span class="status"></span>
+                    JSS Console
+                </div>
+
+                <div class="buttons">
+
+                    <button id="runButton">
+                        Executar
+                    </button>
+
+                    <button id="clearButton">
+                        Limpar
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="console"></div>
+
+        </div>
+
+    </section>
+
+
+<script>
+
+    /* ==================================================
+       EDITOR DE TRECHOS
+       ================================================== */
+
+    const addButton =
+        document.getElementById("addButton");
+
+    const lyricList =
+        document.getElementById("lyricList");
+
+/* ==================================================
+   ROLAGEM PERSONALIZADA
+   ================================================== */
+
+const popupArea =
+    document.getElementById("popupArea");
+
+const customScrollbar =
+    document.getElementById("customScrollbar");
+
+const customScrollbarThumb =
+    document.getElementById("customScrollbarThumb");
+
+
+/* ==================================================
+   ATUALIZA A BARRA
+   ================================================== */
+
+function atualizarScrollbar() {
+
+    const alturaVisivel =
+        popupArea.clientHeight;
+
+    const alturaTotal =
+        popupArea.scrollHeight;
+
+    const alturaBarra =
+        customScrollbar.clientHeight;
+
+
+    /*
+        Não precisa de scrollbar
+    */
+
+    if (
+        alturaTotal <= alturaVisivel ||
+        alturaBarra <= 0
+    ) {
+
+        customScrollbar.style.display = "none";
+
+        return;
+    }
+
+
+    /*
+        Mostra a scrollbar
+    */
+
+    customScrollbar.style.display = "block";
+
+
+    /*
+        Tamanho proporcional do thumb
+    */
+
+    const proporcao =
+        alturaVisivel / alturaTotal;
+
+
+    const alturaThumb =
+        Math.max(
+            38,
+            alturaBarra * proporcao
+        );
+
+
+    customScrollbarThumb.style.height =
+        `${alturaThumb}px`;
+
+
+    /*
+        Distância máxima do conteúdo
+    */
+
+    const maxScroll =
+        alturaTotal - alturaVisivel;
+
+
+    /*
+        Distância máxima do thumb
+    */
+
+    const maxThumb =
+        alturaBarra - alturaThumb;
+
+
+    /*
+        Porcentagem atual do scroll
+    */
+
+    const porcentagem =
+        popupArea.scrollTop / maxScroll;
+
+
+    /*
+        Posição do thumb
+    */
+
+    const posicao =
+        maxThumb * porcentagem;
+
+
+    customScrollbarThumb.style.transform =
+        `translateY(${posicao}px)`;
+}
+
+
+/* ==================================================
+   SCROLL NORMAL
+   ================================================== */
+
+popupArea.addEventListener(
+    "scroll",
+    atualizarScrollbar
+);
+
+
+/* ==================================================
+   RESIZE
+   ================================================== */
+
+window.addEventListener(
+    "resize",
+    atualizarScrollbar
+);
+
+
+/* ==================================================
+   ARRASTAR THUMB
+   ================================================== */
+
+let arrastandoScrollbar = false;
+
+let inicioMouseY = 0;
+
+let inicioScroll = 0;
+
+
+/*
+    Começou o arraste
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointerdown",
+    (event) => {
+
+        arrastandoScrollbar = true;
+
+        inicioMouseY =
+            event.clientY;
+
+        inicioScroll =
+            popupArea.scrollTop;
+
+
+        event.preventDefault();
+
+
+        customScrollbarThumb.setPointerCapture(
+            event.pointerId
+        );
+
+
+        customScrollbarThumb.style.cursor =
+            "grabbing";
+    }
+);
+
+
+/*
+    Movimento
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointermove",
+    (event) => {
+
+        if (!arrastandoScrollbar) {
+            return;
+        }
+
+
+        const deslocamento =
+            event.clientY -
+            inicioMouseY;
+
+
+        const alturaVisivel =
+            popupArea.clientHeight;
+
+        const alturaTotal =
+            popupArea.scrollHeight;
+
+        const alturaBarra =
+            customScrollbar.clientHeight;
+
+        const alturaThumb =
+            customScrollbarThumb.offsetHeight;
+
+
+        const maxScroll =
+            alturaTotal -
+            alturaVisivel;
+
+
+        const maxThumb =
+            alturaBarra -
+            alturaThumb;
+
+
+        if (
+            maxScroll <= 0 ||
+            maxThumb <= 0
+        ) {
+            return;
+        }
+
+
+        /*
+            Conversão:
+
+            movimento do mouse
+            ↓
+            movimento do thumb
+            ↓
+            movimento do conteúdo
+        */
+
+        const novoScroll =
+            inicioScroll +
+            (
+                deslocamento /
+                maxThumb
+            ) *
+            maxScroll;
+
+
+        popupArea.scrollTop =
+            Math.max(
+                0,
+                Math.min(
+                    maxScroll,
+                    novoScroll
+                )
+            );
+    }
+);
+
+
+/*
+    Terminou o arraste
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointerup",
+    (event) => {
+
+        arrastandoScrollbar = false;
+
+        customScrollbarThumb.style.cursor =
+            "grab";
+
+
+        try {
+
+            customScrollbarThumb.releasePointerCapture(
+                event.pointerId
+            );
+
+        } catch {
+
+        }
+    }
+);
+
+
+/*
+    Cancelamento
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoScrollbar = false;
+
+        customScrollbarThumb.style.cursor =
+            "grab";
+    }
+);
+
+
+/* ==================================================
+   INICIALIZA
+   ================================================== */
+
+atualizarScrollbar();
+
+
+    /*
+        Cria um novo retângulo de trecho.
+    */
+
+    function criarTrecho() {
+
+        const item =
+            document.createElement("div");
+
+        item.className = "lyric-item";
+
+
+        /* =========================================
+           BOTÃO X
+           ========================================= */
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "delete-button";
+
+        deleteButton.textContent = "×";
+
+        deleteButton.title =
+            "Excluir trecho";
+
+
+       deleteButton.addEventListener(
+    "click",
+    () => {
+
+        item.remove();
+
+        atualizarScrollbar();
+
+    }
+);
+
+        /* =========================================
+           ÁREA DE TEXTO
+           ========================================= */
+
+        const textArea =
+            document.createElement("textarea");
+
+        textArea.className =
+            "lyric-text";
+
+        textArea.placeholder =
+            "Digite o trecho que será falado...";
+
+
+        /* =========================================
+           BLOQUINHOS NUMÉRICOS
+           ========================================= */
+
+        const numberFields =
+            document.createElement("div");
+
+        numberFields.className =
+            "number-fields";
+
+
+        for (let i = 0; i < 4; i++) {
+
+            const input =
+                document.createElement("input");
+
+            input.type = "number";
+
+            input.className =
+                "number-field";
+
+            input.placeholder =
+                "0";
+
+            input.min = "0";
+
+            /*
+                Impede números muito grandes
+                de ocuparem o bloquinho.
+            */
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    if (input.value.length > 4) {
+
+                        input.value =
+                            input.value.slice(0, 4);
+
+                    }
+
+                }
+            );
+
+            numberFields.appendChild(input);
+        }
+
+
+        /* =========================================
+           MONTA O RETÂNGULO
+           ========================================= */
+
+        item.appendChild(deleteButton);
+
+        item.appendChild(textArea);
+
+        item.appendChild(numberFields);
+
+      lyricList.appendChild(item);
+
+
+/*
+    Atualiza a barra sem alterar
+    a posição atual da tela.
+*/
+
+atualizarScrollbar();
+
+    }
+
+
+    /*
+        Clique no +
+    */
+
+    addButton.addEventListener(
+        "click",
+        criarTrecho
+    );
+
+
+    /* ==================================================
+       CONSOLE VISUAL
+       ================================================== */
+
+    const output =
+        document.getElementById("console");
+
+
+    function addConsoleLine(
+        text,
+        type = "log"
+    ) {
+
+        const line =
+            document.createElement("div");
+
+        line.classList.add(
+            "console-line"
+        );
+
+        line.classList.add(
+            "console-" + type
+        );
+
+        line.textContent = text;
+
+        output.appendChild(line);
+
+        output.scrollTop =
+            output.scrollHeight;
+    }
+
+
+    function formatConsoleValue(value) {
+
+        if (typeof value === "string") {
+            return value;
+        }
+
+        if (typeof value === "undefined") {
+            return "undefined";
+        }
+
+        if (value === null) {
+            return "null";
+        }
+
+        if (typeof value === "object") {
+
+            try {
+
+                return JSON.stringify(
+                    value,
+                    null,
+                    2
+                );
+
+            }
+
+            catch {
+
+                return String(value);
+
+            }
+        }
+
+        return String(value);
+    }
+
+
+    /* ==================================================
+       CONSOLE CUSTOMIZADO
+       ================================================== */
+
+    const customConsole = {
+
+        log: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "log"
+            );
+        },
+
+
+        info: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "info"
+            );
+        },
+
+
+        warn: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "warn"
+            );
+        },
+
+
+        error: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "error"
+            );
+        },
+
+
+        clear: function () {
+
+            output.innerHTML = "";
+
+        }
+    };
+
+
+    /* ==================================================
+       EXECUTOR
+       ================================================== */
+
+    async function executarCodigo(codigo) {
+
+        const executar =
+            new Function(
+                "console",
+                `
+                "use strict";
+
+                return (async () => {
+
+                    ${codigo}
+
+                })();
+                `
+            );
+
+
+        try {
+
+            await executar(
+                customConsole
+            );
+
+        }
+
+        catch (erro) {
+
+            customConsole.error(
+                erro.stack ||
+                erro.message
+            );
+
+        }
+    }
+
+
+    /* ==================================================
+       SEU JSS
+       ================================================== */
+
+    const codigoJSS = `
+
+const lyric = [];
+
+let memoria = "";
+
+function sepletra () {
+
+  for (let i = 0; i < lyric.length; i++){
+
+    lyric[i][0] = lyric[i][0].split(" ");
+
+  };
+
+  return;
+};
+
+
+function timer (t) {
+
+  return new Promise ((resolve) => 
+    setTimeout (resolve, t));
+
+  return;
+};
+
+
+async function falante (t, q, l) {
+
+  let memorypad = "";
+
+  if (memoria !== "") {
+
+    memorypad = memoria;
+
+  };
+
+
+  for (let i = 0; i < q; i++) {
+
+    for (
+      let y = 0;
+      y < lyric[l][0][i].length;
+      y++
+    ) {
+
+      console.clear();
+
+      console.log(
+        memorypad +
+        lyric[l][0][i][y]
+      );
+
+      memorypad =
+        memorypad +
+        lyric[l][0][i][y];
+
+      await timer(t);
+
+    };
+
+  };
+
+
+  if (lyric[l][lyric[l].length - 4] > 0) {
+
+    memoria = "";
+    memorypad = "";
+
+  };
+
+
+  if (lyric[l][lyric[l].length - 1] > 0) {
+
+    if (
+      lyric[l][lyric[l].length - 4] <= 0
+    ) {
+
+      memoria = memorypad + " ";
+
+    } else {
+
+      memoria = "";
+      memorypad = "";
+
+    };
+
+  };
+
+  return;
+
+};
+
+
+async function escrita (l) {
+
+  let quantia =
+    lyric[l][0].length;
+
+  let espaco =
+    quantia - 1;
+
+
+  for (let i = 0; i < quantia; i++) {
+
+    lyric[l][0][i] =
+      lyric[l][0][i].split("");
+
+
+    if (espaco > 0) {
+
+      lyric[l][0][i].push(" ");
+
+      espaco--;
+
+    };
+
+  };
+
+
+  let total = 0;
+
+
+  for (let i = 0; i < quantia; i++) {
+
+    total =
+      total +
+      lyric[l][0][i].length;
+
+  };
+
+
+  let tempo =
+    (
+      lyric[l][lyric[l].length - 3]
+      / total
+    ) * 1000;
+
+
+  await falante(
+    tempo,
+    quantia,
+    l
+  );
+
+
+  if (
+    lyric[l][lyric[l].length - 2] > 0
+  ) {
+
+    await timer(
+      lyric[l][lyric[l].length - 2] * 1000
+    );
+
+  };
+
+  return;
+
+};
+
+
+async function song () {
+
+  await sepletra();
+
+  for (
+    let i = 0;
+    i < lyric.length;
+    i++
+  ) {
+
+    await escrita(i);
+
+  };
+
+};
+
+
+song();
+
+`;
+
+
+    /* ==================================================
+       BOTÃO EXECUTAR
+       ================================================== */
+
+    document
+        .getElementById("runButton")
+        .addEventListener(
+            "click",
+            () => {
+
+                executarCodigo(
+                    codigoJSS
+                );
+
+            }
+        );
+
+
+    /* ==================================================
+       BOTÃO LIMPAR
+       ================================================== */
+
+    document
+        .getElementById("clearButton")
+        .addEventListener(
+            "click",
+            () => {
+
+                customConsole.clear();
+
+            }
+        );
+
+
+    /* ==================================================
+       MENSAGEM INICIAL
+       ================================================== */
+
+    customConsole.log(
+        "JSS Console iniciado."
+    );
+
+    customConsole.log(
+        "Aguardando execução..."
+    );
+
+</script>
+
+</body>
+</html>

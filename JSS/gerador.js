@@ -1,26 +1,4 @@
-const lyric = [
-  ["Eu não quero saber", 0, 2, 0, 0],
-  ["Eu não tou nem aí", 0, 2, 3, 0],
-  ["Eu sou penso em você,", 0, 1, 0, 1],
-  ["nunca mais vou dormir", 1, 2, 3, 0],
-["Você não disse nada,", 0, 2, 0, 1],
-["Eu percebi de", 0, 1, 0, 1],
-["longeeee", 1, 1.5, 2, 0],
-["Quer cheirar meu cabelo e", 0, 1.5, 0, 1],
-["quer ouvir o meu", 0, 1, 0, 1],
-["nomeeee", 1, 2, 2, 0],
-["Didi!", 0, 1, 0, 1],
-["Didi!", 1, 1, 1, 0],
-["Como é bom te ter por aqui", 0, 3, 1, 0],
-["Renato", 0, 1, 0, 1],
-["Aragão!", 1, 2, 0, 0],
-["Vem pegar na minha mão", 0, 3, 1, 0],
-["Didi!", 0, 1, 0, 1],
-["Didi!", 1, 1, 1, 0],
-["Como é bom te ter por aqui", 0, 3, 1, 0],
-["Renato", 0, 1, 0, 1],
-["Aragão!", 1, 2, 0, 0]
-];
+const lyric = [];
 
 let memoria = "";
 

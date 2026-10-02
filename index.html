@@ -56,6 +56,8 @@
 
     width: 100%;
     height: 100%;
+
+    overflow: hidden;
 }
 
 
@@ -64,91 +66,84 @@
    ========================================= */
 
 .popup-area {
-    width: 100%;
-    height: 100%;
+    position: absolute;
 
-    position: relative;
+    top: 55px;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-    padding-top: 55px;
+    padding: 0 14px 20px 0;
 
-    overflow-y: auto;
+    overflow-y: scroll;
     overflow-x: hidden;
 
     scrollbar-width: none;
+    -ms-overflow-style: none;
 
     overscroll-behavior: contain;
-
-    scroll-behavior: auto;
 }
-
-
-/* Chrome / Edge / Safari */
 
 .popup-area::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
+
 /* =========================================
-   BARRA DE ROLAGEM PERSONALIZADA
+   SCROLLBAR PERSONALIZADA
    ========================================= */
 
 .custom-scrollbar {
     position: absolute;
 
     top: 55px;
-    right: 4px;
+    right: 2px;
+    bottom: 0;
 
-    width: 6px;
-    height: calc(100% - 55px);
+    width: 8px;
+
+    background: rgba(255, 0, 0, 0.15);
+
+    z-index: 9999;
 
     pointer-events: none;
-
-    opacity: 1;
-
-    z-index: 50;
 }
 
 
 /* =========================================
-   CILINDRO
+   THUMB
    ========================================= */
 
 .custom-scrollbar-thumb {
     position: absolute;
 
     top: 0;
-    right: 0;
+    left: 1px;
 
-    width: 5px;
-    min-height: 38px;
+    width: 6px;
+    height: 40px;
 
-    background: rgba(255, 255, 255, 0.30);
+    background: #ffffff;
 
     border-radius: 999px;
 
-    cursor: grab;
-
     pointer-events: auto;
+
+    cursor: grab;
 
     user-select: none;
     touch-action: none;
+
+    z-index: 10000;
 }
-
-
-/* Mouse sobre o cilindro */
 
 .custom-scrollbar-thumb:hover {
-    width: 6px;
-    background: rgba(255, 255, 255, 0.45);
+    background: #cccccc;
 }
 
-
-/* Arrastando */
-
 .custom-scrollbar-thumb:active {
-    width: 6px;
-    background: rgba(255, 255, 255, 0.60);
+    background: #aaaaaa;
     cursor: grabbing;
 }
 
@@ -236,31 +231,42 @@
         /* =========================================
            ÁREA DO TRECHO
            ========================================= */
+.lyric-text {
+    width: 100%;
+    min-height: 78px;
 
-        .lyric-text {
-            width: 100%;
-            min-height: 78px;
+    resize: none;
 
-            resize: none;
+    background: transparent;
 
-            background: transparent;
+    border: none;
+    outline: none;
 
-            border: none;
-            outline: none;
+    color: #eeeeee;
 
-            color: #eeeeee;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
 
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 14px;
+    line-height: 1.5;
 
-            line-height: 1.5;
+    padding: 4px;
 
-            padding: 4px;
+    /* Remove a scrollbar interna */
+    overflow-y: hidden;
+    overflow-x: hidden;
 
-            overflow-y: auto;
-        }
+    /* Impede scrollbar nativa */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
 
-        .lyric-text::placeholder {
+.lyric-text::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+               .lyric-text::placeholder {
             color: #666;
         }
 
@@ -691,50 +697,33 @@ const customScrollbarThumb =
 
 
 /* ==================================================
-   ATUALIZA A BARRA
+   ATUALIZA SCROLLBAR
    ================================================== */
 
 function atualizarScrollbar() {
 
-    const alturaVisivel =
-        popupArea.clientHeight;
+    const alturaVisivel = popupArea.clientHeight;
+    const alturaTotal = popupArea.scrollHeight;
+    const alturaBarra = customScrollbar.clientHeight;
 
-    const alturaTotal =
-        popupArea.scrollHeight;
-
-    const alturaBarra =
-        customScrollbar.clientHeight;
-
-
-    /*
-        Não precisa de scrollbar
-    */
+    console.log({
+        alturaVisivel,
+        alturaTotal,
+        alturaBarra
+    });
 
     if (
-        alturaTotal <= alturaVisivel ||
-        alturaBarra <= 0
+        alturaBarra <= 0 ||
+        alturaTotal <= alturaVisivel
     ) {
-
-        customScrollbar.style.display = "none";
-
+        customScrollbar.style.visibility = "hidden";
         return;
     }
 
-
-    /*
-        Mostra a scrollbar
-    */
-
-    customScrollbar.style.display = "block";
-
-
-    /*
-        Tamanho proporcional do thumb
-    */
+    customScrollbar.style.visibility = "visible";
 
     const proporcao =
         alturaVisivel / alturaTotal;
-
 
     const alturaThumb =
         Math.max(
@@ -742,50 +731,27 @@ function atualizarScrollbar() {
             alturaBarra * proporcao
         );
 
-
     customScrollbarThumb.style.height =
         `${alturaThumb}px`;
-
-
-    /*
-        Distância máxima do conteúdo
-    */
 
     const maxScroll =
         alturaTotal - alturaVisivel;
 
-
-    /*
-        Distância máxima do thumb
-    */
-
     const maxThumb =
         alturaBarra - alturaThumb;
 
-
-    /*
-        Porcentagem atual do scroll
-    */
-
     const porcentagem =
-        popupArea.scrollTop / maxScroll;
-
-
-    /*
-        Posição do thumb
-    */
-
-    const posicao =
-        maxThumb * porcentagem;
-
+        maxScroll > 0
+            ? popupArea.scrollTop / maxScroll
+            : 0;
 
     customScrollbarThumb.style.transform =
-        `translateY(${posicao}px)`;
+        `translateY(${maxThumb * porcentagem}px)`;
 }
 
 
 /* ==================================================
-   SCROLL NORMAL
+   SCROLL
    ================================================== */
 
 popupArea.addEventListener(
@@ -795,11 +761,27 @@ popupArea.addEventListener(
 
 
 /* ==================================================
-   RESIZE
+   RESIZE DA JANELA
    ================================================== */
 
 window.addEventListener(
     "resize",
+    atualizarScrollbar
+);
+
+
+const observer = new ResizeObserver(() => {
+    requestAnimationFrame(atualizarScrollbar);
+});
+
+observer.observe(popupArea);
+observer.observe(lyricList);
+
+/* ==================================================
+   INICIALIZA
+   ================================================== */
+
+requestAnimationFrame(
     atualizarScrollbar
 );
 
@@ -1028,6 +1010,18 @@ atualizarScrollbar();
         textArea.placeholder =
             "Digite o trecho que será falado...";
 
+textArea.addEventListener(
+    "input",
+    () => {
+
+        textArea.style.height = "auto";
+
+        textArea.style.height =
+            textArea.scrollHeight + "px";
+
+        atualizarScrollbar();
+    }
+);
 
         /* =========================================
            BLOQUINHOS NUMÉRICOS

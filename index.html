@@ -1351,35 +1351,9 @@ padding: 22px 24px;
     </div>
 
 </div>
-  
-<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-
+    
 <script>
 
-const ffmpeg = new FFmpegWASM.FFmpeg();
-
-let ffmpegCarregado = false;
-
-async function carregarFFmpeg() {
-
-    if (ffmpegCarregado) {
-        return;
-    }
-
-    const baseURL =
-        "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
-
-    await ffmpeg.load({
-        coreURL:
-            baseURL + "/ffmpeg-core.js",
-
-        wasmURL:
-            baseURL + "/ffmpeg-core.wasm"
-    });
-
-    ffmpegCarregado = true;
-}
-  
     /* ==================================================
        EDITOR DE TRECHOS
        ================================================== */

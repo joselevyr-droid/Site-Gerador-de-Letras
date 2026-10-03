@@ -1352,8 +1352,36 @@ padding: 22px 24px;
 
 </div>
   
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+  
 <script>
+const FFmpegClass = FFmpeg.FFmpeg;
 
+const ffmpeg =
+    new FFmpegClass();
+
+let ffmpegCarregado = false;
+
+async function carregarFFmpeg() {
+
+    if (ffmpegCarregado) {
+        return;
+    }
+
+    const baseURL =
+        "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+
+    await ffmpeg.load({
+        coreURL:
+            baseURL + "/ffmpeg-core.js",
+
+        wasmURL:
+            baseURL + "/ffmpeg-core.wasm"
+    });
+
+    ffmpegCarregado = true;
+}
+  
     /* ==================================================
        EDITOR DE TRECHOS
        ================================================== */
@@ -1814,6 +1842,377 @@ removeAllButton.addEventListener(
     const output =
         document.getElementById("console");
 
+  /* ==================================================
+   GRAVAÇÃO DO CONSOLE
+   ================================================== */
+
+let gravandoConsole = false;
+
+let mediaRecorder = null;
+
+let partesGravacao = [];
+
+let canvasGravacao = null;
+
+let contextoGravacao = null;
+
+let animationGravacao = null;
+
+
+/* ==================================================
+   DESENHA O CONSOLE NO CANVAS
+   ================================================== */
+
+function desenharConsoleNoCanvas() {
+
+    if (!gravandoConsole) {
+        return;
+    }
+
+    const largura =
+        output.clientWidth;
+
+    const altura =
+        output.clientHeight;
+
+    if (
+        largura <= 0 ||
+        altura <= 0
+    ) {
+        animationGravacao =
+            requestAnimationFrame(
+                desenharConsoleNoCanvas
+            );
+
+        return;
+    }
+
+
+    const escala = 1;
+
+    canvasGravacao.width =
+        largura * escala;
+
+    canvasGravacao.height =
+        altura * escala;
+
+
+    contextoGravacao.clearRect(
+        0,
+        0,
+        canvasGravacao.width,
+        canvasGravacao.height
+    );
+
+
+    /* =========================================
+       FUNDO
+       ========================================= */
+
+    contextoGravacao.fillStyle =
+        getComputedStyle(output)
+            .backgroundColor;
+
+    contextoGravacao.fillRect(
+        0,
+        0,
+        canvasGravacao.width,
+        canvasGravacao.height
+    );
+
+
+    /* =========================================
+       FONTE
+       ========================================= */
+
+    const estilo =
+        getComputedStyle(output);
+
+    const tamanhoFonte =
+        parseFloat(
+            estilo.fontSize
+        );
+
+    const alturaLinha =
+        parseFloat(
+            estilo.lineHeight
+        );
+
+
+    contextoGravacao.font =
+        `${tamanhoFonte}px ${estilo.fontFamily}`;
+
+    contextoGravacao.textAlign =
+        "center";
+
+    contextoGravacao.textBaseline =
+        "middle";
+
+
+    /* =========================================
+       LINHAS
+       ========================================= */
+
+    const linhas =
+        output.querySelectorAll(
+            ".console-line"
+        );
+
+
+    const linhasArray =
+        Array.from(linhas);
+
+
+    if (linhasArray.length === 0) {
+
+        animationGravacao =
+            requestAnimationFrame(
+                desenharConsoleNoCanvas
+            );
+
+        return;
+    }
+
+
+    const espaco =
+        alturaLinha + 3;
+
+
+    const alturaTotal =
+        linhasArray.length * espaco;
+
+
+    let y =
+        (
+            altura -
+            alturaTotal
+        ) / 2 +
+        espaco / 2;
+
+
+    for (const linha of linhasArray) {
+
+        const estiloLinha =
+            getComputedStyle(linha);
+
+
+        contextoGravacao.fillStyle =
+            estiloLinha.color;
+
+
+        contextoGravacao.fillText(
+            linha.textContent,
+            largura / 2,
+            y
+        );
+
+
+        y += espaco;
+    }
+
+
+    animationGravacao =
+        requestAnimationFrame(
+            desenharConsoleNoCanvas
+        );
+}
+
+
+/* ==================================================
+   INICIA GRAVAÇÃO
+   ================================================== */
+
+async function iniciarGravacaoConsole() {
+
+    canvasGravacao =
+        document.createElement("canvas");
+
+    canvasGravacao.width =
+        output.clientWidth;
+
+    canvasGravacao.height =
+        output.clientHeight;
+
+
+    contextoGravacao =
+        canvasGravacao.getContext("2d");
+
+
+    const stream =
+        canvasGravacao.captureStream(30);
+
+
+    partesGravacao = [];
+
+
+    mediaRecorder =
+        new MediaRecorder(
+            stream,
+            {
+                mimeType:
+                    "video/webm;codecs=vp8"
+            }
+        );
+
+
+    mediaRecorder.ondataavailable =
+        event => {
+
+            if (
+                event.data &&
+                event.data.size > 0
+            ) {
+
+                partesGravacao.push(
+                    event.data
+                );
+
+            }
+        };
+
+
+    gravandoConsole = true;
+
+
+    desenharConsoleNoCanvas();
+
+
+    mediaRecorder.start(100);
+}
+
+
+/* ==================================================
+   PARA GRAVAÇÃO
+   ================================================== */
+
+function pararGravacaoConsole() {
+
+    return new Promise(resolve => {
+
+        if (!mediaRecorder) {
+            resolve(null);
+            return;
+        }
+
+
+        mediaRecorder.onstop =
+            () => {
+
+                gravandoConsole = false;
+
+
+                if (animationGravacao) {
+
+                    cancelAnimationFrame(
+                        animationGravacao
+                    );
+
+                    animationGravacao =
+                        null;
+                }
+
+
+                const blob =
+                    new Blob(
+                        partesGravacao,
+                        {
+                            type:
+                                "video/webm"
+                        }
+                    );
+
+
+                resolve(blob);
+            };
+
+
+        mediaRecorder.stop();
+    });
+}
+
+
+/* ==================================================
+   CONVERTE WEBM → MP4
+   ================================================== */
+
+async function converterParaMP4(webmBlob) {
+
+    await carregarFFmpeg();
+
+
+    await ffmpeg.writeFile(
+        "entrada.webm",
+        new Uint8Array(
+            await webmBlob.arrayBuffer()
+        )
+    );
+
+
+    await ffmpeg.exec([
+        "-i",
+        "entrada.webm",
+
+        "-c:v",
+        "libx264",
+
+        "-pix_fmt",
+        "yuv420p",
+
+        "-movflags",
+        "+faststart",
+
+        "saida.mp4"
+    ]);
+
+
+    const arquivo =
+        await ffmpeg.readFile(
+            "saida.mp4"
+        );
+
+
+    return new Blob(
+        [arquivo.buffer],
+        {
+            type:
+                "video/mp4"
+        }
+    );
+}
+
+
+/* ==================================================
+   BAIXA ARQUIVO
+   ================================================== */
+
+function baixarMP4(blob) {
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.download =
+        "GeLetra.mp4";
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
+}
 
     function addConsoleLine(
         text,
@@ -1951,7 +2350,13 @@ removeAllButton.addEventListener(
        EXECUTOR
        ================================================== */
 let execucaoAtual = 0;
-async function executarCodigo(codigo, idExecucao) {
+
+async function executarCodigo(
+    codigo,
+    idExecucao,
+    gravar = false
+) {
+
     const executar =
         new Function(
             "console",
@@ -1967,23 +2372,60 @@ async function executarCodigo(codigo, idExecucao) {
             `
         );
 
+
     try {
+
         await executar(
             customConsole,
             () => idExecucao === execucaoAtual
         );
+
+
     } catch (erro) {
-        if (idExecucao !== execucaoAtual) return;
+
+        if (
+            idExecucao !== execucaoAtual
+        ) {
+            return;
+        }
+
 
         customConsole.error(
-            erro.stack || erro.message
+            erro.stack ||
+            erro.message
         );
-    } finally {
-        if (idExecucao !== execucaoAtual) return;
 
-        customConsole.clear();
-        customConsole.log("JSS Console iniciado.");
-        customConsole.log("Aguardando execução...");
+
+    } finally {
+
+        if (
+            idExecucao !== execucaoAtual
+        ) {
+            return;
+        }
+
+
+        /*
+            Durante uma gravação,
+            NÃO limpa o console.
+
+            Assim o último texto
+            continua aparecendo no
+            último frame do vídeo.
+        */
+
+        if (!gravar) {
+
+            customConsole.clear();
+
+            customConsole.log(
+                "JSS Console iniciado."
+            );
+
+            customConsole.log(
+                "Aguardando execução..."
+            );
+        }
     }
 }
 
@@ -2235,12 +2677,19 @@ function gerarLyric() {
    EXECUTAR LETRA
    ================================================== */
 
-async function executarLetra() {
+async function executarLetra(
+    gravar = false
+) {
+
     execucaoAtual++;
 
-    const idExecucao = execucaoAtual;
+    const idExecucao =
+        execucaoAtual;
 
-    const dadosLyric = gerarLyric();
+
+    const dadosLyric =
+        gerarLyric();
+
 
     const codigo =
         codigoJSS.replace(
@@ -2248,7 +2697,69 @@ async function executarLetra() {
             `const lyric = ${JSON.stringify(dadosLyric)};`
         );
 
-    await executarCodigo(codigo, idExecucao);
+
+    if (gravar) {
+
+        /*
+            Remove as mensagens iniciais
+            ANTES de começar a gravação.
+        */
+
+        customConsole.clear();
+
+
+        /*
+            Começa a gravar somente
+            a partir daqui.
+        */
+
+        await iniciarGravacaoConsole();
+    }
+
+
+    await executarCodigo(
+        codigo,
+        idExecucao,
+        gravar
+    );
+
+
+    if (gravar) {
+
+        /*
+            Dá tempo para o último
+            frame ser desenhado.
+        */
+
+        await new Promise(
+            resolve =>
+                requestAnimationFrame(
+                    () => resolve()
+                )
+        );
+
+
+        const webm =
+            await pararGravacaoConsole();
+
+
+        if (!webm) {
+            return;
+        }
+
+
+        /*
+            Converte para MP4.
+        */
+
+        const mp4 =
+            await converterParaMP4(
+                webm
+            );
+
+
+        baixarMP4(mp4);
+    }
 }
 
 document
@@ -2258,7 +2769,57 @@ document
         executarLetra
     );
   
+/* ==================================================
+   DOWNLOAD
+   ================================================== */
 
+const downloadButton =
+    document.getElementById(
+        "downloadButton"
+    );
+
+
+downloadButton.addEventListener(
+    "click",
+    async () => {
+
+        if (gravandoConsole) {
+            return;
+        }
+
+
+        downloadButton.disabled =
+            true;
+
+        downloadButton.textContent =
+            "Gravando...";
+
+
+        try {
+
+            await executarLetra(true);
+
+
+        } catch (erro) {
+
+            console.error(erro);
+
+            alert(
+                "Não foi possível gerar o vídeo."
+            );
+
+
+        } finally {
+
+            downloadButton.disabled =
+                false;
+
+            downloadButton.textContent =
+                "Download";
+        }
+    }
+);
+  
     /* ==================================================
        MENSAGEM INICIAL
        ================================================== */

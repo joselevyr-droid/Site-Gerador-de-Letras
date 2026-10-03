@@ -103,7 +103,7 @@
 
     width: 8px;
 
-    background: rgba(255, 0, 0, 0.15);
+    background: rgba(54, 54, 54, 0.14901960784313725);
 
     z-index: 9999;
 
@@ -189,13 +189,61 @@
             background: #292929;
             border-color: #505050;
 
-            transform: translateY(-1px);
+            transform: none;
         }
 
         .add-button:active {
             transform: scale(0.95);
         }
 
+      /* =========================================
+   BOTÃO -
+   ========================================= */
+
+.remove-all-button {
+    position: absolute;
+
+    top: 0;
+    left: 50px;
+
+    width: 42px;
+    height: 42px;
+
+    z-index: 100;
+
+    background: #241515;
+
+    border: 1px solid #4a2929;
+    border-radius: 7px;
+
+    color: #ff5f56;
+
+    font-size: 25px;
+    font-weight: 300;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        transform 0.15s;
+}
+
+.remove-all-button:hover {
+    background: #351b1b;
+    border-color: #7a3a3a;
+
+    transform: none;
+}
+
+.remove-all-button:active {
+    transform: scale(0.95);
+}
+      
         /* =========================================
            RETÂNGULOS DOS TRECHOS
            ========================================= */
@@ -441,17 +489,21 @@
             gap: 8px;
         }
 
-        .status {
-            width: 9px;
-            height: 9px;
+.status {
+    position: relative;
 
-            border-radius: 50%;
+    width: 9px;
+    height: 9px;
 
-            background: #27c93f;
+    border-radius: 50%;
 
-            box-shadow: 0 0 8px rgba(39, 201, 63, 0.6);
-        }
+    background: #27c93f;
 
+    box-shadow:
+        0 0 8px rgba(39, 201, 63, 0.6);
+
+    flex-shrink: 0;
+}
 
         /* =========================================
            BOTÕES
@@ -477,24 +529,38 @@
             transition: 0.15s;
         }
 
-        #runButton {
-            background: #111;
-            color: white;
-        }
+        #downloadButton {
+    background: #e9e9e9;
+    color: #111;
+}
 
-        #runButton:hover {
-            background: #333;
-        }
+#downloadButton:hover {
+    background: #d5d5d5;
+}
 
-        #clearButton {
-            background: #e9e9e9;
-            color: #111;
-        }
+#playButton {
+    width: 32px;
+    height: 30px;
 
-        #clearButton:hover {
-            background: #d5d5d5;
-        }
+    padding: 0;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #111;
+    color: white;
+
+    font-size: 11px;
+}
+
+#playButton:hover {
+    background: #333;
+}
+
+#playButton:active {
+    transform: scale(0.94);
+}
 
         /* =========================================
            CONSOLE
@@ -574,6 +640,7 @@
             }
 
             .left-panel {
+              order: 2;
                 width: 100%;
                 height: 35vh;
 
@@ -582,6 +649,7 @@
             }
 
             .right-panel {
+              order: 1;
                 width: 100%;
                 height: 65vh;
 
@@ -592,6 +660,415 @@
                 width: 95%;
             }
         }
+
+      /* ==================================================
+   CONFIGURAÇÕES
+   ================================================== */
+
+.console-title {
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   FUNDO DO POPUP
+   ================================================== */
+
+.settings-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 50000;
+}
+
+
+/* ==================================================
+   POPUP
+   ================================================== */
+
+.settings-popup {
+    position: relative;
+
+   width: min(360px, 90vw);
+min-height: 0;
+
+padding: 22px 24px;
+
+    background: #ffffff;
+
+    color: #111;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ==================================================
+   X
+   ================================================== */
+
+.settings-close {
+    position: absolute;
+
+    top: 8px;
+    right: 9px;
+
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: #777;
+
+    font-size: 22px;
+    font-weight: normal;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-close:hover {
+    background: #eeeeee;
+
+    color: #111;
+}
+
+
+/* ==================================================
+   OPÇÕES
+   ================================================== */
+
+.settings-screen {
+    width: 100%;
+}
+
+.settings-option {
+    width: 100%;
+    min-height: 48px;
+
+    padding: 10px 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    background: transparent;
+
+    color: #111;
+
+    border: none;
+
+    font-size: 13px;
+
+    text-align: left;
+}
+
+
+/* ==================================================
+   QUADRADO DA COR
+   ================================================== */
+
+.color-preview {
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+
+    border: 1px solid #bbbbbb;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   FONTE
+   ================================================== */
+
+.font-option {
+    cursor: pointer;
+
+    border-top: 1px solid #eeeeee;
+}
+
+.font-option:hover {
+    background: #f5f5f5;
+}
+
+
+/* ==================================================
+   BOTÃO VOLTAR
+   ================================================== */
+
+.back-button {
+    padding: 6px 9px;
+
+    background: #eeeeee;
+
+    color: #111;
+
+    border-radius: 5px;
+
+    margin-bottom: 18px;
+}
+
+.back-button:hover {
+    background: #dddddd;
+}
+
+
+.settings-screen h3 {
+    margin: 0 0 18px;
+
+    font-size: 14px;
+}
+
+
+/* ==================================================
+   SELETOR RGB
+   ================================================== */
+
+.rgb-picker {
+    width: 100%;
+}
+
+
+/* ==================================================
+   GRADIENTE
+   ================================================== */
+
+.color-gradient {
+    position: relative;
+
+    width: 100%;
+    height: 150px;
+
+    border-radius: 7px;
+
+    overflow: hidden;
+
+    cursor: crosshair;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            #000000
+        ),
+        linear-gradient(
+            to right,
+            #ffffff,
+            hsl(0, 100%, 50%)
+        );
+}
+
+
+/* ==================================================
+   CURSOR DO GRADIENTE
+   ================================================== */
+
+.color-gradient-cursor {
+    position: absolute;
+
+    width: 14px;
+    height: 14px;
+
+    border: 2px solid white;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5);
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
+}
+
+
+/* ==================================================
+   BARRA DE MATIZ
+   ================================================== */
+
+.hue-slider {
+    position: relative;
+
+    width: 100%;
+    height: 14px;
+
+    margin-top: 12px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            to right,
+            red,
+            yellow,
+            lime,
+            cyan,
+            blue,
+            magenta,
+            red
+        );
+
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   CURSOR DA MATIZ
+   ================================================== */
+
+.hue-slider-cursor {
+    position: absolute;
+
+    top: 50%;
+    left: 0;
+
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid white;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
+}
+
+
+/* ==================================================
+   RGB
+   ================================================== */
+
+.rgb-values {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.rgb-values label {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    font-size: 11px;
+
+    color: #555;
+}
+
+.rgb-values input {
+    width: 100%;
+
+    height: 30px;
+
+    padding: 0 7px;
+
+    border: 1px solid #cccccc;
+
+    border-radius: 5px;
+
+    outline: none;
+
+    color: #111;
+
+    background: #ffffff;
+
+    font-size: 12px;
+}
+
+.rgb-values input:focus {
+    border-color: #777777;
+}
+
+
+/* ==================================================
+   COR ATUAL
+   ================================================== */
+
+.selected-color {
+    margin-top: 12px;
+
+    padding: 8px;
+
+    border: 1px solid #dddddd;
+
+    border-radius: 5px;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 12px;
+
+    text-align: center;
+
+    color: #111;
+
+    background: #f5f5f5;
+}
+
+
+/* ==================================================
+   LISTA DE FONTES
+   ================================================== */
+
+.font-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.font-list button {
+    width: 100%;
+
+    padding: 10px;
+
+    background: #eeeeee;
+
+    color: #111;
+
+    text-align: left;
+
+    border-radius: 5px;
+}
+
+.font-list button:hover {
+    background: #dddddd;
+}
+      
     </style>
 </head>
 
@@ -612,7 +1089,15 @@
     >
         +
     </button>
-
+  
+<button
+    class="remove-all-button"
+    id="removeAllButton"
+    title="Excluir todos os trechos"
+>
+    −
+</button>
+  
     <div class="popup-area" id="popupArea">
 
         <div id="lyricList"></div>
@@ -642,26 +1127,33 @@
 
         <div class="console-container">
 
-            <div class="console-header">
+           <div class="console-header">
 
-                <div class="console-title">
-                    <span class="status"></span>
-                    JSS Console
-                </div>
+<div class="console-title" id="editSettingsButton">
 
-                <div class="buttons">
+    <span class="status"></span>
 
-                    <button id="runButton">
-                        Executar
-                    </button>
+    <span>Editar Letra</span>
 
-                    <button id="clearButton">
-                        Limpar
-                    </button>
+</div>
 
-                </div>
+    <div class="buttons">
 
-            </div>
+        <button id="downloadButton">
+            Download
+        </button>
+
+        <button
+            id="playButton"
+            title="Executar"
+            aria-label="Executar"
+        >
+            ▶
+        </button>
+
+    </div>
+
+</div>
 
             <div id="console"></div>
 
@@ -669,7 +1161,197 @@
 
     </section>
 
+<!-- ==================================================
+     POPUP DE CONFIGURAÇÕES
+     ================================================== -->
 
+<div class="settings-overlay" id="settingsOverlay">
+
+    <div class="settings-popup">
+
+        <button
+            class="settings-close"
+            id="settingsClose"
+        >
+            ×
+        </button>
+
+
+        <!-- TELA PRINCIPAL -->
+
+        <div
+            class="settings-screen"
+            id="settingsMain"
+        >
+
+            <div class="settings-option">
+
+                <span>
+                    Cor de Fundo Padrão
+                </span>
+
+                <button
+                    class="color-preview"
+                    id="colorPreview"
+                    title="Alterar cor"
+                ></button>
+
+            </div>
+
+
+            <button
+                class="settings-option font-option"
+                id="fontOption"
+            >
+
+                <span>
+                    Fonte do Console
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- TELA DA COR -->
+
+        <div
+            class="settings-screen"
+            id="colorScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="colorBack"
+            >
+                ← Voltar
+            </button>
+
+            <h3>Cor de Fundo Padrão</h3>
+
+  <div class="rgb-picker">
+
+    <div
+        class="color-gradient"
+        id="colorGradient"
+    >
+        <div
+            class="color-gradient-cursor"
+            id="colorGradientCursor"
+        ></div>
+    </div>
+
+    <div
+        class="hue-slider"
+        id="hueSlider"
+    >
+        <div
+            class="hue-slider-cursor"
+            id="hueSliderCursor"
+        ></div>
+    </div>
+
+    <div class="rgb-values">
+
+        <label>
+            R
+            <input
+                type="number"
+                id="redValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            G
+            <input
+                type="number"
+                id="greenValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            B
+            <input
+                type="number"
+                id="blueValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+    </div>
+
+    <div
+        class="selected-color"
+        id="selectedColor"
+    >
+        #050505
+    </div>
+
+</div>
+
+        </div>
+
+
+        <!-- TELA DA FONTE -->
+
+        <div
+            class="settings-screen"
+            id="fontScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="fontBack"
+            >
+                ← Voltar
+            </button>
+
+            <h3>Fonte do Console</h3>
+
+            <div class="font-list">
+
+                <button data-font="monospace">
+                    Monospace
+                </button>
+
+                <button data-font="Arial, Helvetica, sans-serif">
+                    Arial
+                </button>
+
+                <button data-font="'Courier New', monospace">
+                    Courier New
+                </button>
+
+                <button data-font="Consolas, monospace">
+                    Consolas
+                </button>
+
+                <button data-font="'Lucida Console', monospace">
+                    Lucida Console
+                </button>
+
+                <button data-font="Georgia, serif">
+                    Georgia
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  
 <script>
 
     /* ==================================================
@@ -678,6 +1360,9 @@
 
     const addButton =
         document.getElementById("addButton");
+  
+    const removeAllButton =
+    document.getElementById("removeAllButton");
 
     const lyricList =
         document.getElementById("lyricList");
@@ -1039,7 +1724,8 @@ textArea.addEventListener(
             const input =
                 document.createElement("input");
 
-            input.type = "number";
+            input.type = "text";
+            input.inputMode = "decimal";
 
             input.className =
                 "number-field";
@@ -1054,20 +1740,26 @@ textArea.addEventListener(
                 de ocuparem o bloquinho.
             */
 
-            input.addEventListener(
-                "input",
-                () => {
+input.addEventListener("input", () => {
+    input.value = input.value
+        .replace(/-/g, "")
+        .replace(/,/g, ".");
 
-                    if (input.value.length > 4) {
+    const primeiroPonto = input.value.indexOf(".");
 
-                        input.value =
-                            input.value.slice(0, 4);
+    if (primeiroPonto !== -1) {
+        input.value =
+            input.value.slice(0, primeiroPonto + 1) +
+            input.value
+                .slice(primeiroPonto + 1)
+                .replace(/\./g, "");
+    }
 
-                    }
-
-                }
-            );
-
+    if (input.value.length > 4) {
+        input.value = input.value.slice(0, 4);
+    }
+});
+          
             numberFields.appendChild(input);
         }
 
@@ -1104,6 +1796,16 @@ atualizarScrollbar();
         criarTrecho
     );
 
+removeAllButton.addEventListener(
+    "click",
+    () => {
+
+        lyricList.innerHTML = "";
+
+        atualizarScrollbar();
+
+    }
+);
 
     /* ==================================================
        CONSOLE VISUAL
@@ -1248,42 +1950,42 @@ atualizarScrollbar();
     /* ==================================================
        EXECUTOR
        ================================================== */
+let execucaoAtual = 0;
+async function executarCodigo(codigo, idExecucao) {
+    const executar =
+        new Function(
+            "console",
+            "estaExecutando",
+            `
+            "use strict";
 
-    async function executarCodigo(codigo) {
+            return (async () => {
 
-        const executar =
-            new Function(
-                "console",
-                `
-                "use strict";
+                ${codigo}
 
-                return (async () => {
+            })();
+            `
+        );
 
-                    ${codigo}
+    try {
+        await executar(
+            customConsole,
+            () => idExecucao === execucaoAtual
+        );
+    } catch (erro) {
+        if (idExecucao !== execucaoAtual) return;
 
-                })();
-                `
-            );
+        customConsole.error(
+            erro.stack || erro.message
+        );
+    } finally {
+        if (idExecucao !== execucaoAtual) return;
 
-
-        try {
-
-            await executar(
-                customConsole
-            );
-
-        }
-
-        catch (erro) {
-
-            customConsole.error(
-                erro.stack ||
-                erro.message
-            );
-
-        }
+        customConsole.clear();
+        customConsole.log("JSS Console iniciado.");
+        customConsole.log("Aguardando execução...");
     }
-
+}
 
     /* ==================================================
        SEU JSS
@@ -1308,11 +2010,35 @@ function sepletra () {
 
 
 function timer (t) {
+  return new Promise ((resolve) => {
 
-  return new Promise ((resolve) => 
-    setTimeout (resolve, t));
+    const inicio = performance.now();
 
-  return;
+    function verificar() {
+
+      if (!estaExecutando()) {
+        resolve();
+        return;
+      }
+
+      const passou =
+        performance.now() - inicio;
+
+      if (passou >= t) {
+        resolve();
+        return;
+      }
+
+      setTimeout(
+        verificar,
+        Math.min(10, t - passou)
+      );
+
+    }
+
+    verificar();
+
+  });
 };
 
 
@@ -1467,44 +2193,71 @@ async function song () {
 };
 
 
-song();
+await song();
 
 `;
 
+/* ==================================================
+   MONTA O LYRIC A PARTIR DOS RETÂNGULOS
+   ================================================== */
 
-    /* ==================================================
-       BOTÃO EXECUTAR
-       ================================================== */
+function gerarLyric() {
 
-    document
-        .getElementById("runButton")
-        .addEventListener(
-            "click",
-            () => {
+    const trechos =
+        document.querySelectorAll(".lyric-item");
 
-                executarCodigo(
-                    codigoJSS
-                );
+    const lyric =
+        Array.from(trechos).map(item => {
 
-            }
+            const texto =
+                item.querySelector(".lyric-text").value;
+
+            const numeros =
+                Array.from(
+                    item.querySelectorAll(".number-field")
+                ).map(input => {
+
+                    return Number(input.value) || 0;
+
+                });
+
+            return [
+                texto,
+                ...numeros
+            ];
+
+        });
+
+    return lyric;
+}
+  
+/* ==================================================
+   EXECUTAR LETRA
+   ================================================== */
+
+async function executarLetra() {
+    execucaoAtual++;
+
+    const idExecucao = execucaoAtual;
+
+    const dadosLyric = gerarLyric();
+
+    const codigo =
+        codigoJSS.replace(
+            "const lyric = [];",
+            `const lyric = ${JSON.stringify(dadosLyric)};`
         );
 
+    await executarCodigo(codigo, idExecucao);
+}
 
-    /* ==================================================
-       BOTÃO LIMPAR
-       ================================================== */
-
-    document
-        .getElementById("clearButton")
-        .addEventListener(
-            "click",
-            () => {
-
-                customConsole.clear();
-
-            }
-        );
-
+document
+    .getElementById("playButton")
+    .addEventListener(
+        "click",
+        executarLetra
+    );
+  
 
     /* ==================================================
        MENSAGEM INICIAL
@@ -1518,6 +2271,857 @@ song();
         "Aguardando execução..."
     );
 
+ /* ==================================================
+   CONFIGURAÇÕES DO CONSOLE
+   ================================================== */
+
+const editSettingsButton =
+    document.getElementById("editSettingsButton");
+
+const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+const settingsClose =
+    document.getElementById("settingsClose");
+
+const settingsMain =
+    document.getElementById("settingsMain");
+
+const colorScreen =
+    document.getElementById("colorScreen");
+
+const fontScreen =
+    document.getElementById("fontScreen");
+
+const colorPreview =
+    document.getElementById("colorPreview");
+
+const colorBack =
+    document.getElementById("colorBack");
+
+const fontOption =
+    document.getElementById("fontOption");
+
+const fontBack =
+    document.getElementById("fontBack");
+
+const status =
+    document.querySelector(".status");
+
+
+/* ==================================================
+   SELETOR RGB
+   ================================================== */
+
+const colorGradient =
+    document.getElementById("colorGradient");
+
+const colorGradientCursor =
+    document.getElementById("colorGradientCursor");
+
+const hueSlider =
+    document.getElementById("hueSlider");
+
+const hueSliderCursor =
+    document.getElementById("hueSliderCursor");
+
+const redValue =
+    document.getElementById("redValue");
+
+const greenValue =
+    document.getElementById("greenValue");
+
+const blueValue =
+    document.getElementById("blueValue");
+
+const selectedColor =
+    document.getElementById("selectedColor");
+
+
+/* ==================================================
+   COR ATUAL
+   ================================================== */
+
+let corConsole =
+    localStorage.getItem("jssConsoleCor")
+    || "#050505";
+
+output.style.background =
+    corConsole;
+
+colorPreview.style.background =
+    corConsole;
+
+status.style.background =
+    corConsole;
+
+
+/* ==================================================
+   CONVERSÃO RGB → HSV
+   ================================================== */
+
+function rgbToHsv(r, g, b) {
+
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    const maior =
+        Math.max(r, g, b);
+
+    const menor =
+        Math.min(r, g, b);
+
+    const diferenca =
+        maior - menor;
+
+    let h = 0;
+    let s = 0;
+
+    const v = maior;
+
+    if (diferenca !== 0) {
+
+        s =
+            diferenca / maior;
+
+        if (maior === r) {
+
+            h =
+                60 *
+                (
+                    ((g - b) / diferenca) % 6
+                );
+
+        } else if (maior === g) {
+
+            h =
+                60 *
+                (
+                    ((b - r) / diferenca) + 2
+                );
+
+        } else {
+
+            h =
+                60 *
+                (
+                    ((r - g) / diferenca) + 4
+                );
+
+        }
+
+    }
+
+    if (h < 0) {
+        h += 360;
+    }
+
+    return {
+        h,
+        s,
+        v
+    };
+}
+
+
+/* ==================================================
+   CONVERSÃO HSV → RGB
+   ================================================== */
+
+function hsvToRgb(h, s, v) {
+
+    const c =
+        v * s;
+
+    const x =
+        c *
+        (
+            1 -
+            Math.abs(
+                ((h / 60) % 2) - 1
+            )
+        );
+
+    const m =
+        v - c;
+
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (h < 60) {
+
+        r = c;
+        g = x;
+
+    } else if (h < 120) {
+
+        r = x;
+        g = c;
+
+    } else if (h < 180) {
+
+        g = c;
+        b = x;
+
+    } else if (h < 240) {
+
+        g = x;
+        b = c;
+
+    } else if (h < 300) {
+
+        r = x;
+        b = c;
+
+    } else {
+
+        r = c;
+        b = x;
+
+    }
+
+    return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+    };
+}
+
+
+/* ==================================================
+   HEX → RGB
+   ================================================== */
+
+function hexToRgb(hex) {
+
+    hex =
+        hex.replace("#", "");
+
+    return {
+        r: parseInt(
+            hex.slice(0, 2),
+            16
+        ),
+
+        g: parseInt(
+            hex.slice(2, 4),
+            16
+        ),
+
+        b: parseInt(
+            hex.slice(4, 6),
+            16
+        )
+    };
+}
+
+
+/* ==================================================
+   RGB → HEX
+   ================================================== */
+
+function rgbToHex(r, g, b) {
+
+    return "#" +
+        [r, g, b]
+            .map(valor =>
+                valor
+                    .toString(16)
+                    .padStart(2, "0")
+            )
+            .join("");
+}
+
+
+/* ==================================================
+   MATIZ ATUAL
+   ================================================== */
+
+let hsvAtual =
+    rgbToHsv(
+        ...Object.values(
+            hexToRgb(corConsole)
+        )
+    );
+
+
+/* ==================================================
+   ATUALIZA VISUAL DO GRADIENTE
+   ================================================== */
+
+function atualizarGradiente() {
+
+    colorGradient.style.background =
+        `
+        linear-gradient(
+            to bottom,
+            transparent,
+            #000000
+        ),
+        linear-gradient(
+            to right,
+            #ffffff,
+            hsl(${hsvAtual.h}, 100%, 50%)
+        )
+        `;
+
+
+    colorGradientCursor.style.left =
+        `${hsvAtual.s * 100}%`;
+
+    colorGradientCursor.style.top =
+        `${(1 - hsvAtual.v) * 100}%`;
+
+
+    hueSliderCursor.style.left =
+        `${(hsvAtual.h / 360) * 100}%`;
+}
+
+
+/* ==================================================
+   ATUALIZA COR
+   ================================================== */
+
+function aplicarCorRGB(r, g, b) {
+
+    r =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(r)
+            )
+        );
+
+    g =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(g)
+            )
+        );
+
+    b =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(b)
+            )
+        );
+
+
+    corConsole =
+        rgbToHex(
+            r,
+            g,
+            b
+        );
+
+
+    output.style.background =
+        corConsole;
+
+    colorPreview.style.background =
+        corConsole;
+
+    status.style.background =
+        corConsole;
+
+
+    redValue.value = r;
+    greenValue.value = g;
+    blueValue.value = b;
+
+
+    selectedColor.textContent =
+        corConsole;
+
+
+    localStorage.setItem(
+        "jssConsoleCor",
+        corConsole
+    );
+}
+
+
+/* ==================================================
+   SINCRONIZA SELETOR
+   ================================================== */
+
+function sincronizarSeletor() {
+
+    const rgb =
+        hexToRgb(corConsole);
+
+    hsvAtual =
+        rgbToHsv(
+            rgb.r,
+            rgb.g,
+            rgb.b
+        );
+
+
+    redValue.value =
+        rgb.r;
+
+    greenValue.value =
+        rgb.g;
+
+    blueValue.value =
+        rgb.b;
+
+
+    selectedColor.textContent =
+        corConsole;
+
+
+    atualizarGradiente();
+}
+
+
+/* ==================================================
+   CLICAR / ARRASTAR NO GRADIENTE
+   ================================================== */
+
+function atualizarPeloGradiente(event) {
+
+    const rect =
+        colorGradient.getBoundingClientRect();
+
+    let x =
+        (event.clientX - rect.left)
+        / rect.width;
+
+    let y =
+        (event.clientY - rect.top)
+        / rect.height;
+
+
+    x =
+        Math.max(
+            0,
+            Math.min(1, x)
+        );
+
+    y =
+        Math.max(
+            0,
+            Math.min(1, y)
+        );
+
+
+    hsvAtual.s = x;
+    hsvAtual.v = 1 - y;
+
+
+    const rgb =
+        hsvToRgb(
+            hsvAtual.h,
+            hsvAtual.s,
+            hsvAtual.v
+        );
+
+
+    aplicarCorRGB(
+        rgb.r,
+        rgb.g,
+        rgb.b
+    );
+
+    atualizarGradiente();
+}
+
+
+let arrastandoGradiente = false;
+
+
+colorGradient.addEventListener(
+    "pointerdown",
+    event => {
+
+        arrastandoGradiente = true;
+
+        colorGradient.setPointerCapture(
+            event.pointerId
+        );
+
+        atualizarPeloGradiente(event);
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointermove",
+    event => {
+
+        if (!arrastandoGradiente) {
+            return;
+        }
+
+        atualizarPeloGradiente(event);
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointerup",
+    () => {
+
+        arrastandoGradiente = false;
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoGradiente = false;
+    }
+);
+
+
+/* ==================================================
+   CLICAR / ARRASTAR NA MATIZ
+   ================================================== */
+
+function atualizarPelaMatiz(event) {
+
+    const rect =
+        hueSlider.getBoundingClientRect();
+
+    let x =
+        (event.clientX - rect.left)
+        / rect.width;
+
+
+    x =
+        Math.max(
+            0,
+            Math.min(1, x)
+        );
+
+
+    hsvAtual.h =
+        x * 360;
+
+
+    atualizarGradiente();
+
+
+    const rgb =
+        hsvToRgb(
+            hsvAtual.h,
+            hsvAtual.s,
+            hsvAtual.v
+        );
+
+
+    aplicarCorRGB(
+        rgb.r,
+        rgb.g,
+        rgb.b
+    );
+
+    atualizarGradiente();
+}
+
+
+let arrastandoMatiz = false;
+
+
+hueSlider.addEventListener(
+    "pointerdown",
+    event => {
+
+        arrastandoMatiz = true;
+
+        hueSlider.setPointerCapture(
+            event.pointerId
+        );
+
+        atualizarPelaMatiz(event);
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointermove",
+    event => {
+
+        if (!arrastandoMatiz) {
+            return;
+        }
+
+        atualizarPelaMatiz(event);
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointerup",
+    () => {
+
+        arrastandoMatiz = false;
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoMatiz = false;
+    }
+);
+
+
+/* ==================================================
+   CAMPOS RGB
+   ================================================== */
+
+function atualizarPelosCampos() {
+
+    let r =
+        Number(redValue.value);
+
+    let g =
+        Number(greenValue.value);
+
+    let b =
+        Number(blueValue.value);
+
+
+    if (Number.isNaN(r)) r = 0;
+    if (Number.isNaN(g)) g = 0;
+    if (Number.isNaN(b)) b = 0;
+
+
+    r =
+        Math.max(
+            0,
+            Math.min(255, r)
+        );
+
+    g =
+        Math.max(
+            0,
+            Math.min(255, g)
+        );
+
+    b =
+        Math.max(
+            0,
+            Math.min(255, b)
+        );
+
+
+    hsvAtual =
+        rgbToHsv(
+            r,
+            g,
+            b
+        );
+
+
+    aplicarCorRGB(
+        r,
+        g,
+        b
+    );
+
+    atualizarGradiente();
+}
+
+
+[
+    redValue,
+    greenValue,
+    blueValue
+]
+.forEach(input => {
+
+    input.addEventListener(
+        "input",
+        atualizarPelosCampos
+    );
+
+});
+
+
+/* ==================================================
+   FONTE ATUAL
+   ================================================== */
+
+let fonteConsole =
+    localStorage.getItem("jssConsoleFonte")
+    || '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
+
+
+output.style.fontFamily =
+    fonteConsole;
+
+
+/* ==================================================
+   ABRIR CONFIGURAÇÕES
+   ================================================== */
+
+editSettingsButton.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.style.display =
+            "flex";
+
+        settingsMain.style.display =
+            "block";
+
+        colorScreen.style.display =
+            "none";
+
+        fontScreen.style.display =
+            "none";
+    }
+);
+
+
+/* ==================================================
+   FECHAR
+   ================================================== */
+
+settingsClose.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.style.display =
+            "none";
+    }
+);
+
+
+/* ==================================================
+   ABRIR COR
+   ================================================== */
+
+colorPreview.addEventListener(
+    "click",
+    () => {
+
+        settingsMain.style.display =
+            "none";
+
+        colorScreen.style.display =
+            "block";
+
+        sincronizarSeletor();
+    }
+);
+
+
+/* ==================================================
+   VOLTAR DA COR
+   ================================================== */
+
+colorBack.addEventListener(
+    "click",
+    () => {
+
+        colorScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+
+
+/* ==================================================
+   ABRIR FONTES
+   ================================================== */
+
+fontOption.addEventListener(
+    "click",
+    () => {
+
+        settingsMain.style.display =
+            "none";
+
+        fontScreen.style.display =
+            "block";
+    }
+);
+
+
+/* ==================================================
+   ESCOLHER FONTE
+   ================================================== */
+
+document
+    .querySelectorAll(".font-list button")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                fonteConsole =
+                    button.dataset.font;
+
+                output.style.fontFamily =
+                    fonteConsole;
+
+                localStorage.setItem(
+                    "jssConsoleFonte",
+                    fonteConsole
+                );
+            }
+        );
+
+    });
+
+
+/* ==================================================
+   VOLTAR DAS FONTES
+   ================================================== */
+
+fontBack.addEventListener(
+    "click",
+    () => {
+
+        fontScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+
+
+/* ==================================================
+   INICIALIZA SELETOR
+   ================================================== */
+
+sincronizarSeletor();
+/* ==================================================
+   VOLTAR DAS FONTES
+   ================================================== */
+
+fontBack.addEventListener(
+    "click",
+    () => {
+
+        fontScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+  
 </script>
 
 </body>

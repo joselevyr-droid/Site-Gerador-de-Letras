@@ -1351,7 +1351,7 @@ padding: 22px 24px;
     </div>
 
 </div>
-    
+  
 <script>
 
     /* ==================================================
@@ -2106,11 +2106,110 @@ function pararGravacaoConsole() {
 /* ==================================================
    CONVERTE WEBM → MP4
    ================================================== */
+let ffmpeg = null;
+let ffmpegCarregado = false;
 
 async function converterParaMP4(webmBlob) {
 
-    await carregarFFmpeg();
+    if (!ffmpegCarregado) {
 
+        const scriptURL =
+            "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js";
+
+        const utilURL =
+            "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/umd/index.js";
+
+
+        const script =
+            document.createElement("script");
+
+        script.src = scriptURL;
+
+        document.head.appendChild(script);
+
+
+        await new Promise((resolve, reject) => {
+
+            script.onload = resolve;
+
+            script.onerror = reject;
+
+        });
+
+
+        /*
+            O UMD do ffmpeg.wasm disponibiliza
+            FFmpegWASM depois de ser carregado.
+        */
+
+        ffmpeg =
+            new FFmpegWASM.FFmpeg();
+
+
+        /*
+            Carrega o core somente agora,
+            quando o usuário realmente pediu
+            o Download.
+        */
+
+        const baseURL =
+            "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
+
+
+        const respostaJS =
+            await fetch(
+                baseURL + "/ffmpeg-core.js"
+            );
+
+        const blobJS =
+            await respostaJS.blob();
+
+        const coreURL =
+            URL.createObjectURL(
+                new Blob(
+                    [blobJS],
+                    {
+                        type:
+                            "text/javascript"
+                    }
+                )
+            );
+
+
+        const respostaWASM =
+            await fetch(
+                baseURL + "/ffmpeg-core.wasm"
+            );
+
+        const blobWASM =
+            await respostaWASM.blob();
+
+        const wasmURL =
+            URL.createObjectURL(
+                new Blob(
+                    [blobWASM],
+                    {
+                        type:
+                            "application/wasm"
+                    }
+                )
+            );
+
+
+        await ffmpeg.load({
+            coreURL,
+            wasmURL
+        });
+
+
+        ffmpegCarregado = true;
+    }
+
+
+    /*
+        Coloca o WebM dentro do sistema
+        de arquivos virtual do FFmpeg.
+    */
 
     await ffmpeg.writeFile(
         "entrada.webm",
@@ -2119,6 +2218,10 @@ async function converterParaMP4(webmBlob) {
         )
     );
 
+
+    /*
+        Converte WebM para MP4.
+    */
 
     await ffmpeg.exec([
         "-i",

@@ -2113,96 +2113,56 @@ async function converterParaMP4(webmBlob) {
 
     if (!ffmpegCarregado) {
 
-        const script =
-            document.createElement("script");
+        if (!window.FFmpegWASM) {
 
-        script.src =
-            "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js";
+            await new Promise((resolve, reject) => {
 
-        document.head.appendChild(script);
+                const script =
+                    document.createElement("script");
 
-        await new Promise((resolve, reject) => {
+                script.src =
+                    "./ffmpeg/ffmpeg.js";
 
-            script.onload = resolve;
-            script.onerror = reject;
+                script.onload = resolve;
 
-        });
+                script.onerror = () => {
+                    reject(
+                        new Error(
+                            "Não foi possível carregar ffmpeg.js"
+                        )
+                    );
+                };
 
-        if (
-            typeof FFmpeg === "undefined" ||
-            typeof FFmpeg.FFmpeg !== "function"
-        ) {
+                document.head.appendChild(script);
+            });
+        }
+
+        if (!window.FFmpegWASM) {
             throw new Error(
-                "A biblioteca FFmpeg não foi carregada corretamente."
+                "FFmpegWASM não foi encontrado."
             );
         }
 
         ffmpeg =
-            new FFmpeg.FFmpeg();
+            new FFmpegWASM.FFmpeg();
 
-        const baseURL =
-            "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd";
-
-        const coreJS =
-            await fetch(
-                baseURL + "/ffmpeg-core.js"
-            );
-
-        if (!coreJS.ok) {
-            throw new Error(
-                "Não foi possível carregar ffmpeg-core.js"
-            );
-        }
-
-        const coreBlob =
-            await coreJS.blob();
-
-        const coreURL =
-            URL.createObjectURL(
-                new Blob(
-                    [coreBlob],
-                    {
-                        type: "text/javascript"
-                    }
-                )
-            );
-
-
-        const wasm =
-            await fetch(
-                baseURL + "/ffmpeg-core.wasm"
-            );
-
-        if (!wasm.ok) {
-            throw new Error(
-                "Não foi possível carregar ffmpeg-core.wasm"
-            );
-        }
-
-        const wasmBlob =
-            await wasm.blob();
-
-        const wasmURL =
-            URL.createObjectURL(
-                new Blob(
-                    [wasmBlob],
-                    {
-                        type: "application/wasm"
-                    }
-                )
-            );
-
+        ffmpeg.on(
+            "log",
+            ({ message }) => {
+                console.log("[FFmpeg]", message);
+            }
+        );
 
         await ffmpeg.load({
-            coreURL,
-            wasmURL
+            coreURL:
+                "./ffmpeg/ffmpeg-core.js",
+
+            wasmURL:
+                "./ffmpeg/ffmpeg-core.wasm"
         });
 
-
         ffmpegCarregado = true;
-
     }
-
 
     await ffmpeg.writeFile(
         "entrada.webm",
@@ -2210,7 +2170,6 @@ async function converterParaMP4(webmBlob) {
             await webmBlob.arrayBuffer()
         )
     );
-
 
     await ffmpeg.exec([
         "-i",
@@ -2224,12 +2183,10 @@ async function converterParaMP4(webmBlob) {
         "saida.mp4"
     ]);
 
-
     const arquivo =
         await ffmpeg.readFile(
             "saida.mp4"
         );
-
 
     return new Blob(
         [arquivo.buffer],
@@ -2238,7 +2195,6 @@ async function converterParaMP4(webmBlob) {
         }
     );
 }
-
 
 /* ==================================================
    BAIXA ARQUIVO

@@ -2819,9 +2819,12 @@ downloadButton.addEventListener(
 
             console.error(erro);
 
-            alert(
-                "Não foi possível gerar o vídeo."
-            );
+            console.error("Erro ao gerar vídeo:", erro);
+
+    alert(
+        "Erro ao gerar vídeo:\n\n" +
+        (erro.message || String(erro))
+    );
 
 
         } finally {

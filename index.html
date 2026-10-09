@@ -2153,13 +2153,19 @@ async function converterParaMP4(webmBlob) {
             }
         );
 
-        await ffmpeg.load({
-            coreURL:
-                "./ffmpeg/ffmpeg-core.js",
+        
+await ffmpeg.load({
+    coreURL: new URL(
+        "ffmpeg/ffmpeg-core.js",
+        document.baseURI
+    ).href,
 
-            wasmURL:
-                "./ffmpeg/ffmpeg-core.wasm"
-        });
+    wasmURL: new URL(
+        "ffmpeg/ffmpeg-core.wasm",
+        document.baseURI
+    ).href
+});
+    
 
         ffmpegCarregado = true;
     }

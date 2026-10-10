@@ -1860,7 +1860,10 @@ function desenharConsoleNoCanvas() {
     }
 
 
-    const escala = 1;
+    const escala = Math.max(
+    2,
+    window.devicePixelRatio || 1
+);
 
     canvasGravacao.width =
         largura * escala;
@@ -1868,6 +1871,11 @@ function desenharConsoleNoCanvas() {
     canvasGravacao.height =
         altura * escala;
 
+    contextoGravacao.setTransform(
+    escala, 0,
+    0, escala,
+    0, 0
+);
 
     contextoGravacao.clearRect(
         0,

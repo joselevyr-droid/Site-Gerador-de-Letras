@@ -1831,170 +1831,67 @@ let contextoGravacao = null;
 let animationGravacao = null;
 
 
+let streamGravacao = null;
+let escalaGravacao = 2;
+    
 /* ==================================================
    DESENHA O CONSOLE NO CANVAS
    ================================================== */
 
+
 function desenharConsoleNoCanvas() {
-
-    if (!gravandoConsole) {
+    if (!gravandoConsole || !canvasGravacao || !contextoGravacao) {
         return;
     }
 
-    const largura =
-        output.clientWidth;
+    const largura = output.clientWidth;
+    const altura = output.clientHeight;
 
-    const altura =
-        output.clientHeight;
-
-    if (
-        largura <= 0 ||
-        altura <= 0
-    ) {
-        animationGravacao =
-            requestAnimationFrame(
-                desenharConsoleNoCanvas
-            );
-
+    if (largura <= 0 || altura <= 0) {
+        animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
         return;
     }
 
+    // Não altere canvas.width/height aqui.
+    // Redimensionar o canvas a cada frame consome recursos.
+    contextoGravacao.clearRect(0, 0, largura, altura);
 
-    const escala = Math.max(
-    2,
-    window.devicePixelRatio || 1
-);
+    const estilo = getComputedStyle(output);
 
-    canvasGravacao.width =
-        largura * escala;
+    contextoGravacao.fillStyle = estilo.backgroundColor;
+    contextoGravacao.fillRect(0, 0, largura, altura);
 
-    canvasGravacao.height =
-        altura * escala;
+    const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
+    const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
 
-    contextoGravacao.setTransform(
-    escala, 0,
-    0, escala,
-    0, 0
-);
+    contextoGravacao.font = `${tamanhoFonte}px ${estilo.fontFamily}`;
+    contextoGravacao.textAlign = "center";
+    contextoGravacao.textBaseline = "middle";
 
-    contextoGravacao.clearRect(
-        0,
-        0,
-        canvasGravacao.width,
-        canvasGravacao.height
+    const linhasArray = Array.from(
+        output.querySelectorAll(".console-line")
     );
 
+    if (linhasArray.length > 0) {
+        const espaco = alturaLinha + 3;
+        const alturaTotal = linhasArray.length * espaco;
+        let y = (altura - alturaTotal) / 2 + espaco / 2;
 
-    /* =========================================
-       FUNDO
-       ========================================= */
+        for (const linha of linhasArray) {
+            const estiloLinha = getComputedStyle(linha);
 
-    contextoGravacao.fillStyle =
-        getComputedStyle(output)
-            .backgroundColor;
-
-    contextoGravacao.fillRect(
-        0,
-        0,
-        canvasGravacao.width,
-        canvasGravacao.height
-    );
-
-
-    /* =========================================
-       FONTE
-       ========================================= */
-
-    const estilo =
-        getComputedStyle(output);
-
-    const tamanhoFonte =
-        parseFloat(
-            estilo.fontSize
-        );
-
-    const alturaLinha =
-        parseFloat(
-            estilo.lineHeight
-        );
-
-
-    contextoGravacao.font =
-        `${tamanhoFonte}px ${estilo.fontFamily}`;
-
-    contextoGravacao.textAlign =
-        "center";
-
-    contextoGravacao.textBaseline =
-        "middle";
-
-
-    /* =========================================
-       LINHAS
-       ========================================= */
-
-    const linhas =
-        output.querySelectorAll(
-            ".console-line"
-        );
-
-
-    const linhasArray =
-        Array.from(linhas);
-
-
-    if (linhasArray.length === 0) {
-
-        animationGravacao =
-            requestAnimationFrame(
-                desenharConsoleNoCanvas
+            contextoGravacao.fillStyle = estiloLinha.color;
+            contextoGravacao.fillText(
+                linha.textContent || "",
+                largura / 2,
+                y
             );
 
-        return;
+            y += espaco;
+        }
     }
 
-
-    const espaco =
-        alturaLinha + 3;
-
-
-    const alturaTotal =
-        linhasArray.length * espaco;
-
-
-    let y =
-        (
-            altura -
-            alturaTotal
-        ) / 2 +
-        espaco / 2;
-
-
-    for (const linha of linhasArray) {
-
-        const estiloLinha =
-            getComputedStyle(linha);
-
-
-        contextoGravacao.fillStyle =
-            estiloLinha.color;
-
-
-        contextoGravacao.fillText(
-            linha.textContent,
-            largura / 2,
-            y
-        );
-
-
-        y += espaco;
-    }
-
-
-    animationGravacao =
-        requestAnimationFrame(
-            desenharConsoleNoCanvas
-        );
+    animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
 }
 
 
@@ -2002,126 +1899,201 @@ function desenharConsoleNoCanvas() {
    INICIA GRAVAÇÃO
    ================================================== */
 
+
 async function iniciarGravacaoConsole() {
+    if (!window.MediaRecorder) {
+        throw new Error("Este navegador não suporta gravação de vídeo.");
+    }
 
-    canvasGravacao =
-        document.createElement("canvas");
+    // Evita manter recursos de uma gravação anterior.
+    if (streamGravacao) {
+        streamGravacao.getTracks().forEach(track => track.stop());
+        streamGravacao = null;
+    }
 
-    canvasGravacao.width =
-        output.clientWidth;
+    if (animationGravacao !== null) {
+        cancelAnimationFrame(animationGravacao);
+        animationGravacao = null;
+    }
 
-    canvasGravacao.height =
-        output.clientHeight;
-
-
-    contextoGravacao =
-        canvasGravacao.getContext("2d");
-
-
-    const stream =
-        canvasGravacao.captureStream(30);
-
-
+    gravandoConsole = false;
     partesGravacao = [];
 
+    canvasGravacao = document.createElement("canvas");
 
-    
-if (!window.MediaRecorder) {
-    throw new Error("Este navegador não suporta gravação de vídeo.");
-}
+    const largura = Math.max(1, output.clientWidth);
+    const altura = Math.max(1, output.clientHeight);
 
-const formatos = [
-    "video/mp4",
-    "video/webm;codecs=vp8",
-    "video/webm"
-];
+    // Limita a escala para controlar o consumo de memória.
+    escalaGravacao = Math.min(
+        2,
+        Math.max(1, window.devicePixelRatio || 1)
+    );
 
-const formato = formatos.find(tipo =>
-    MediaRecorder.isTypeSupported(tipo)
-);
+    // O tamanho físico é definido apenas uma vez por gravação.
+    canvasGravacao.width = Math.round(largura * escalaGravacao);
+    canvasGravacao.height = Math.round(altura * escalaGravacao);
 
-if (!formato) {
-    throw new Error("Nenhum formato de vídeo compatível foi encontrado.");
-}
+    contextoGravacao = canvasGravacao.getContext("2d", {
+        alpha: false
+    });
 
-mediaRecorder = new MediaRecorder(stream, {
-    mimeType: formato
-});
+    if (!contextoGravacao) {
+        throw new Error("Não foi possível criar o canvas da gravação.");
+    }
 
+    contextoGravacao.setTransform(
+        escalaGravacao, 0,
+        0, escalaGravacao,
+        0, 0
+    );
 
-    mediaRecorder.ondataavailable =
-        event => {
+    streamGravacao = canvasGravacao.captureStream(30);
 
-            if (
-                event.data &&
-                event.data.size > 0
-            ) {
+    const formatos = [
+        "video/mp4",
+        "video/webm;codecs=vp8",
+        "video/webm"
+    ];
 
-                partesGravacao.push(
-                    event.data
-                );
+    const formato = formatos.find(tipo =>
+        MediaRecorder.isTypeSupported(tipo)
+    );
 
+    if (!formato) {
+        streamGravacao.getTracks().forEach(track => track.stop());
+        streamGravacao = null;
+        throw new Error("Nenhum formato de vídeo compatível foi encontrado.");
+    }
+
+    try {
+        mediaRecorder = new MediaRecorder(streamGravacao, {
+            mimeType: formato
+        });
+
+        mediaRecorder.ondataavailable = event => {
+            if (event.data && event.data.size > 0) {
+                partesGravacao.push(event.data);
             }
         };
 
+        mediaRecorder.onerror = event => {
+            console.error("Erro durante a gravação:", event.error || event);
+        };
 
-    gravandoConsole = true;
+        gravandoConsole = true;
 
+        // Desenha o primeiro frame antes de iniciar a captura.
+        desenharConsoleNoCanvas();
 
-    desenharConsoleNoCanvas();
+        mediaRecorder.start(100);
+    } catch (erro) {
+        gravandoConsole = false;
 
+        if (animationGravacao !== null) {
+            cancelAnimationFrame(animationGravacao);
+            animationGravacao = null;
+        }
 
-    mediaRecorder.start(100);
+        if (streamGravacao) {
+            streamGravacao.getTracks().forEach(track => track.stop());
+            streamGravacao = null;
+        }
+
+        mediaRecorder = null;
+        canvasGravacao = null;
+        contextoGravacao = null;
+
+        throw erro;
+    }
 }
-
 
 /* ==================================================
    PARA GRAVAÇÃO
    ================================================== */
 
+
 function pararGravacaoConsole() {
+    return new Promise((resolve, reject) => {
+        const recorder = mediaRecorder;
 
-    return new Promise(resolve => {
-
-        if (!mediaRecorder) {
+        if (!recorder) {
+            gravandoConsole = false;
             resolve(null);
             return;
         }
 
+        const finalizarRecursos = () => {
+            gravandoConsole = false;
 
-        mediaRecorder.onstop =
-            () => {
+            if (animationGravacao !== null) {
+                cancelAnimationFrame(animationGravacao);
+                animationGravacao = null;
+            }
 
-                gravandoConsole = false;
+            if (streamGravacao) {
+                streamGravacao.getTracks().forEach(track => track.stop());
+                streamGravacao = null;
+            }
 
+            mediaRecorder = null;
+            canvasGravacao = null;
+            contextoGravacao = null;
+        };
 
-                if (animationGravacao) {
+        recorder.onstop = () => {
+            try {
+                const blob = new Blob(partesGravacao, {
+                    type: recorder.mimeType || "video/webm"
+                });
 
-                    cancelAnimationFrame(
-                        animationGravacao
-                    );
+                partesGravacao = [];
+                finalizarRecursos();
 
-                    animationGravacao =
-                        null;
+                if (blob.size === 0) {
+                    reject(new Error("A gravação ficou vazia."));
+                    return;
                 }
 
-
-                const blob = new Blob(
-    partesGravacao,
-    {
-        type: mediaRecorder.mimeType || "video/webm"
-    }
-);
-
-
                 resolve(blob);
-            };
+            } catch (erro) {
+                partesGravacao = [];
+                finalizarRecursos();
+                reject(erro);
+            }
+        };
 
+        recorder.onerror = event => {
+            partesGravacao = [];
+            finalizarRecursos();
+            reject(event.error || new Error("Falha ao gravar o vídeo."));
+        };
 
-        mediaRecorder.stop();
+        try {
+            if (recorder.state !== "inactive") {
+                recorder.stop();
+            } else {
+                // Se já estiver parado, monta o arquivo com os dados disponíveis.
+                const blob = new Blob(partesGravacao, {
+                    type: recorder.mimeType || "video/webm"
+                });
+
+                partesGravacao = [];
+                finalizarRecursos();
+
+                if (blob.size === 0) {
+                    reject(new Error("A gravação ficou vazia."));
+                } else {
+                    resolve(blob);
+                }
+            }
+        } catch (erro) {
+            partesGravacao = [];
+            finalizarRecursos();
+            reject(erro);
+        }
     });
 }
-
 
 /* ==================================================
    CONVERTE WEBM → MP4
@@ -2190,11 +2162,19 @@ await ffmpeg.load({
         ffmpegCarregado = true;
     }
 
+    
+    // Remove arquivos que possam ter sobrado da conversão anterior.
+    for (const nome of ["entrada.webm", "saida.mp4"]) {
+        try {
+            await ffmpeg.deleteFile(nome);
+        } catch (_) {
+            // O arquivo pode não existir ainda.
+        }
+    }
+
     await ffmpeg.writeFile(
         "entrada.webm",
-        new Uint8Array(
-            await webmBlob.arrayBuffer()
-        )
+        new Uint8Array(await webmBlob.arrayBuffer())
     );
 
     await ffmpeg.exec([
@@ -2209,17 +2189,23 @@ await ffmpeg.load({
         "saida.mp4"
     ]);
 
-    const arquivo =
-        await ffmpeg.readFile(
-            "saida.mp4"
-        );
+    const arquivo = await ffmpeg.readFile("saida.mp4");
 
-    return new Blob(
-        [arquivo.buffer],
-        {
-            type: "video/mp4"
-        }
+    // Cria o Blob antes de limpar os arquivos temporários.
+    const mp4Blob = new Blob(
+        [arquivo],
+        { type: "video/mp4" }
     );
+
+    for (const nome of ["entrada.webm", "saida.mp4"]) {
+        try {
+            await ffmpeg.deleteFile(nome);
+        } catch (erro) {
+            console.warn("Não foi possível limpar o arquivo temporário:", nome, erro);
+        }
+    }
+
+    return mp4Blob;
 }
 
 /* ==================================================
@@ -2765,23 +2751,23 @@ async function executarLetra(
     );
 
 
-    if (gravar) {
+    
+if (gravar) {
 
-        /*
-            Dá tempo para o último
-            frame ser desenhado.
-        */
+    /*
+        Aguarda alguns frames e dá tempo
+        para o último pedaço do vídeo ser registrado.
+    */
 
-        await new Promise(
-            resolve =>
-                requestAnimationFrame(
-                    () => resolve()
-                )
-        );
+    await new Promise(resolve => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setTimeout(resolve, 250);
+            });
+        });
+    });
 
-
-        const webm =
-            await pararGravacaoConsole();
+    const webm = await pararGravacaoConsole();
 
 
         if (!webm) {

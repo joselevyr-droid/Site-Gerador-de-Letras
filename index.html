@@ -2017,14 +2017,28 @@ async function iniciarGravacaoConsole() {
     partesGravacao = [];
 
 
-    mediaRecorder =
-        new MediaRecorder(
-            stream,
-            {
-                mimeType:
-                    "video/webm;codecs=vp8"
-            }
-        );
+    
+if (!window.MediaRecorder) {
+    throw new Error("Este navegador não suporta gravação de vídeo.");
+}
+
+const formatos = [
+    "video/mp4",
+    "video/webm;codecs=vp8",
+    "video/webm"
+];
+
+const formato = formatos.find(tipo =>
+    MediaRecorder.isTypeSupported(tipo)
+);
+
+if (!formato) {
+    throw new Error("Nenhum formato de vídeo compatível foi encontrado.");
+}
+
+mediaRecorder = new MediaRecorder(stream, {
+    mimeType: formato
+});
 
 
     mediaRecorder.ondataavailable =
@@ -2084,14 +2098,12 @@ function pararGravacaoConsole() {
                 }
 
 
-                const blob =
-                    new Blob(
-                        partesGravacao,
-                        {
-                            type:
-                                "video/webm"
-                        }
-                    );
+                const blob = new Blob(
+    partesGravacao,
+    {
+        type: mediaRecorder.mimeType || "video/webm"
+    }
+);
 
 
                 resolve(blob);
@@ -2773,13 +2785,15 @@ async function executarLetra(
             Converte para MP4.
         */
 
-        const mp4 =
-            await converterParaMP4(
-                webm
-            );
-
-
-        baixarMP4(mp4);
+        
+if (webm.type.includes("mp4")) {
+    // O navegador já gravou em MP4.
+    baixarMP4(webm);
+} else {
+    // Se gravou em WebM, converte para MP4.
+    const mp4 = await converterParaMP4(webm);
+    baixarMP4(mp4);
+}
     }
 }
 

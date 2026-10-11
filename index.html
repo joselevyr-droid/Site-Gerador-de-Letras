@@ -2176,11 +2176,11 @@ async function iniciarGravacaoConsole() {
 
     streamGravacao = canvasGravacao.captureStream(30);
 
-    const formatos = [
-        "video/mp4",
-        "video/webm;codecs=vp8",
-        "video/webm"
-    ];
+const formatos = [
+    "video/webm;codecs=vp8",
+    "video/webm",
+    "video/mp4"
+];
 
     const formato = formatos.find(tipo =>
         MediaRecorder.isTypeSupported(tipo)
@@ -2355,7 +2355,13 @@ async function converterParaMP4(webmBlob, idExecucao) {
 
     conversaoEmAndamento = true;
 
-    const arquivosTemporarios = ["entrada.webm", "saida.mp4"];
+    const extensaoEntrada = webmBlob.type.includes("mp4")
+    ? "mp4"
+    : "webm";
+
+const nomeEntrada = `entrada.${extensaoEntrada}`;
+
+const arquivosTemporarios = [nomeEntrada, "saida.mp4"];
 
     async function limparArquivosTemporarios() {
         if (!ffmpegCarregado || !ffmpeg) return;
@@ -2418,21 +2424,22 @@ async function converterParaMP4(webmBlob, idExecucao) {
         await limparArquivosTemporarios();
 
         await ffmpeg.writeFile(
-            "entrada.webm",
-            new Uint8Array(await webmBlob.arrayBuffer())
-        );
+    nomeEntrada,
+    new Uint8Array(await webmBlob.arrayBuffer())
+);
 
         if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
             return null;
         }
 
         await ffmpeg.exec([
-            "-i", "entrada.webm",
-            "-c:v", "libx264",
-            "-pix_fmt", "yuv420p",
-            "-movflags", "+faststart",
-            "saida.mp4"
-        ]);
+    "-i", nomeEntrada,
+    "-map", "0:v:0",
+    "-c:v", "libx264",
+    "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+    "saida.mp4"
+]);
 
         if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
             return null;
@@ -3023,13 +3030,7 @@ async function executarLetra(gravar = false) {
             return;
         }
 
-        let mp4;
-
-        if (webm.type.includes("mp4")) {
-            mp4 = webm;
-        } else {
-            mp4 = await converterParaMP4(webm, idExecucao);
-        }
+        const mp4 = await converterParaMP4(webm, idExecucao);
 
         if (
             !mp4 ||

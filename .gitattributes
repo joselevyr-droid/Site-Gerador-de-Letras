@@ -1,0 +1,6 @@
+*.js  linguist-detectable=true -linguist-generated -linguist-vendored
+*.css linguist-detectable=true -linguist-generated -linguist-vendored
+
+
+dist/**  -linguist-vendored -linguist-generated
+build/** -linguist-vendored -linguist-generated

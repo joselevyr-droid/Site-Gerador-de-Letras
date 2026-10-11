@@ -877,33 +877,57 @@ async function converterParaMP4(webmBlob, idExecucao) {
    BAIXA ARQUIVO
    ================================================== */
 
-function baixarMP4(blob) {
+async function baixarMP4(blob) {
+    const nomeArquivo = "GeLetra.mp4";
 
-    const url =
-        URL.createObjectURL(blob);
+    // No iPhone, tenta compartilhar o vídeo com o nome correto.
+    try {
+        if (
+            /iPhone|iPad|iPod/.test(navigator.userAgent) &&
+            typeof navigator.share === "function" &&
+            typeof navigator.canShare === "function"
+        ) {
+            const arquivo = new File(
+                [blob],
+                nomeArquivo,
+                { type: "video/mp4" }
+            );
 
+            if (navigator.canShare({ files: [arquivo] })) {
+                await navigator.share({
+                    files: [arquivo],
+                    title: "GeLetra"
+                });
 
-    const link =
-        document.createElement("a");
+                return;
+            }
+        }
+    } catch (erro) {
+        // Se o usuário cancelar o compartilhamento, não inicia outro download.
+        if (erro.name === "AbortError") {
+            return;
+        }
 
+        console.warn(
+            "Não foi possível compartilhar o arquivo:",
+            erro
+        );
+    }
+
+    // Download normal nos demais casos.
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
     link.href = url;
-
-    link.download =
-        "GeLetra.mp4";
-
+    link.download = nomeArquivo;
 
     document.body.appendChild(link);
-
     link.click();
-
     link.remove();
 
-
-    setTimeout(
-        () => URL.revokeObjectURL(url),
-        1000
-    );
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 10000);
 }
 
     function addConsoleLine(
@@ -1459,7 +1483,7 @@ async function executarLetra(gravar = false) {
             return;
         }
 
-        baixarMP4(mp4);
+        await baixarMP4(mp4);
 } finally {
     webm = null;
 

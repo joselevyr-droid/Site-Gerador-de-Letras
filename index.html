@@ -607,9 +607,10 @@
             margin-bottom: 3px;
         }
 
-        .console-log {
-            color: #ffffff;
-        }
+        
+.console-log {
+    color: var(--console-text-color, #ffffff);
+}
 
         .console-info {
             color: #62b0ff;
@@ -1038,6 +1039,82 @@ padding: 22px 24px;
     background: #f5f5f5;
 }
 
+/* ==================================================
+   CAMPO HEX E CORES RECENTES
+   ================================================== */
+
+.hex-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.hex-color-row label {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+}
+
+.hex-color-input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    color: #111;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    outline: none;
+}
+
+.hex-color-input:focus {
+    border-color: #777;
+}
+
+.recent-colors-title {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 12px;
+}
+
+.recent-colors {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.recent-color {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.recent-color:hover {
+    transform: scale(1.08);
+    border-color: #555;
+}
+
+.recent-color:focus-visible {
+    outline: 2px solid #555;
+    outline-offset: 2px;
+}
+
+.recent-color-empty {
+    width: 32px;
+    height: 32px;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    background: #f5f5f5;
+}
 
 /* ==================================================
    LISTA DE FONTES
@@ -1199,6 +1276,19 @@ padding: 22px 24px;
             </div>
 
 
+            <div class="settings-option">
+                <span>Cor da letra do console</span>
+
+                <input
+                    type="color"
+                    class="color-preview"
+                    id="fontColorPreview"
+                    value="#ffffff"
+                    title="Alterar cor da letra"
+                    aria-label="Cor da letra do console"
+                >
+            </div>
+            
             <button
                 class="settings-option font-option"
                 id="fontOption"
@@ -1289,12 +1379,39 @@ padding: 22px 24px;
 
     </div>
 
-    <div
-        class="selected-color"
-        id="selectedColor"
+
+<div class="hex-color-row">
+    <label for="hexColorInput">Código HEX</label>
+
+    <input
+        type="text"
+        id="hexColorInput"
+        class="hex-color-input"
+        value="#050505"
+        placeholder="#FF5733"
+        maxlength="7"
+        spellcheck="false"
+        autocomplete="off"
+        aria-label="Código hexadecimal da cor de fundo"
     >
-        #050505
-    </div>
+</div>
+
+<div class="recent-colors-title">
+    Últimas 3 cores usadas
+</div>
+
+<div
+    class="recent-colors"
+    id="recentColors"
+>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+</div>
+
+<div class="selected-color" id="selectedColor">
+    #050505
+</div>
 
 </div>
 
@@ -3020,6 +3137,15 @@ const selectedColor =
     document.getElementById("selectedColor");
 
 
+const hexColorInput =
+    document.getElementById("hexColorInput");
+
+const recentColors =
+    document.getElementById("recentColors");
+
+const fontColorPreview =
+    document.getElementById("fontColorPreview");
+    
 /* ==================================================
    COR ATUAL
    ================================================== */
@@ -3038,6 +3164,34 @@ status.style.background =
     corConsole;
 
 
+/* ==================================================
+   COR DA LETRA DO CONSOLE
+   ================================================== */
+
+let corTextoConsole =
+    localStorage.getItem("jssConsoleTextoCor") || "#ffffff";
+
+output.style.setProperty(
+    "--console-text-color",
+    corTextoConsole
+);
+
+fontColorPreview.value = corTextoConsole;
+
+fontColorPreview.addEventListener("input", () => {
+    corTextoConsole = fontColorPreview.value;
+
+    output.style.setProperty(
+        "--console-text-color",
+        corTextoConsole
+    );
+
+    localStorage.setItem(
+        "jssConsoleTextoCor",
+        corTextoConsole
+    );
+});
+    
 /* ==================================================
    CONVERSÃO RGB → HSV
    ================================================== */
@@ -3319,8 +3473,10 @@ function aplicarCorRGB(r, g, b) {
     blueValue.value = b;
 
 
-    selectedColor.textContent =
-        corConsole;
+    
+selectedColor.textContent = corConsole;
+
+hexColorInput.value = corConsole.toUpperCase();
 
 
     localStorage.setItem(
@@ -3365,6 +3521,123 @@ function sincronizarSeletor() {
 }
 
 
+/* ==================================================
+   HISTÓRICO DAS 3 ÚLTIMAS CORES DE FUNDO
+   ================================================== */
+
+let coresRecentes = [];
+
+try {
+    const salvas = JSON.parse(
+        localStorage.getItem("jssConsoleCoresRecentes") || "[]"
+    );
+
+    if (Array.isArray(salvas)) {
+        coresRecentes = salvas
+            .filter(cor => /^#[0-9a-f]{6}$/i.test(cor))
+            .slice(0, 3);
+    }
+} catch {
+    coresRecentes = [];
+}
+
+function desenharCoresRecentes() {
+    recentColors.innerHTML = "";
+
+    for (let i = 0; i < 3; i++) {
+        const cor = coresRecentes[i];
+
+        if (cor) {
+            const botao = document.createElement("button");
+
+            botao.type = "button";
+            botao.className = "recent-color";
+            botao.style.backgroundColor = cor;
+            botao.title = `Usar ${cor.toUpperCase()}`;
+            botao.setAttribute(
+                "aria-label",
+                `Usar cor ${cor.toUpperCase()}`
+            );
+
+            botao.addEventListener("click", () => {
+                const rgb = hexToRgb(cor);
+
+                aplicarCorRGB(rgb.r, rgb.g, rgb.b);
+                sincronizarSeletor();
+                registrarCorRecente(cor);
+            });
+
+            recentColors.appendChild(botao);
+        } else {
+            const vazio = document.createElement("div");
+            vazio.className = "recent-color-empty";
+            recentColors.appendChild(vazio);
+        }
+    }
+}
+
+function registrarCorRecente(cor) {
+    cor = cor.toLowerCase();
+
+    coresRecentes = [
+        cor,
+        ...coresRecentes.filter(item => item !== cor)
+    ].slice(0, 3);
+
+    localStorage.setItem(
+        "jssConsoleCoresRecentes",
+        JSON.stringify(coresRecentes)
+    );
+
+    desenharCoresRecentes();
+}
+
+hexColorInput.addEventListener("change", () => {
+    let hex = hexColorInput.value.trim();
+
+    if (!hex.startsWith("#")) {
+        hex = "#" + hex;
+    }
+
+    // Aceita #RGB e converte para #RRGGBB.
+    if (/^#[0-9a-f]{3}$/i.test(hex)) {
+        hex = "#" + hex[1] + hex[1]
+                   + hex[2] + hex[2]
+                   + hex[3] + hex[3];
+    }
+
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) {
+        hexColorInput.value = corConsole.toUpperCase();
+        return;
+    }
+
+    const rgb = hexToRgb(hex);
+
+    hsvAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    aplicarCorRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradiente();
+    registrarCorRecente(corConsole);
+});
+
+// Registra a cor escolhida quando a pessoa termina de arrastar.
+colorGradient.addEventListener("pointerup", () => {
+    registrarCorRecente(corConsole);
+});
+
+hueSlider.addEventListener("pointerup", () => {
+    registrarCorRecente(corConsole);
+});
+
+// Registra a cor final digitada nos campos RGB.
+[redValue, greenValue, blueValue].forEach(input => {
+    input.addEventListener("change", () => {
+        registrarCorRecente(corConsole);
+    });
+});
+
+desenharCoresRecentes();
+    
 /* ==================================================
    CLICAR / ARRASTAR NO GRADIENTE
    ================================================== */

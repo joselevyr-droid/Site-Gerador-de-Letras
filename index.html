@@ -1819,7 +1819,7 @@ removeAllButton.addEventListener(
    ================================================== */
 
 let gravandoConsole = false;
-
+let exportacaoAtiva = false;
 let mediaRecorder = null;
 
 let partesGravacao = [];
@@ -2013,84 +2013,104 @@ async function iniciarGravacaoConsole() {
    ================================================== */
 
 
-function pararGravacaoConsole() {
+function pararGravacaoConsole(descartar = false) {
     return new Promise((resolve, reject) => {
         const recorder = mediaRecorder;
 
+        if (animationGravacao !== null) {
+            cancelAnimationFrame(animationGravacao);
+            animationGravacao = null;
+        }
+
+        gravandoConsole = false;
+
+        const liberarRecursos = () => {
+            if (streamGravacao) {
+                streamGravacao.getTracks().forEach(track => {
+                    try {
+                        track.stop();
+                    } catch (_) {}
+                });
+                streamGravacao = null;
+            }
+
+            if (canvasGravacao) {
+                canvasGravacao.width = 1;
+                canvasGravacao.height = 1;
+            }
+
+            canvasGravacao = null;
+            contextoGravacao = null;
+
+            if (mediaRecorder === recorder) {
+                mediaRecorder = null;
+            }
+        };
+
+        const limparPartes = () => {
+            partesGravacao.length = 0;
+            partesGravacao = [];
+        };
+
         if (!recorder) {
-            gravandoConsole = false;
+            limparPartes();
+            liberarRecursos();
             resolve(null);
             return;
         }
 
-        const finalizarRecursos = () => {
-            gravandoConsole = false;
+        let finalizado = false;
 
-            if (animationGravacao !== null) {
-                cancelAnimationFrame(animationGravacao);
-                animationGravacao = null;
-            }
+        const finalizar = (erro = null) => {
+            if (finalizado) return;
+            finalizado = true;
 
-            if (streamGravacao) {
-                streamGravacao.getTracks().forEach(track => track.stop());
-                streamGravacao = null;
-            }
+            let blob = null;
 
-            mediaRecorder = null;
-            canvasGravacao = null;
-            contextoGravacao = null;
-        };
-
-        recorder.onstop = () => {
-            try {
-                const blob = new Blob(partesGravacao, {
+            if (!descartar && !erro) {
+                blob = new Blob(partesGravacao, {
                     type: recorder.mimeType || "video/webm"
                 });
+            }
 
-                partesGravacao = [];
-                finalizarRecursos();
+            limparPartes();
+            liberarRecursos();
 
-                if (blob.size === 0) {
-                    reject(new Error("A gravação ficou vazia."));
-                    return;
-                }
-
-                resolve(blob);
-            } catch (erro) {
-                partesGravacao = [];
-                finalizarRecursos();
+            if (erro) {
                 reject(erro);
+            } else if (!blob || blob.size === 0) {
+                resolve(null);
+            } else {
+                resolve(blob);
+            }
+        };
+
+        recorder.ondataavailable = event => {
+            if (
+                !descartar &&
+                event.data &&
+                event.data.size > 0
+            ) {
+                partesGravacao.push(event.data);
             }
         };
 
         recorder.onerror = event => {
-            partesGravacao = [];
-            finalizarRecursos();
-            reject(event.error || new Error("Falha ao gravar o vídeo."));
+            finalizar(
+                event.error || new Error("Falha durante a gravação.")
+            );
         };
+
+        recorder.onstop = () => finalizar();
 
         try {
             if (recorder.state !== "inactive") {
                 recorder.stop();
             } else {
-                // Se já estiver parado, monta o arquivo com os dados disponíveis.
-                const blob = new Blob(partesGravacao, {
-                    type: recorder.mimeType || "video/webm"
-                });
-
-                partesGravacao = [];
-                finalizarRecursos();
-
-                if (blob.size === 0) {
-                    reject(new Error("A gravação ficou vazia."));
-                } else {
-                    resolve(blob);
-                }
+                finalizar();
             }
         } catch (erro) {
-            partesGravacao = [];
-            finalizarRecursos();
-            reject(erro);
+            finalizar(erro);
         }
     });
 }
@@ -2101,111 +2121,111 @@ function pararGravacaoConsole() {
 let ffmpeg = null;
 let ffmpegCarregado = false;
 
-async function converterParaMP4(webmBlob) {
 
-    if (!ffmpegCarregado) {
+async function converterParaMP4(webmBlob, idExecucao) {
+    if (conversaoEmAndamento) {
+        throw new Error("Já existe uma conversão em andamento.");
+    }
 
-        if (!window.FFmpegWASM) {
+    conversaoEmAndamento = true;
 
-            await new Promise((resolve, reject) => {
+    const arquivosTemporarios = ["entrada.webm", "saida.mp4"];
 
-                const script =
-                    document.createElement("script");
+    async function limparArquivosTemporarios() {
+        if (!ffmpegCarregado || !ffmpeg) return;
 
-                script.src =
-                    "./ffmpeg/ffmpeg.js";
-
-                script.onload = resolve;
-
-                script.onerror = () => {
-                    reject(
-                        new Error(
-                            "Não foi possível carregar ffmpeg.js"
-                        )
-                    );
-                };
-
-                document.head.appendChild(script);
-            });
-        }
-
-        if (!window.FFmpegWASM) {
-            throw new Error(
-                "FFmpegWASM não foi encontrado."
-            );
-        }
-
-        ffmpeg =
-            new FFmpegWASM.FFmpeg();
-
-        ffmpeg.on(
-            "log",
-            ({ message }) => {
-                console.log("[FFmpeg]", message);
+        for (const nome of arquivosTemporarios) {
+            try {
+                await ffmpeg.deleteFile(nome);
+            } catch (_) {
+                // O arquivo pode já ter sido removido.
             }
+        }
+    }
+
+    try {
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        if (!ffmpegCarregado) {
+            if (!window.FFmpegWASM) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    script.src = "./ffmpeg/ffmpeg.js";
+                    script.onload = resolve;
+                    script.onerror = () => reject(
+                        new Error("Não foi possível carregar ffmpeg.js")
+                    );
+                    document.head.appendChild(script);
+                });
+            }
+
+            if (!window.FFmpegWASM) {
+                throw new Error("FFmpegWASM não foi encontrado.");
+            }
+
+            ffmpeg = new FFmpegWASM.FFmpeg();
+
+            ffmpeg.on("log", ({ message }) => {
+                console.log("[FFmpeg]", message);
+            });
+
+            await ffmpeg.load({
+                coreURL: new URL(
+                    "ffmpeg/ffmpeg-core.js",
+                    document.baseURI
+                ).href,
+                wasmURL: new URL(
+                    "ffmpeg/ffmpeg-core.wasm",
+                    document.baseURI
+                ).href
+            });
+
+            ffmpegCarregado = true;
+        }
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        await limparArquivosTemporarios();
+
+        await ffmpeg.writeFile(
+            "entrada.webm",
+            new Uint8Array(await webmBlob.arrayBuffer())
         );
 
-        
-await ffmpeg.load({
-    coreURL: new URL(
-        "ffmpeg/ffmpeg-core.js",
-        document.baseURI
-    ).href,
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
 
-    wasmURL: new URL(
-        "ffmpeg/ffmpeg-core.wasm",
-        document.baseURI
-    ).href
-});
-    
+        await ffmpeg.exec([
+            "-i", "entrada.webm",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+            "saida.mp4"
+        ]);
 
-        ffmpegCarregado = true;
-    }
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
 
-    
-    // Remove arquivos que possam ter sobrado da conversão anterior.
-    for (const nome of ["entrada.webm", "saida.mp4"]) {
+        const arquivo = await ffmpeg.readFile("saida.mp4");
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        return new Blob([arquivo], { type: "video/mp4" });
+    } finally {
         try {
-            await ffmpeg.deleteFile(nome);
-        } catch (_) {
-            // O arquivo pode não existir ainda.
+            await limparArquivosTemporarios();
+        } finally {
+            conversaoEmAndamento = false;
         }
     }
-
-    await ffmpeg.writeFile(
-        "entrada.webm",
-        new Uint8Array(await webmBlob.arrayBuffer())
-    );
-
-    await ffmpeg.exec([
-        "-i",
-        "entrada.webm",
-        "-c:v",
-        "libx264",
-        "-pix_fmt",
-        "yuv420p",
-        "-movflags",
-        "+faststart",
-        "saida.mp4"
-    ]);
-
-    const arquivo = await ffmpeg.readFile("saida.mp4");
-
-    // Cria o Blob antes de limpar os arquivos temporários.
-    const mp4Blob = new Blob(
-        [arquivo],
-        { type: "video/mp4" }
-    );
-
-    for (const nome of ["entrada.webm", "saida.mp4"]) {
-        try {
-            await ffmpeg.deleteFile(nome);
-        } catch (erro) {
-            console.warn("Não foi possível limpar o arquivo temporário:", nome, erro);
-        }
-    }
-
-    return mp4Blob;
 }
 
 /* ==================================================
@@ -2377,6 +2397,8 @@ function baixarMP4(blob) {
        EXECUTOR
        ================================================== */
 let execucaoAtual = 0;
+let cancelamentoGravacao = false;
+let conversaoEmAndamento = false;
 
 async function executarCodigo(
     codigo,
@@ -2704,150 +2726,196 @@ function gerarLyric() {
    EXECUTAR LETRA
    ================================================== */
 
-async function executarLetra(
-    gravar = false
-) {
 
+async function executarLetra(gravar = false) {
     execucaoAtual++;
 
-    const idExecucao =
-        execucaoAtual;
+    const idExecucao = execucaoAtual;
+    let webm = null;
 
+    if (gravar) {
+        cancelamentoGravacao = false;
+        exportacaoAtiva = true;
+    }
 
-    const dadosLyric =
-        gerarLyric();
+    try {
+        const dadosLyric = gerarLyric();
 
-
-    const codigo =
-        codigoJSS.replace(
+        const codigo = codigoJSS.replace(
             "const lyric = [];",
             `const lyric = ${JSON.stringify(dadosLyric)};`
         );
 
+        if (gravar) {
+            customConsole.clear();
+            await iniciarGravacaoConsole();
+        }
 
-    if (gravar) {
+        // Se foi cancelado durante a inicialização, não executa a letra.
+        if (
+            idExecucao !== execucaoAtual ||
+            (gravar && cancelamentoGravacao)
+        ) {
+            return;
+        }
 
-        /*
-            Remove as mensagens iniciais
-            ANTES de começar a gravação.
-        */
+        await executarCodigo(codigo, idExecucao, gravar);
 
-        customConsole.clear();
+        if (!gravar) return;
 
+        // Não exporta um vídeo incompleto após o cancelamento.
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            return;
+        }
 
-        /*
-            Começa a gravar somente
-            a partir daqui.
-        */
-
-        await iniciarGravacaoConsole();
-    }
-
-
-    await executarCodigo(
-        codigo,
-        idExecucao,
-        gravar
-    );
-
-
-    
-if (gravar) {
-
-    /*
-        Aguarda alguns frames e dá tempo
-        para o último pedaço do vídeo ser registrado.
-    */
-
-    await new Promise(resolve => {
-        requestAnimationFrame(() => {
+        // Dá tempo para o último frame e os dados finais serem registrados.
+        await new Promise(resolve => {
             requestAnimationFrame(() => {
-                setTimeout(resolve, 250);
+                requestAnimationFrame(() => {
+                    setTimeout(resolve, 250);
+                });
             });
         });
-    });
 
-    const webm = await pararGravacaoConsole();
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            return;
+        }
 
+        webm = await pararGravacaoConsole(false);
 
         if (!webm) {
+            throw new Error("Não foi possível finalizar o vídeo.");
+        }
+
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            webm = null;
             return;
         }
 
+        let mp4;
 
-        /*
-            Converte para MP4.
-        */
+        if (webm.type.includes("mp4")) {
+            mp4 = webm;
+        } else {
+            mp4 = await converterParaMP4(webm, idExecucao);
+        }
 
-        
-if (webm.type.includes("mp4")) {
-    // O navegador já gravou em MP4.
-    baixarMP4(webm);
-} else {
-    // Se gravou em WebM, converte para MP4.
-    const mp4 = await converterParaMP4(webm);
-    baixarMP4(mp4);
-}
-    }
-}
-
-document
-    .getElementById("playButton")
-    .addEventListener("click", () => executarLetra(false));
-  
-/* ==================================================
-   DOWNLOAD
-   ================================================== */
-
-const downloadButton =
-    document.getElementById(
-        "downloadButton"
-    );
-
-
-downloadButton.addEventListener(
-    "click",
-    async () => {
-
-        if (gravandoConsole) {
+        if (
+            !mp4 ||
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            mp4 = null;
             return;
         }
 
+        baixarMP4(mp4);
+    } finally {
+        webm = null;
 
-        downloadButton.disabled =
-            true;
+        if (gravar) {
+            if (gravandoConsole || mediaRecorder) {
+                await pararGravacaoConsole(true).catch(() => {});
+            }
 
-        downloadButton.textContent =
-            "Gravando...";
+            // Descarta qualquer parte que ainda tenha ficado na memória.
+            partesGravacao.length = 0;
+            partesGravacao = [];
 
+            if (idExecucao === execucaoAtual) {
+                customConsole.clear();
+                customConsole.log("JSS Console iniciado.");
+                customConsole.log("Aguardando execução...");
+            }
 
-        try {
-
-            await executarLetra(true);
-
-
-        } catch (erro) {
-
-            alert(erro);
-
-            alert("Erro ao gerar vídeo:", erro);
-
-    alert(
-        "Erro ao gerar vídeo:\n\n" +
-        (erro.message || String(erro))
-    );
-
-
-        } finally {
-
-            downloadButton.disabled =
-                false;
-
-            downloadButton.textContent =
-                "Download";
+            exportacaoAtiva = false;
+            cancelamentoGravacao = false;
         }
     }
-);
+}
+    
+
+const playButton = document.getElementById("playButton");
+
+const downloadButton = document.getElementById("downloadButton");
+
+// Estilo do botão durante a gravação/exportação.
+const estiloGravacao = document.createElement("style");
+estiloGravacao.textContent = `
+    #downloadButton.gravando {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #b91c1c !important;
+        cursor: pointer !important;
+    }
+
+    #downloadButton.gravando:hover {
+        background-color: #b91c1c !important;
+    }
+
+    #playButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+    }
+`;
+document.head.appendChild(estiloGravacao);
+
+playButton.addEventListener("click", () => {
+    if (exportacaoAtiva) return;
+    executarLetra(false);
+});
+
+downloadButton.addEventListener("click", async () => {
+    // Se o processo já começou, este clique cancela.
+    if (exportacaoAtiva) {
+        cancelamentoGravacao = true;
+        execucaoAtual++;
+
+        downloadButton.textContent = "Cancelando...";
+        downloadButton.disabled = true;
+
+            // A função executarLetra fará a limpeza do gravador
+        // assim que a execução atual for interrompida.
+        customConsole.clear();
+        customConsole.log("JSS Console iniciado.");
+        customConsole.log("Aguardando execução...");
+
+        return;
+    }
+
+    if (downloadButton.disabled) return;
+
+    playButton.disabled = true;
+    downloadButton.classList.add("gravando");
+    downloadButton.textContent = "⏹ Parar gravação";
+
+    try {
+        await executarLetra(true);
+    } catch (erro) {
+        console.error("Erro ao gerar vídeo:", erro);
+
+        if (!cancelamentoGravacao) {
+            alert(
+                "Erro ao gerar vídeo:\n\n" +
+                (erro.message || String(erro))
+            );
+        }
+    } finally {
+        playButton.disabled = false;
+        downloadButton.disabled = false;
+        downloadButton.classList.remove("gravando");
+        downloadButton.textContent = "Download";
+    }
+});
   
     /* ==================================================
        MENSAGEM INICIAL

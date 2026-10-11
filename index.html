@@ -2815,31 +2815,32 @@ async function executarLetra(gravar = false) {
         }
 
         baixarMP4(mp4);
-    } finally {
-        webm = null;
+} finally {
+    webm = null;
 
-        if (gravar) {
-            if (gravandoConsole || mediaRecorder) {
-                await pararGravacaoConsole(true).catch(() => {});
-            }
-
-            // Descarta qualquer parte que ainda tenha ficado na memória.
-            partesGravacao.length = 0;
-            partesGravacao = [];
-
-            
-if (idExecucao === execucaoAtual) {
-    customConsole.clear();
-
-    customConsole.log("Bem-vindo ao GeLetra");
-    customConsole.log("");
-    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
-}
-
-            exportacaoAtiva = false;
-            cancelamentoGravacao = false;
+    if (gravar) {
+        if (gravandoConsole || mediaRecorder) {
+            await pararGravacaoConsole(true).catch(() => {});
         }
+
+        // Descarta qualquer parte que ainda tenha ficado na memória.
+        partesGravacao.length = 0;
+        partesGravacao = [];
     }
+
+    if (idExecucao === execucaoAtual) {
+        customConsole.clear();
+
+        customConsole.log("Bem-vindo ao GeLetra!");
+        customConsole.log("");
+        customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+    }
+
+    if (gravar) {
+        exportacaoAtiva = false;
+        cancelamentoGravacao = false;
+    }
+}
 }
     
 
@@ -2898,7 +2899,7 @@ return;
 
     playButton.disabled = true;
     downloadButton.classList.add("gravando");
-    downloadButton.textContent = "⏹ Parar gravação";
+    downloadButton.textContent = "Parar gravação";
 
     try {
         await executarLetra(true);

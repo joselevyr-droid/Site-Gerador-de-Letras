@@ -483,69 +483,140 @@ let escalaGravacao = 2;
    DESENHA O CONSOLE NO CANVAS
    ================================================== */
 
+function desenharConsoleNoCanvas(forcar = false) {
+if (
+(!gravandoConsole && !forcar) ||
+!canvasGravacao ||
+!contextoGravacao
+) {
+return;
+}
 
-function desenharConsoleNoCanvas() {
-    if (!gravandoConsole || !canvasGravacao || !contextoGravacao) {
-        return;
+
+const largura = output.clientWidth;
+const altura = output.clientHeight;
+
+if (largura <= 0 || altura <= 0) {
+    if (gravandoConsole && !forcar) {
+        animationGravacao =
+            requestAnimationFrame(desenharConsoleNoCanvas);
+    }
+    return;
+}
+
+contextoGravacao.clearRect(0, 0, largura, altura);
+
+const estilo = getComputedStyle(output);
+
+contextoGravacao.fillStyle = estilo.backgroundColor;
+contextoGravacao.fillRect(0, 0, largura, altura);
+
+const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
+const alturaLinha =
+    parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
+
+contextoGravacao.font =
+    `${tamanhoFonte}px ${estilo.fontFamily}`;
+
+contextoGravacao.textAlign = "center";
+contextoGravacao.textBaseline = "middle";
+
+const larguraMaxima = Math.max(1, largura - 32);
+const linhasOriginais = Array.from(
+    output.querySelectorAll(".console-line")
+);
+
+const linhasDesenhadas = [];
+
+for (const linha of linhasOriginais) {
+    const texto = linha.textContent || "";
+    const cor = getComputedStyle(linha).color;
+
+    contextoGravacao.font =
+        `${tamanhoFonte}px ${estilo.fontFamily}`;
+
+    if (texto === "") {
+        linhasDesenhadas.push({ texto: "", cor });
+        continue;
     }
 
-    const largura = output.clientWidth;
-    const altura = output.clientHeight;
+    let linhaAtual = "";
 
-    if (largura <= 0 || altura <= 0) {
-        animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
-        return;
-    }
+    for (const palavra of texto.split(" ")) {
+        const tentativa = linhaAtual
+            ? `${linhaAtual} ${palavra}`
+            : palavra;
 
-    // Não altere canvas.width/height aqui.
-    // Redimensionar o canvas a cada frame consome recursos.
-    contextoGravacao.clearRect(0, 0, largura, altura);
+        if (
+            contextoGravacao.measureText(tentativa).width
+            <= larguraMaxima
+        ) {
+            linhaAtual = tentativa;
+            continue;
+        }
 
-    const estilo = getComputedStyle(output);
+        if (linhaAtual) {
+            linhasDesenhadas.push({
+                texto: linhaAtual,
+                cor
+            });
+            linhaAtual = "";
+        }
 
-    contextoGravacao.fillStyle = estilo.backgroundColor;
-    contextoGravacao.fillRect(0, 0, largura, altura);
+        for (const caractere of palavra) {
+            const tentativaCaractere =
+                linhaAtual + caractere;
 
-    const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
-    const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
-
-    contextoGravacao.font = `${tamanhoFonte}px ${estilo.fontFamily}`;
-    contextoGravacao.textAlign = "center";
-    contextoGravacao.textBaseline = "middle";
-
-    const linhasArray = Array.from(
-        output.querySelectorAll(".console-line")
-    );
-
-    if (linhasArray.length > 0) {
-        const espaco = alturaLinha + 3;
-        const alturaTotal = linhasArray.length * espaco;
-        let y = (altura - alturaTotal) / 2 + espaco / 2;
-
-        for (const linha of linhasArray) {
-            const estiloLinha = getComputedStyle(linha);
-
-            contextoGravacao.fillStyle = estiloLinha.color;
-            contextoGravacao.fillText(
-                linha.textContent || "",
-                largura / 2,
-                y
-            );
-
-            y += espaco;
+            if (
+                contextoGravacao.measureText(
+                    tentativaCaractere
+                ).width > larguraMaxima &&
+                linhaAtual
+            ) {
+                linhasDesenhadas.push({
+                    texto: linhaAtual,
+                    cor
+                });
+                linhaAtual = caractere;
+            } else {
+                linhaAtual = tentativaCaractere;
+            }
         }
     }
 
-    // Solicita a captura do quadro recém-desenhado quando
-// o navegador oferece captura manual de frames.
-const trilhaVideo = streamGravacao?.getVideoTracks()[0];
-
-if (trilhaVideo && typeof trilhaVideo.requestFrame === "function") {
-    trilhaVideo.requestFrame();
+    if (linhaAtual) {
+        linhasDesenhadas.push({
+            texto: linhaAtual,
+            cor
+        });
+    }
 }
 
-animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+const espaco = alturaLinha + 3;
+const alturaTotal = linhasDesenhadas.length * espaco;
+
+let y = (altura - alturaTotal) / 2 + espaco / 2;
+
+for (const linha of linhasDesenhadas) {
+    contextoGravacao.fillStyle = linha.cor;
+
+    contextoGravacao.fillText(
+        linha.texto,
+        largura / 2,
+        y
+    );
+
+    y += espaco;
 }
+
+// Só mantém a animação automática durante a gravação.
+if (gravandoConsole && !forcar) {
+    animationGravacao =
+        requestAnimationFrame(desenharConsoleNoCanvas);
+}
+
+}
+
 
 
 /* ==================================================
@@ -679,12 +750,16 @@ function pararGravacaoConsole(descartar = false) {
     return new Promise((resolve, reject) => {
         const recorder = mediaRecorder;
 
-        if (animationGravacao !== null) {
-            cancelAnimationFrame(animationGravacao);
-            animationGravacao = null;
-        }
+    if (animationGravacao !== null) {
+        cancelAnimationFrame(animationGravacao);
+        animationGravacao = null;
+    }
 
-        gravandoConsole = false;
+    // Desenha o estado mais recente antes de encerrar.
+    desenharConsoleNoCanvas(true);
+
+    gravandoConsole = false;
+
 
         const liberarRecursos = () => {
             if (streamGravacao) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSS Console</title>
+    <title>GeLetra</title>
 
     <style>
         * {
@@ -2463,18 +2463,14 @@ async function executarCodigo(
             último frame do vídeo.
         */
 
-        if (!gravar) {
+        
+if (!gravar) {
+    customConsole.clear();
 
-            customConsole.clear();
-
-            customConsole.log(
-                "JSS Console iniciado."
-            );
-
-            customConsole.log(
-                "Aguardando execução..."
-            );
-        }
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+}
     }
 }
 
@@ -2831,11 +2827,14 @@ async function executarLetra(gravar = false) {
             partesGravacao.length = 0;
             partesGravacao = [];
 
-            if (idExecucao === execucaoAtual) {
-                customConsole.clear();
-                customConsole.log("JSS Console iniciado.");
-                customConsole.log("Aguardando execução...");
-            }
+            
+if (idExecucao === execucaoAtual) {
+    customConsole.clear();
+
+    customConsole.log("Bem-vindo ao GeLetra");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+}
 
             exportacaoAtiva = false;
             cancelamentoGravacao = false;
@@ -2885,11 +2884,14 @@ downloadButton.addEventListener("click", async () => {
 
             // A função executarLetra fará a limpeza do gravador
         // assim que a execução atual for interrompida.
-        customConsole.clear();
-        customConsole.log("JSS Console iniciado.");
-        customConsole.log("Aguardando execução...");
+        
+customConsole.clear();
 
-        return;
+customConsole.log("Bem-vindo ao GeLetra!");
+customConsole.log("");
+customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+
+return;
     }
 
     if (downloadButton.disabled) return;
@@ -2921,13 +2923,10 @@ downloadButton.addEventListener("click", async () => {
        MENSAGEM INICIAL
        ================================================== */
 
-    customConsole.log(
-        "JSS Console iniciado."
-    );
-
-    customConsole.log(
-        "Aguardando execução..."
-    );
+    
+customConsole.log("Bem-vindo ao GeLetra!");
+customConsole.log("");
+customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
 
  /* ==================================================
    CONFIGURAÇÕES DO CONSOLE

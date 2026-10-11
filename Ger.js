@@ -483,140 +483,61 @@ let escalaGravacao = 2;
    DESENHA O CONSOLE NO CANVAS
    ================================================== */
 
-function desenharConsoleNoCanvas(forcar = false) {
-if (
-(!gravandoConsole && !forcar) ||
-!canvasGravacao ||
-!contextoGravacao
-) {
-return;
-}
 
-
-const largura = output.clientWidth;
-const altura = output.clientHeight;
-
-if (largura <= 0 || altura <= 0) {
-    if (gravandoConsole && !forcar) {
-        animationGravacao =
-            requestAnimationFrame(desenharConsoleNoCanvas);
-    }
-    return;
-}
-
-contextoGravacao.clearRect(0, 0, largura, altura);
-
-const estilo = getComputedStyle(output);
-
-contextoGravacao.fillStyle = estilo.backgroundColor;
-contextoGravacao.fillRect(0, 0, largura, altura);
-
-const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
-const alturaLinha =
-    parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
-
-contextoGravacao.font =
-    `${tamanhoFonte}px ${estilo.fontFamily}`;
-
-contextoGravacao.textAlign = "center";
-contextoGravacao.textBaseline = "middle";
-
-const larguraMaxima = Math.max(1, largura - 32);
-const linhasOriginais = Array.from(
-    output.querySelectorAll(".console-line")
-);
-
-const linhasDesenhadas = [];
-
-for (const linha of linhasOriginais) {
-    const texto = linha.textContent || "";
-    const cor = getComputedStyle(linha).color;
-
-    contextoGravacao.font =
-        `${tamanhoFonte}px ${estilo.fontFamily}`;
-
-    if (texto === "") {
-        linhasDesenhadas.push({ texto: "", cor });
-        continue;
+function desenharConsoleNoCanvas() {
+    if (!gravandoConsole || !canvasGravacao || !contextoGravacao) {
+        return;
     }
 
-    let linhaAtual = "";
+    const largura = output.clientWidth;
+    const altura = output.clientHeight;
 
-    for (const palavra of texto.split(" ")) {
-        const tentativa = linhaAtual
-            ? `${linhaAtual} ${palavra}`
-            : palavra;
-
-        if (
-            contextoGravacao.measureText(tentativa).width
-            <= larguraMaxima
-        ) {
-            linhaAtual = tentativa;
-            continue;
-        }
-
-        if (linhaAtual) {
-            linhasDesenhadas.push({
-                texto: linhaAtual,
-                cor
-            });
-            linhaAtual = "";
-        }
-
-        for (const caractere of palavra) {
-            const tentativaCaractere =
-                linhaAtual + caractere;
-
-            if (
-                contextoGravacao.measureText(
-                    tentativaCaractere
-                ).width > larguraMaxima &&
-                linhaAtual
-            ) {
-                linhasDesenhadas.push({
-                    texto: linhaAtual,
-                    cor
-                });
-                linhaAtual = caractere;
-            } else {
-                linhaAtual = tentativaCaractere;
-            }
-        }
+    if (largura <= 0 || altura <= 0) {
+        animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+        return;
     }
 
-    if (linhaAtual) {
-        linhasDesenhadas.push({
-            texto: linhaAtual,
-            cor
-        });
-    }
-}
+    // Não altere canvas.width/height aqui.
+    // Redimensionar o canvas a cada frame consome recursos.
+    contextoGravacao.clearRect(0, 0, largura, altura);
 
-const espaco = alturaLinha + 3;
-const alturaTotal = linhasDesenhadas.length * espaco;
+    const estilo = getComputedStyle(output);
 
-let y = (altura - alturaTotal) / 2 + espaco / 2;
+    contextoGravacao.fillStyle = estilo.backgroundColor;
+    contextoGravacao.fillRect(0, 0, largura, altura);
 
-for (const linha of linhasDesenhadas) {
-    contextoGravacao.fillStyle = linha.cor;
+    const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
+    const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
 
-    contextoGravacao.fillText(
-        linha.texto,
-        largura / 2,
-        y
+    contextoGravacao.font = `${tamanhoFonte}px ${estilo.fontFamily}`;
+    contextoGravacao.textAlign = "center";
+    contextoGravacao.textBaseline = "middle";
+
+    const linhasArray = Array.from(
+        output.querySelectorAll(".console-line")
     );
 
-    y += espaco;
-}
+    if (linhasArray.length > 0) {
+        const espaco = alturaLinha + 3;
+        const alturaTotal = linhasArray.length * espaco;
+        let y = (altura - alturaTotal) / 2 + espaco / 2;
 
-// Só mantém a animação automática durante a gravação.
-if (gravandoConsole && !forcar) {
-    animationGravacao =
-        requestAnimationFrame(desenharConsoleNoCanvas);
-}
+        for (const linha of linhasArray) {
+            const estiloLinha = getComputedStyle(linha);
 
-}
+            contextoGravacao.fillStyle = estiloLinha.color;
+            contextoGravacao.fillText(
+                linha.textContent || "",
+                largura / 2,
+                y
+            );
 
+            y += espaco;
+        }
+    }
+
+    animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+}
 
 
 /* ==================================================
@@ -672,16 +593,7 @@ async function iniciarGravacaoConsole() {
         0, 0
     );
 
-    // Tenta capturar somente os quadros solicitados pelo código.
-streamGravacao = canvasGravacao.captureStream(0);
-
-const trilhaInicial = streamGravacao.getVideoTracks()[0];
-
-// Se a captura manual não estiver disponível, usa 30 FPS.
-if (!trilhaInicial || typeof trilhaInicial.requestFrame !== "function") {
-    streamGravacao.getTracks().forEach(track => track.stop());
     streamGravacao = canvasGravacao.captureStream(30);
-}
 
     const formatos = [
         "video/mp4",
@@ -750,16 +662,12 @@ function pararGravacaoConsole(descartar = false) {
     return new Promise((resolve, reject) => {
         const recorder = mediaRecorder;
 
-    if (animationGravacao !== null) {
-        cancelAnimationFrame(animationGravacao);
-        animationGravacao = null;
-    }
+        if (animationGravacao !== null) {
+            cancelAnimationFrame(animationGravacao);
+            animationGravacao = null;
+        }
 
-    // Desenha o estado mais recente antes de encerrar.
-    desenharConsoleNoCanvas(true);
-
-    gravandoConsole = false;
-
+        gravandoConsole = false;
 
         const liberarRecursos = () => {
             if (streamGravacao) {
@@ -969,163 +877,33 @@ async function converterParaMP4(webmBlob, idExecucao) {
    BAIXA ARQUIVO
    ================================================== */
 
-
 function baixarMP4(blob) {
-    const nomeArquivo = "GeLetra.mp4";
-    const url = URL.createObjectURL(blob);
 
-    const ehIOS =
-        /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        (
-            navigator.platform === "MacIntel" &&
-            navigator.maxTouchPoints > 1
-        );
+    const url =
+        URL.createObjectURL(blob);
 
-    // No iPhone/iPad, oferece o compartilhamento nativo
-    // para que o usuário possa salvar com o nome correto.
-    if (
-        ehIOS &&
-        typeof navigator.share === "function" &&
-        typeof File !== "undefined"
-    ) {
-        const arquivo = new File(
-            [blob],
-            nomeArquivo,
-            { type: "video/mp4" }
-        );
 
-        if (
-            typeof navigator.canShare === "function" &&
-            navigator.canShare({ files: [arquivo] })
-        ) {
-            const painelAntigo =
-                document.getElementById("geLetraSharePanel");
+    const link =
+        document.createElement("a");
 
-            if (painelAntigo) painelAntigo.remove();
 
-            const painel = document.createElement("div");
-            painel.id = "geLetraSharePanel";
-
-            Object.assign(painel.style, {
-                position: "fixed",
-                inset: "0",
-                zIndex: "999999",
-                background: "rgba(0,0,0,0.85)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "14px",
-                padding: "24px",
-                color: "#fff",
-                fontFamily: "Arial, sans-serif",
-                textAlign: "center"
-            });
-
-            const titulo = document.createElement("h2");
-            titulo.textContent = "Vídeo pronto!";
-
-            const mensagem = document.createElement("p");
-            mensagem.textContent =
-                "Toque em Compartilhar e escolha " +
-                "Salvar em Arquivos para salvar como GeLetra.mp4.";
-
-            const botaoCompartilhar =
-                document.createElement("button");
-
-            botaoCompartilhar.type = "button";
-            botaoCompartilhar.textContent = "Compartilhar vídeo";
-
-            Object.assign(botaoCompartilhar.style, {
-                padding: "14px 22px",
-                border: "0",
-                borderRadius: "8px",
-                background: "#fff",
-                color: "#111",
-                fontSize: "16px",
-                cursor: "pointer"
-            });
-
-            botaoCompartilhar.addEventListener("click", async () => {
-                try {
-                    await navigator.share({
-                        files: [arquivo],
-                        title: "GeLetra"
-                    });
-
-                    painel.remove();
-                } catch (erro) {
-                    if (erro.name !== "AbortError") {
-                        mensagem.textContent =
-                            "Não foi possível abrir o compartilhamento. " +
-                            "Tente usar o link abaixo.";
-                    }
-                }
-            });
-
-            const linkAlternativo =
-                document.createElement("a");
-
-            linkAlternativo.href = url;
-            linkAlternativo.download = nomeArquivo;
-            linkAlternativo.textContent =
-                "Tentar baixar diretamente";
-
-            Object.assign(linkAlternativo.style, {
-                color: "#fff",
-                fontSize: "14px",
-                padding: "10px"
-            });
-
-            const botaoFechar = document.createElement("button");
-            botaoFechar.type = "button";
-            botaoFechar.textContent = "Fechar";
-
-            Object.assign(botaoFechar.style, {
-                padding: "10px 18px",
-                border: "1px solid #888",
-                borderRadius: "8px",
-                background: "transparent",
-                color: "#fff",
-                fontSize: "14px"
-            });
-
-            botaoFechar.addEventListener("click", () => {
-                painel.remove();
-            });
-
-            painel.append(
-                titulo,
-                mensagem,
-                botaoCompartilhar,
-                linkAlternativo,
-                botaoFechar
-            );
-
-            document.body.appendChild(painel);
-
-            // Mantém a URL válida enquanto o painel estiver disponível.
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 600000);
-
-            return;
-        }
-    }
-
-    // Download tradicional para computadores e outros navegadores.
-    const link = document.createElement("a");
     link.href = url;
-    link.download = nomeArquivo;
+
+    link.download =
+        "GeLetra.mp4";
+
 
     document.body.appendChild(link);
+
     link.click();
+
     link.remove();
 
-    // Dá mais tempo ao navegador para iniciar o download.
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 60000);
+
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
 }
 
     function addConsoleLine(
@@ -1634,28 +1412,10 @@ async function executarLetra(gravar = false) {
             return;
         }
 
-        // Dá mais tempo para o tablet registrar o texto final.
+        // Dá tempo para o último frame e os dados finais serem registrados.
         await new Promise(resolve => {
             requestAnimationFrame(() => {
-                const trilhaFinal =
-                    streamGravacao?.getVideoTracks()[0];
-
-                if (
-                    trilhaFinal &&
-                    typeof trilhaFinal.requestFrame === "function"
-                ) {
-                    trilhaFinal.requestFrame();
-                }
-
                 requestAnimationFrame(() => {
-                    if (
-                        trilhaFinal &&
-                        typeof trilhaFinal.requestFrame === "function"
-                    ) {
-                        trilhaFinal.requestFrame();
-                    }
-
-                    // Mantém o último texto visível por 1 segundo.
                     setTimeout(resolve, 250);
                 });
             });
@@ -3609,4 +3369,3 @@ fontBack.addEventListener(
             "block";
     }
 );
-  

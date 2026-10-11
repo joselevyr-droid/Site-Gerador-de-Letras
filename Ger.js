@@ -1581,7 +1581,7 @@ async function executarLetra(gravar = false) {
                     }
 
                     // Mantém o último texto visível por 1 segundo.
-                    setTimeout(resolve, 1000);
+                    setTimeout(resolve, 250);
                 });
             });
         });

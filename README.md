@@ -1,4 +1,4 @@
-# GeLetraa
+# GeLetra
 
 O **GeLetra** é uma ferramenta para criar vídeos com um efeito de escrita progressiva, exibindo um texto caractere por caractere em um console personalizável. Você pode organizar o conteúdo em trechos, controlar o tempo de escrita, adicionar pausas e personalizar as cores e a fonte antes de gerar o vídeo.
 

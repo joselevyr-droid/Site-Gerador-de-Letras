@@ -1,3 +1,0 @@
-# Força o GitHub a contar os arquivos JavaScript e CSS
-*.js  linguist-detectable=true -linguist-vendored -linguist-generated
-*.css linguist-detectable=true -linguist-vendored -linguist-generated

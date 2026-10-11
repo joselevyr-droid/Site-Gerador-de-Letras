@@ -2875,50 +2875,80 @@ playButton.addEventListener("click", () => {
 });
 
 downloadButton.addEventListener("click", async () => {
-    // Se o processo já começou, este clique cancela.
-    if (exportacaoAtiva) {
-        cancelamentoGravacao = true;
-        execucaoAtual++;
+// Se já estiver gravando ou exportando, cancela o processo.
+if (exportacaoAtiva) {
+cancelamentoGravacao = true;
+execucaoAtual++;
 
-        downloadButton.textContent = "Cancelando...";
-        downloadButton.disabled = true;
+    // Atualiza imediatamente o console.
+    customConsole.clear();
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
 
-            // A função executarLetra fará a limpeza do gravador
-        // assim que a execução atual for interrompida.
-        
-customConsole.clear();
+    downloadButton.textContent = "Cancelando...";
+    downloadButton.disabled = true;
 
-customConsole.log("Bem-vindo ao GeLetra!");
-customConsole.log("");
-customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
-
-return;
-    }
-
-    if (downloadButton.disabled) return;
-
-    playButton.disabled = true;
-    downloadButton.classList.add("gravando");
-    downloadButton.textContent = "Parar gravação";
-
+    // Interrompe a gravação e descarta os dados capturados.
     try {
-        await executarLetra(true);
+        await pararGravacaoConsole(true);
     } catch (erro) {
-        console.error("Erro ao gerar vídeo:", erro);
-
-        if (!cancelamentoGravacao) {
-            alert(
-                "Erro ao gerar vídeo:\n\n" +
-                (erro.message || String(erro))
-            );
-        }
-    } finally {
-        playButton.disabled = false;
-        downloadButton.disabled = false;
-        downloadButton.classList.remove("gravando");
-        downloadButton.textContent = "Download";
+        console.error("Erro ao interromper a gravação:", erro);
     }
+
+    partesGravacao.length = 0;
+    partesGravacao = [];
+
+    exportacaoAtiva = false;
+    cancelamentoGravacao = false;
+
+    downloadButton.disabled = false;
+    downloadButton.classList.remove("gravando");
+    downloadButton.textContent = "Download";
+    playButton.disabled = false;
+
+    // Garante que a mensagem inicial permaneça visível.
+    customConsole.clear();
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+
+    return;
+}
+
+if (downloadButton.disabled) return;
+
+playButton.disabled = true;
+downloadButton.classList.add("gravando");
+downloadButton.textContent = "Parar gravação";
+
+try {
+    await executarLetra(true);
+} catch (erro) {
+    console.error("Erro ao gerar vídeo:", erro);
+
+    if (!cancelamentoGravacao) {
+        alert(
+            "Erro ao gerar vídeo:\n\n" +
+            (erro.message || String(erro))
+        );
+    }
+} finally {
+    playButton.disabled = false;
+    downloadButton.disabled = false;
+    downloadButton.classList.remove("gravando");
+    downloadButton.textContent = "Download";
+
+    // Restaura a mensagem apenas quando não há outra execução ativa.
+    if (!exportacaoAtiva) {
+        customConsole.clear();
+        customConsole.log("Bem-vindo ao GeLetra!");
+        customConsole.log("");
+        customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+    }
+}
 });
+
   
     /* ==================================================
        MENSAGEM INICIAL

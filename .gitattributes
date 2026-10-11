@@ -1,6 +1,3 @@
-*.js  linguist-detectable=true -linguist-generated -linguist-vendored
-*.css linguist-detectable=true -linguist-generated -linguist-vendored
-
-
-dist/**  -linguist-vendored -linguist-generated
-build/** -linguist-vendored -linguist-generated
+# Força o GitHub a contar os arquivos JavaScript e CSS
+*.js  linguist-detectable=true -linguist-vendored -linguist-generated
+*.css linguist-detectable=true -linguist-vendored -linguist-generated

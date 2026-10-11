@@ -1275,19 +1275,16 @@ padding: 22px 24px;
 
             </div>
 
+<div class="settings-option">
+    <span>Cor da letra do console</span>
 
-            <div class="settings-option">
-                <span>Cor da letra do console</span>
-
-                <input
-                    type="color"
-                    class="color-preview"
-                    id="fontColorPreview"
-                    value="#ffffff"
-                    title="Alterar cor da letra"
-                    aria-label="Cor da letra do console"
-                >
-            </div>
+    <button
+        class="color-preview"
+        id="fontColorPreview"
+        title="Alterar cor da letra"
+        aria-label="Alterar cor da letra do console"
+    ></button>
+</div>
             
             <button
                 class="settings-option font-option"
@@ -1417,7 +1414,119 @@ padding: 22px 24px;
 
         </div>
 
+<!-- TELA DA COR DA LETRA -->
 
+<div
+    class="settings-screen"
+    id="fontColorScreen"
+    style="display: none;"
+>
+    <button
+        class="back-button"
+        id="fontColorBack"
+    >
+        ← Voltar
+    </button>
+
+    <h3>Cor da Letra do Console</h3>
+
+    <div class="rgb-picker">
+
+        <div
+            class="color-gradient"
+            id="fontColorGradient"
+        >
+            <div
+                class="color-gradient-cursor"
+                id="fontColorGradientCursor"
+            ></div>
+        </div>
+
+        <div
+            class="hue-slider"
+            id="fontHueSlider"
+        >
+            <div
+                class="hue-slider-cursor"
+                id="fontHueSliderCursor"
+            ></div>
+        </div>
+
+        <div class="rgb-values">
+            <label>
+                R
+                <input
+                    type="number"
+                    id="fontRedValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                G
+                <input
+                    type="number"
+                    id="fontGreenValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                B
+                <input
+                    type="number"
+                    id="fontBlueValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+        </div>
+
+        <div class="hex-color-row">
+            <label for="fontHexColorInput">
+                Código HEX
+            </label>
+
+            <input
+                type="text"
+                id="fontHexColorInput"
+                class="hex-color-input"
+                value="#FFFFFF"
+                placeholder="#FF5733"
+                maxlength="7"
+                spellcheck="false"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="recent-colors-title">
+            Últimas 3 cores usadas
+        </div>
+
+        <div
+            class="recent-colors"
+            id="fontRecentColors"
+        >
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+        </div>
+
+        <div
+            class="selected-color"
+            id="fontSelectedColor"
+        >
+            #FFFFFF
+        </div>
+
+    </div>
+</div>
+        
         <!-- TELA DA FONTE -->
 
         <div
@@ -3145,6 +3254,42 @@ const recentColors =
 
 const fontColorPreview =
     document.getElementById("fontColorPreview");
+
+const fontColorScreen =
+    document.getElementById("fontColorScreen");
+
+const fontColorBack =
+    document.getElementById("fontColorBack");
+
+const fontColorGradient =
+    document.getElementById("fontColorGradient");
+
+const fontColorGradientCursor =
+    document.getElementById("fontColorGradientCursor");
+
+const fontHueSlider =
+    document.getElementById("fontHueSlider");
+
+const fontHueSliderCursor =
+    document.getElementById("fontHueSliderCursor");
+
+const fontRedValue =
+    document.getElementById("fontRedValue");
+
+const fontGreenValue =
+    document.getElementById("fontGreenValue");
+
+const fontBlueValue =
+    document.getElementById("fontBlueValue");
+
+const fontHexColorInput =
+    document.getElementById("fontHexColorInput");
+
+const fontRecentColors =
+    document.getElementById("fontRecentColors");
+
+const fontSelectedColor =
+    document.getElementById("fontSelectedColor");
     
 /* ==================================================
    COR ATUAL
@@ -3163,9 +3308,8 @@ colorPreview.style.background =
 status.style.background =
     corConsole;
 
-
 /* ==================================================
-   COR DA LETRA DO CONSOLE
+   SELETOR COMPLETO DA COR DA LETRA
    ================================================== */
 
 let corTextoConsole =
@@ -3176,21 +3320,306 @@ output.style.setProperty(
     corTextoConsole
 );
 
-fontColorPreview.value = corTextoConsole;
+fontColorPreview.style.backgroundColor = corTextoConsole;
 
-fontColorPreview.addEventListener("input", () => {
-    corTextoConsole = fontColorPreview.value;
+let hsvTextoAtual = rgbToHsv(
+    ...Object.values(hexToRgb(corTextoConsole))
+);
+
+function aplicarCorTextoRGB(r, g, b) {
+    r = Math.max(0, Math.min(255, Math.round(r)));
+    g = Math.max(0, Math.min(255, Math.round(g)));
+    b = Math.max(0, Math.min(255, Math.round(b)));
+
+    corTextoConsole = rgbToHex(r, g, b);
 
     output.style.setProperty(
         "--console-text-color",
         corTextoConsole
     );
 
+    fontColorPreview.style.backgroundColor = corTextoConsole;
+
+    fontRedValue.value = r;
+    fontGreenValue.value = g;
+    fontBlueValue.value = b;
+
+    fontHexColorInput.value = corTextoConsole.toUpperCase();
+    fontSelectedColor.textContent = corTextoConsole.toUpperCase();
+
     localStorage.setItem(
         "jssConsoleTextoCor",
         corTextoConsole
     );
+}
+
+function atualizarGradienteTexto() {
+    fontColorGradient.style.background = `
+        linear-gradient(to bottom, transparent, #000000),
+        linear-gradient(to right, #ffffff, hsl(${hsvTextoAtual.h}, 100%, 50%))
+    `;
+
+    fontColorGradientCursor.style.left =
+        `${hsvTextoAtual.s * 100}%`;
+
+    fontColorGradientCursor.style.top =
+        `${(1 - hsvTextoAtual.v) * 100}%`;
+
+    fontHueSliderCursor.style.left =
+        `${(hsvTextoAtual.h / 360) * 100}%`;
+}
+
+function sincronizarSeletorTexto() {
+    const rgb = hexToRgb(corTextoConsole);
+
+    hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    fontRedValue.value = rgb.r;
+    fontGreenValue.value = rgb.g;
+    fontBlueValue.value = rgb.b;
+
+    fontHexColorInput.value = corTextoConsole.toUpperCase();
+    fontSelectedColor.textContent = corTextoConsole.toUpperCase();
+
+    atualizarGradienteTexto();
+}
+
+/* Histórico independente das 3 últimas cores */
+
+let coresRecentesTexto = [];
+
+try {
+    const salvas = JSON.parse(
+        localStorage.getItem("jssConsoleTextoCoresRecentes") || "[]"
+    );
+
+    if (Array.isArray(salvas)) {
+        coresRecentesTexto = salvas
+            .filter(cor => /^#[0-9a-f]{6}$/i.test(cor))
+            .slice(0, 3);
+    }
+} catch {
+    coresRecentesTexto = [];
+}
+
+function desenharCoresRecentesTexto() {
+    fontRecentColors.innerHTML = "";
+
+    for (let i = 0; i < 3; i++) {
+        const cor = coresRecentesTexto[i];
+
+        if (cor) {
+            const botao = document.createElement("button");
+
+            botao.type = "button";
+            botao.className = "recent-color";
+            botao.style.backgroundColor = cor;
+            botao.title = `Usar ${cor.toUpperCase()}`;
+            botao.setAttribute(
+                "aria-label",
+                `Usar cor ${cor.toUpperCase()}`
+            );
+
+            botao.addEventListener("click", () => {
+                const rgb = hexToRgb(cor);
+
+                hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+                aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+                atualizarGradienteTexto();
+                registrarCorRecenteTexto(cor);
+            });
+
+            fontRecentColors.appendChild(botao);
+        } else {
+            const vazio = document.createElement("div");
+            vazio.className = "recent-color-empty";
+            fontRecentColors.appendChild(vazio);
+        }
+    }
+}
+
+function registrarCorRecenteTexto(cor) {
+    cor = cor.toLowerCase();
+
+    coresRecentesTexto = [
+        cor,
+        ...coresRecentesTexto.filter(item => item !== cor)
+    ].slice(0, 3);
+
+    localStorage.setItem(
+        "jssConsoleTextoCoresRecentes",
+        JSON.stringify(coresRecentesTexto)
+    );
+
+    desenharCoresRecentesTexto();
+}
+
+/* Clique e arraste no gradiente */
+
+function atualizarPeloGradienteTexto(event) {
+    const rect = fontColorGradient.getBoundingClientRect();
+
+    const x = Math.max(
+        0,
+        Math.min(1, (event.clientX - rect.left) / rect.width)
+    );
+
+    const y = Math.max(
+        0,
+        Math.min(1, (event.clientY - rect.top) / rect.height)
+    );
+
+    hsvTextoAtual.s = x;
+    hsvTextoAtual.v = 1 - y;
+
+    const rgb = hsvToRgb(
+        hsvTextoAtual.h,
+        hsvTextoAtual.s,
+        hsvTextoAtual.v
+    );
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+}
+
+let arrastandoGradienteTexto = false;
+
+fontColorGradient.addEventListener("pointerdown", event => {
+    arrastandoGradienteTexto = true;
+
+    fontColorGradient.setPointerCapture(event.pointerId);
+    atualizarPeloGradienteTexto(event);
 });
+
+fontColorGradient.addEventListener("pointermove", event => {
+    if (arrastandoGradienteTexto) {
+        atualizarPeloGradienteTexto(event);
+    }
+});
+
+fontColorGradient.addEventListener("pointerup", () => {
+    if (arrastandoGradienteTexto) {
+        registrarCorRecenteTexto(corTextoConsole);
+    }
+
+    arrastandoGradienteTexto = false;
+});
+
+fontColorGradient.addEventListener("pointercancel", () => {
+    arrastandoGradienteTexto = false;
+});
+
+/* Barra de matiz */
+
+function atualizarPelaMatizTexto(event) {
+    const rect = fontHueSlider.getBoundingClientRect();
+
+    const x = Math.max(
+        0,
+        Math.min(1, (event.clientX - rect.left) / rect.width)
+    );
+
+    hsvTextoAtual.h = x * 360;
+
+    const rgb = hsvToRgb(
+        hsvTextoAtual.h,
+        hsvTextoAtual.s,
+        hsvTextoAtual.v
+    );
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+}
+
+let arrastandoMatizTexto = false;
+
+fontHueSlider.addEventListener("pointerdown", event => {
+    arrastandoMatizTexto = true;
+
+    fontHueSlider.setPointerCapture(event.pointerId);
+    atualizarPelaMatizTexto(event);
+});
+
+fontHueSlider.addEventListener("pointermove", event => {
+    if (arrastandoMatizTexto) {
+        atualizarPelaMatizTexto(event);
+    }
+});
+
+fontHueSlider.addEventListener("pointerup", () => {
+    if (arrastandoMatizTexto) {
+        registrarCorRecenteTexto(corTextoConsole);
+    }
+
+    arrastandoMatizTexto = false;
+});
+
+fontHueSlider.addEventListener("pointercancel", () => {
+    arrastandoMatizTexto = false;
+});
+
+/* Campos RGB */
+
+function atualizarPelosCamposTexto() {
+    let r = Number(fontRedValue.value);
+    let g = Number(fontGreenValue.value);
+    let b = Number(fontBlueValue.value);
+
+    if (Number.isNaN(r)) r = 0;
+    if (Number.isNaN(g)) g = 0;
+    if (Number.isNaN(b)) b = 0;
+
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+
+    hsvTextoAtual = rgbToHsv(r, g, b);
+
+    aplicarCorTextoRGB(r, g, b);
+    atualizarGradienteTexto();
+}
+
+[fontRedValue, fontGreenValue, fontBlueValue].forEach(input => {
+    input.addEventListener("change", () => {
+        atualizarPelosCamposTexto();
+        registrarCorRecenteTexto(corTextoConsole);
+    });
+
+    input.addEventListener("input", atualizarPelosCamposTexto);
+});
+
+/* Campo HEX */
+
+fontHexColorInput.addEventListener("change", () => {
+    let hex = fontHexColorInput.value.trim();
+
+    if (!hex.startsWith("#")) {
+        hex = "#" + hex;
+    }
+
+    if (/^#[0-9a-f]{3}$/i.test(hex)) {
+        hex = "#" + hex[1] + hex[1]
+                   + hex[2] + hex[2]
+                   + hex[3] + hex[3];
+    }
+
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) {
+        fontHexColorInput.value = corTextoConsole.toUpperCase();
+        return;
+    }
+
+    const rgb = hexToRgb(hex);
+
+    hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+    registrarCorRecenteTexto(corTextoConsole);
+});
+
+desenharCoresRecentesTexto();
+sincronizarSeletorTexto();
     
 /* ==================================================
    CONVERSÃO RGB → HSV
@@ -3940,6 +4369,8 @@ editSettingsButton.addEventListener(
 
         fontScreen.style.display =
             "none";
+
+        fontColorScreen.style.display = "none";
     }
 );
 
@@ -3972,6 +4403,8 @@ colorPreview.addEventListener(
         colorScreen.style.display =
             "block";
 
+        fontColorScreen.style.display = "none";
+        
         sincronizarSeletor();
     }
 );
@@ -3993,6 +4426,27 @@ colorBack.addEventListener(
     }
 );
 
+/* ==================================================
+   ABRIR SELETOR DA COR DA LETRA
+   ================================================== */
+
+fontColorPreview.addEventListener("click", () => {
+    settingsMain.style.display = "none";
+    colorScreen.style.display = "none";
+    fontScreen.style.display = "none";
+    fontColorScreen.style.display = "block";
+
+    sincronizarSeletorTexto();
+});
+
+/* ==================================================
+   VOLTAR DO SELETOR DA COR DA LETRA
+   ================================================== */
+
+fontColorBack.addEventListener("click", () => {
+    fontColorScreen.style.display = "none";
+    settingsMain.style.display = "block";
+});
 
 /* ==================================================
    ABRIR FONTES

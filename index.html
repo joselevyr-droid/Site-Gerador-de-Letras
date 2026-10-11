@@ -1168,6 +1168,39 @@ padding: 22px 24px;
     background: #f5f5f5;
 }
 
+/* CONTROLE DE TAMANHO DA FONTE */
+
+.font-size-control {
+    margin: 0 0 16px;
+    padding: 12px;
+    background: #f2f2f2;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+}
+
+.font-size-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+#consoleFontSizeValue {
+    font-weight: bold;
+    color: #333333;
+    white-space: nowrap;
+}
+
+#consoleFontSize {
+    display: block;
+    width: 100%;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #222222;
+}
+        
 /* ==================================================
    LISTA DE FONTES
    ================================================== */
@@ -1677,9 +1710,25 @@ padding: 22px 24px;
                 ← Voltar
             </button>
 
-            <h3>Fonte do Console</h3>
-
             
+<h3>Fonte do Console</h3>
+
+<div class="font-size-control">
+    <div class="font-size-header">
+        <label for="consoleFontSize">Tamanho da fonte</label>
+        <span id="consoleFontSizeValue">14 px</span>
+    </div>
+
+    <input
+        type="range"
+        id="consoleFontSize"
+        min="8"
+        max="40"
+        step="1"
+        value="14"
+    >
+</div>
+
 <div class="font-list">
 
     <button data-font="monospace">
@@ -4510,6 +4559,47 @@ output.style.fontFamily =
     fonteConsole;
 
 
+/* ==================================================
+   TAMANHO DA FONTE DO CONSOLE
+   ================================================== */
+
+const consoleFontSize =
+    document.getElementById("consoleFontSize");
+
+const consoleFontSizeValue =
+    document.getElementById("consoleFontSizeValue");
+
+let tamanhoFonteConsole = Number(
+    localStorage.getItem("jssConsoleTamanhoFonte") || 14
+);
+
+tamanhoFonteConsole = Math.max(
+    8,
+    Math.min(40, tamanhoFonteConsole)
+);
+
+function aplicarTamanhoFonteConsole() {
+    output.style.fontSize = tamanhoFonteConsole + "px";
+
+    consoleFontSize.value = tamanhoFonteConsole;
+
+    consoleFontSizeValue.textContent =
+        tamanhoFonteConsole + " px";
+}
+
+aplicarTamanhoFonteConsole();
+
+consoleFontSize.addEventListener("input", () => {
+    tamanhoFonteConsole = Number(consoleFontSize.value);
+
+    aplicarTamanhoFonteConsole();
+
+    localStorage.setItem(
+        "jssConsoleTamanhoFonte",
+        tamanhoFonteConsole
+    );
+});
+    
 /* ==================================================
    ABRIR CONFIGURAÇÕES
    ================================================== */

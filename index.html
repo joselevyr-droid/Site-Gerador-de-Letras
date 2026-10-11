@@ -2828,13 +2828,16 @@ async function executarLetra(gravar = false) {
         partesGravacao = [];
     }
 
-    if (idExecucao === execucaoAtual) {
-        customConsole.clear();
+    
+const foiCancelada = gravar && cancelamentoGravacao;
 
-        customConsole.log("Bem-vindo ao GeLetra!");
-        customConsole.log("");
-        customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
-    }
+if (idExecucao === execucaoAtual || foiCancelada) {
+    customConsole.clear();
+
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+}
 
     if (gravar) {
         exportacaoAtiva = false;
@@ -2889,18 +2892,9 @@ execucaoAtual++;
     downloadButton.textContent = "Cancelando...";
     downloadButton.disabled = true;
 
-    // Interrompe a gravação e descarta os dados capturados.
-    try {
-        await pararGravacaoConsole(true);
-    } catch (erro) {
-        console.error("Erro ao interromper a gravação:", erro);
-    }
-
     partesGravacao.length = 0;
     partesGravacao = [];
 
-    exportacaoAtiva = false;
-    cancelamentoGravacao = false;
 
     downloadButton.disabled = false;
     downloadButton.classList.remove("gravando");

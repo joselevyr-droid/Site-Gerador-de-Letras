@@ -1559,31 +1559,32 @@ async function executarLetra(gravar = false) {
             return;
         }
 
- // Aguarda a renderização final antes de encerrar a gravação.
-await new Promise(resolve => {
-    requestAnimationFrame(() => {
-        const trilhaFinal =
-            streamGravacao?.getVideoTracks()[0];
+        // Dá mais tempo para o tablet registrar o texto final.
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                const trilhaFinal =
+                    streamGravacao?.getVideoTracks()[0];
 
-        if (
-            trilhaFinal &&
-            typeof trilhaFinal.requestFrame === "function"
-        ) {
-            trilhaFinal.requestFrame();
-        }
+                if (
+                    trilhaFinal &&
+                    typeof trilhaFinal.requestFrame === "function"
+                ) {
+                    trilhaFinal.requestFrame();
+                }
 
-        requestAnimationFrame(() => {
-            if (
-                trilhaFinal &&
-                typeof trilhaFinal.requestFrame === "function"
-            ) {
-                trilhaFinal.requestFrame();
-            }
+                requestAnimationFrame(() => {
+                    if (
+                        trilhaFinal &&
+                        typeof trilhaFinal.requestFrame === "function"
+                    ) {
+                        trilhaFinal.requestFrame();
+                    }
 
-            setTimeout(resolve, 350);
+                    // Mantém o último texto visível por 1 segundo.
+                    setTimeout(resolve, 1000);
+                });
+            });
         });
-    });
-});
 
         if (
             idExecucao !== execucaoAtual ||

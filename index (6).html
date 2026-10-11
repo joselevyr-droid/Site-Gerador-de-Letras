@@ -1,0 +1,5166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeLetra</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+
+            background: #151515;
+            color: white;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            display: flex;
+        }
+
+        /* =========================================
+           LADO ESQUERDO
+           ========================================= */
+
+        .left-panel {
+            width: 35%;
+            height: 100vh;
+
+            padding: 30px;
+
+            position: relative;
+
+            background: #111;
+
+            border-right: 1px solid #292929;
+
+            overflow: hidden;
+        }
+
+       /* =========================================
+   ÁREA DOS RETÂNGULOS
+   ========================================= */
+
+/* =========================================
+   WRAPPER DO POPUP
+   ========================================= */
+
+.popup-wrapper {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   ÁREA DOS RETÂNGULOS
+   ========================================= */
+
+.popup-area {
+    position: absolute;
+
+    top: 55px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding: 0 14px 20px 0;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    overscroll-behavior: contain;
+}
+
+.popup-area::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+
+/* =========================================
+   SCROLLBAR PERSONALIZADA
+   ========================================= */
+
+.custom-scrollbar {
+    position: absolute;
+
+    top: 55px;
+    right: 2px;
+    bottom: 0;
+
+    width: 8px;
+
+    background: rgba(54, 54, 54, 0.14901960784313725);
+
+    z-index: 9999;
+
+    pointer-events: none;
+}
+
+
+/* =========================================
+   THUMB
+   ========================================= */
+
+.custom-scrollbar-thumb {
+    position: absolute;
+
+    top: 0;
+    left: 1px;
+
+    width: 6px;
+    height: 40px;
+
+    background: #ffffff;
+
+    border-radius: 999px;
+
+    pointer-events: auto;
+
+    cursor: grab;
+
+    user-select: none;
+    touch-action: none;
+
+    z-index: 10000;
+}
+
+.custom-scrollbar-thumb:hover {
+    background: #cccccc;
+}
+
+.custom-scrollbar-thumb:active {
+    background: #aaaaaa;
+    cursor: grabbing;
+}
+
+
+        /* =========================================
+           BOTÃO +
+           ========================================= */
+
+        .add-button {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 42px;
+            height: 42px;
+
+            z-index: 100;
+
+            background: #1f1f1f;
+
+            border: 1px solid #353535;
+            border-radius: 7px;
+
+            color: #ffffff;
+
+            font-size: 25px;
+            font-weight: 300;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            transition:
+                background 0.15s,
+                border-color 0.15s,
+                transform 0.15s;
+        }
+
+        .add-button:hover {
+            background: #292929;
+            border-color: #505050;
+
+            transform: none;
+        }
+
+        .add-button:active {
+            transform: scale(0.95);
+        }
+
+      /* =========================================
+   BOTÃO -
+   ========================================= */
+
+.remove-all-button {
+    position: absolute;
+
+    top: 0;
+    left: 50px;
+
+    width: 42px;
+    height: 42px;
+
+    z-index: 100;
+
+    background: #241515;
+
+    border: 1px solid #4a2929;
+    border-radius: 7px;
+
+    color: #ff5f56;
+
+    font-size: 25px;
+    font-weight: 300;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        transform 0.15s;
+}
+
+.remove-all-button:hover {
+    background: #351b1b;
+    border-color: #7a3a3a;
+
+    transform: none;
+}
+
+.remove-all-button:active {
+    transform: scale(0.95);
+}
+      
+        /* =========================================
+           RETÂNGULOS DOS TRECHOS
+           ========================================= */
+
+        .lyric-item {
+            position: relative;
+
+            width: 100%;
+            min-height: 115px;
+
+            margin-bottom: 12px;
+
+            padding: 18px 150px 18px 18px;
+
+            background: #181818;
+
+            border: 1px solid #303030;
+            border-radius: 9px;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.18);
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+        .lyric-item:focus-within {
+            border-color: #454545;
+            background: #1b1b1b;
+        }
+
+        /* =========================================
+           ÁREA DO TRECHO
+           ========================================= */
+.lyric-text {
+    width: 100%;
+    min-height: 78px;
+
+    resize: none;
+
+    background: transparent;
+
+    border: none;
+    outline: none;
+
+    color: #eeeeee;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+
+    line-height: 1.5;
+
+    padding: 4px;
+
+    /* Remove a scrollbar interna */
+    overflow-y: hidden;
+    overflow-x: hidden;
+
+    /* Impede scrollbar nativa */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.lyric-text::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+               .lyric-text::placeholder {
+            color: #666;
+        }
+
+        /* =========================================
+           BOTÃO X
+           ========================================= */
+
+        .delete-button {
+            position: absolute;
+
+            top: 8px;
+            right: 9px;
+
+            width: 25px;
+            height: 25px;
+
+            padding: 0;
+
+            background: transparent;
+
+            color: #777;
+
+            border: none;
+
+            font-size: 17px;
+            font-weight: normal;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            border-radius: 5px;
+
+            transition:
+                background 0.15s,
+                color 0.15s;
+        }
+
+        .delete-button:hover {
+            background: #2d2d2d;
+            color: #ff5f56;
+        }
+
+        /* =========================================
+           BLOQUINHOS NUMÉRICOS
+           ========================================= */
+
+        .number-fields {
+            position: absolute;
+
+            right: 14px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 115px;
+
+            display: grid;
+
+            grid-template-columns: repeat(4, 1fr);
+
+            gap: 5px;
+        }
+
+        .number-field {
+            width: 25px;
+            height: 32px;
+
+            padding: 0;
+
+            background: #101010;
+
+            border: 1px solid #343434;
+            border-radius: 5px;
+
+            color: #eeeeee;
+
+            text-align: center;
+
+            font-size: 11px;
+            font-family: Arial, Helvetica, sans-serif;
+
+            outline: none;
+
+            transition:
+                border-color 0.15s,
+                background 0.15s;
+        }
+
+        .number-field:focus {
+            background: #151515;
+            border-color: #626262;
+        }
+
+        /* Remove setinhas dos inputs number */
+
+        .number-field::-webkit-inner-spin-button,
+        .number-field::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .number-field {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+
+        /* =========================================
+           LADO DIREITO
+           ========================================= */
+
+        .right-panel {
+            width: 65%;
+            height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 40px;
+
+            background: #1b1b1b;
+        }
+
+
+        /* =========================================
+           QUADRADO BRANCO
+           ========================================= */
+
+        .console-container {
+            width: min(700px, 90%);
+            aspect-ratio: 1 / 1;
+
+            background: white;
+
+            padding: 18px;
+
+            border-radius: 8px;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.45);
+
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+
+        /* =========================================
+           BARRA SUPERIOR
+           ========================================= */
+
+        .console-header {
+            height: 38px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            color: #111;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .console-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+.status {
+    position: relative;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #27c93f;
+
+    box-shadow:
+        0 0 8px rgba(39, 201, 63, 0.6);
+
+    flex-shrink: 0;
+}
+
+        /* =========================================
+           BOTÕES
+           ========================================= */
+
+        .buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        button {
+            border: none;
+
+            padding: 7px 12px;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+            font-weight: bold;
+
+            transition: 0.15s;
+        }
+
+        #downloadButton {
+    background: #e9e9e9;
+    color: #111;
+}
+
+#downloadButton:hover {
+    background: #d5d5d5;
+}
+
+#playButton {
+    width: 32px;
+    height: 30px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #111;
+    color: white;
+
+    font-size: 11px;
+}
+
+#playButton:hover {
+    background: #333;
+}
+
+#playButton:active {
+    transform: scale(0.94);
+}
+
+        /* =========================================
+           CONSOLE
+           ========================================= */
+
+        #console {
+            flex: 1;
+            min-height: 0;
+
+            background: #050505;
+
+            border-radius: 5px;
+
+            padding: 16px;
+
+            color: white;
+
+            font-family:
+                "SFMono-Regular",
+                Consolas,
+                "Liberation Mono",
+                monospace;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            overflow-y: auto;
+
+            white-space: pre-wrap;
+
+            word-break: break-word;
+
+            display: flex;
+            flex-direction: column;
+
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+        }
+
+        .console-line {
+            margin-bottom: 3px;
+        }
+
+        
+.console-log {
+    color: var(--console-text-color, #ffffff);
+}
+
+        .console-info {
+            color: #62b0ff;
+        }
+
+        .console-warn {
+            color: #ffd166;
+        }
+
+        .console-error {
+            color: #ff5f56;
+        }
+
+        .console-success {
+            color: #55efc4;
+        }
+
+
+        /* =========================================
+           RESPONSIVO
+           ========================================= */
+
+        
+/* =========================================
+   LAYOUT PARA TELAS VERTICAIS
+   ========================================= */
+
+@media (max-width: 800px), (orientation: portrait) {
+
+    html,
+    body {
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        min-height: 100%;
+        margin: 0;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .right-panel {
+        order: 1;
+        width: 100%;
+        min-width: 0;
+        height: 60vh;
+        min-height: 350px;
+        padding: 12px;
+        flex-shrink: 0;
+    }
+
+    .left-panel {
+        order: 2;
+        width: 100%;
+        min-width: 0;
+        height: 40vh;
+        min-height: 260px;
+        padding: 16px;
+        border-right: none;
+        border-bottom: 1px solid #292929;
+        flex-shrink: 0;
+    }
+
+    .console-container {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .console-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .console-header .buttons {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .popup-wrapper {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .popup-area {
+        right: 0;
+        padding-right: 12px;
+    }
+
+    .settings-popup {
+        width: min(360px, calc(100vw - 24px));
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+        
+      /* ==================================================
+   CONFIGURAÇÕES
+   ================================================== */
+
+.console-title {
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   FUNDO DO POPUP
+   ================================================== */
+
+.settings-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.55);
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 50000;
+}
+
+
+/* ==================================================
+   POPUP
+   ================================================== */
+
+.settings-popup {
+    position: relative;
+
+   width: min(360px, 90vw);
+min-height: 0;
+
+padding: 22px 24px;
+
+    background: #ffffff;
+
+    color: #111;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 20px 70px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ==================================================
+   X
+   ================================================== */
+
+.settings-close {
+    position: absolute;
+
+    top: 8px;
+    right: 9px;
+
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+
+    background: transparent;
+
+    color: #777;
+
+    font-size: 22px;
+    font-weight: normal;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-close:hover {
+    background: #eeeeee;
+
+    color: #111;
+}
+
+
+/* ==================================================
+   OPÇÕES
+   ================================================== */
+
+.settings-screen {
+    width: 100%;
+}
+
+.settings-option {
+    width: 100%;
+    min-height: 48px;
+
+    padding: 10px 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    background: transparent;
+
+    color: #111;
+
+    border: none;
+
+    font-size: 13px;
+
+    text-align: left;
+}
+
+
+/* ==================================================
+   QUADRADO DA COR
+   ================================================== */
+
+.color-preview {
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+
+    border: 1px solid #bbbbbb;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   FONTE
+   ================================================== */
+
+.font-option {
+    cursor: pointer;
+
+    border-top: 1px solid #eeeeee;
+}
+
+.font-option:hover {
+    background: #f5f5f5;
+}
+
+
+/* ==================================================
+   BOTÃO VOLTAR
+   ================================================== */
+
+.back-button {
+    padding: 6px 9px;
+
+    background: #eeeeee;
+
+    color: #111;
+
+    border-radius: 5px;
+
+    margin-bottom: 18px;
+}
+
+.back-button:hover {
+    background: #dddddd;
+}
+
+
+.settings-screen h3 {
+    margin: 0 0 18px;
+
+    font-size: 14px;
+}
+
+
+/* ==================================================
+   SELETOR RGB
+   ================================================== */
+
+.rgb-picker {
+    width: 100%;
+}
+
+
+/* ==================================================
+   GRADIENTE
+   ================================================== */
+
+.color-gradient {
+    position: relative;
+
+    width: 100%;
+    height: 150px;
+
+    border-radius: 7px;
+
+    overflow: hidden;
+
+    cursor: crosshair;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            #000000
+        ),
+        linear-gradient(
+            to right,
+            #ffffff,
+            hsl(0, 100%, 50%)
+        );
+}
+
+
+/* ==================================================
+   CURSOR DO GRADIENTE
+   ================================================== */
+
+.color-gradient-cursor {
+    position: absolute;
+
+    width: 14px;
+    height: 14px;
+
+    border: 2px solid white;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5);
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
+}
+
+
+/* ==================================================
+   BARRA DE MATIZ
+   ================================================== */
+
+.hue-slider {
+    position: relative;
+
+    width: 100%;
+    height: 14px;
+
+    margin-top: 12px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            to right,
+            red,
+            yellow,
+            lime,
+            cyan,
+            blue,
+            magenta,
+            red
+        );
+
+    cursor: pointer;
+}
+
+
+/* ==================================================
+   CURSOR DA MATIZ
+   ================================================== */
+
+.hue-slider-cursor {
+    position: absolute;
+
+    top: 50%;
+    left: 0;
+
+    width: 18px;
+    height: 18px;
+
+    border: 2px solid white;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+
+    transform:
+        translate(-50%, -50%);
+
+    pointer-events: none;
+}
+
+
+/* ==================================================
+   RGB
+   ================================================== */
+
+.rgb-values {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.rgb-values label {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    font-size: 11px;
+
+    color: #555;
+}
+
+.rgb-values input {
+    width: 100%;
+
+    height: 30px;
+
+    padding: 0 7px;
+
+    border: 1px solid #cccccc;
+
+    border-radius: 5px;
+
+    outline: none;
+
+    color: #111;
+
+    background: #ffffff;
+
+    font-size: 12px;
+}
+
+.rgb-values input:focus {
+    border-color: #777777;
+}
+
+
+/* ==================================================
+   COR ATUAL
+   ================================================== */
+
+.selected-color {
+    margin-top: 12px;
+
+    padding: 8px;
+
+    border: 1px solid #dddddd;
+
+    border-radius: 5px;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        monospace;
+
+    font-size: 12px;
+
+    text-align: center;
+
+    color: #111;
+
+    background: #f5f5f5;
+}
+
+/* ==================================================
+   CAMPO HEX E CORES RECENTES
+   ================================================== */
+
+.hex-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.hex-color-row label {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+}
+
+.hex-color-input {
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    color: #111;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    outline: none;
+}
+
+.hex-color-input:focus {
+    border-color: #777;
+}
+
+.recent-colors-title {
+    margin-top: 16px;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 12px;
+}
+
+.recent-colors {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.recent-color {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.recent-color:hover {
+    transform: scale(1.08);
+    border-color: #555;
+}
+
+.recent-color:focus-visible {
+    outline: 2px solid #555;
+    outline-offset: 2px;
+}
+
+.recent-color-empty {
+    width: 32px;
+    height: 32px;
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+    background: #f5f5f5;
+}
+
+/* CONTROLE DE TAMANHO DA FONTE */
+
+.font-size-control {
+    margin: 0 0 16px;
+    padding: 12px;
+    background: #f2f2f2;
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+}
+
+.font-size-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+#consoleFontSizeValue {
+    font-weight: bold;
+    color: #333333;
+    white-space: nowrap;
+}
+
+#consoleFontSize {
+    display: block;
+    width: 100%;
+    margin: 0;
+    cursor: pointer;
+    accent-color: #222222;
+}
+        
+/* ==================================================
+   LISTA DE FONTES
+   ================================================== */
+
+.font-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.font-list button {
+    width: 100%;
+
+    padding: 10px;
+
+    background: #eeeeee;
+
+    color: #111;
+
+    text-align: left;
+
+    border-radius: 5px;
+}
+
+.font-list button:hover {
+    background: #dddddd;
+}
+
+        
+/* FONTES PERSONALIZADAS */
+
+.font-list {
+    max-height: 55vh;
+    overflow-y: auto;
+}
+
+.custom-fonts-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #dddddd;
+}
+
+.custom-fonts-section h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #222;
+}
+
+.font-list button.font-upload-button {
+    width: 100%;
+    padding: 10px;
+    background: #222;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.font-list button.font-upload-button:hover {
+    background: #444;
+}
+
+.font-upload-info {
+    margin: 7px 0 10px;
+    font-size: 11px;
+    color: #777;
+}
+
+#customFontList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.custom-font-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.font-list button.custom-font-select {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.font-list button.custom-font-delete {
+    flex: 0 0 34px;
+    width: 34px;
+    padding: 8px 0;
+    text-align: center;
+    color: #b42318;
+    background: #f5e7e7;
+    font-size: 18px;
+}
+
+.font-list button.custom-font-delete:hover {
+    background: #ead0d0;
+}
+
+#customFontMessage {
+    margin: 8px 0 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #555;
+    overflow-wrap: anywhere;
+}
+    </style>
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <!-- =========================================
+         ESQUERDA
+         ========================================= -->
+
+    <section class="left-panel">
+
+<div class="popup-wrapper">
+
+    <button
+        class="add-button"
+        id="addButton"
+        title="Adicionar trecho"
+    >
+        +
+    </button>
+  
+<button
+    class="remove-all-button"
+    id="removeAllButton"
+    title="Excluir todos os trechos"
+>
+    −
+</button>
+  
+    <div class="popup-area" id="popupArea">
+
+        <div id="lyricList"></div>
+
+    </div>
+
+    <div
+        class="custom-scrollbar"
+        id="customScrollbar"
+    >
+        <div
+            class="custom-scrollbar-thumb"
+            id="customScrollbarThumb"
+        ></div>
+    </div>
+
+</div>
+
+    </section>
+
+
+    <!-- =========================================
+         DIREITA
+         ========================================= -->
+
+    <section class="right-panel">
+
+        <div class="console-container">
+
+           <div class="console-header">
+
+<div class="console-title" id="editSettingsButton">
+
+    <span class="status"></span>
+
+    <span>Editar Letra</span>
+
+</div>
+
+    <div class="buttons">
+
+        <button id="downloadButton">
+            Download
+        </button>
+
+        <button
+            id="playButton"
+            title="Executar"
+            aria-label="Executar"
+        >
+            ▶
+        </button>
+
+    </div>
+
+</div>
+
+            <div id="console"></div>
+
+        </div>
+
+    </section>
+
+<!-- ==================================================
+     POPUP DE CONFIGURAÇÕES
+     ================================================== -->
+
+<div class="settings-overlay" id="settingsOverlay">
+
+    <div class="settings-popup">
+
+        <button
+            class="settings-close"
+            id="settingsClose"
+        >
+            ×
+        </button>
+
+
+        <!-- TELA PRINCIPAL -->
+
+        <div
+            class="settings-screen"
+            id="settingsMain"
+        >
+
+            <div class="settings-option">
+
+                <span>
+                    Cor de Fundo Padrão
+                </span>
+
+                <button
+                    class="color-preview"
+                    id="colorPreview"
+                    title="Alterar cor"
+                ></button>
+
+            </div>
+
+<div class="settings-option">
+    <span>Cor da letra do console</span>
+
+    <button
+        class="color-preview"
+        id="fontColorPreview"
+        title="Alterar cor da letra"
+        aria-label="Alterar cor da letra do console"
+    ></button>
+</div>
+            
+            <button
+                class="settings-option font-option"
+                id="fontOption"
+            >
+
+                <span>
+                    Fonte do Console
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- TELA DA COR -->
+
+        <div
+            class="settings-screen"
+            id="colorScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="colorBack"
+            >
+                ← Voltar
+            </button>
+
+            <h3>Cor de Fundo Padrão</h3>
+
+  <div class="rgb-picker">
+
+    <div
+        class="color-gradient"
+        id="colorGradient"
+    >
+        <div
+            class="color-gradient-cursor"
+            id="colorGradientCursor"
+        ></div>
+    </div>
+
+    <div
+        class="hue-slider"
+        id="hueSlider"
+    >
+        <div
+            class="hue-slider-cursor"
+            id="hueSliderCursor"
+        ></div>
+    </div>
+
+    <div class="rgb-values">
+
+        <label>
+            R
+            <input
+                type="number"
+                id="redValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            G
+            <input
+                type="number"
+                id="greenValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            B
+            <input
+                type="number"
+                id="blueValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+    </div>
+
+
+<div class="hex-color-row">
+    <label for="hexColorInput">Código HEX</label>
+
+    <input
+        type="text"
+        id="hexColorInput"
+        class="hex-color-input"
+        value="#050505"
+        placeholder="#FF5733"
+        maxlength="7"
+        spellcheck="false"
+        autocomplete="off"
+        aria-label="Código hexadecimal da cor de fundo"
+    >
+</div>
+
+<div class="recent-colors-title">
+    Últimas 3 cores usadas
+</div>
+
+<div
+    class="recent-colors"
+    id="recentColors"
+>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+</div>
+
+<div class="selected-color" id="selectedColor">
+    #050505
+</div>
+
+</div>
+
+        </div>
+
+<!-- TELA DA COR DA LETRA -->
+
+<div
+    class="settings-screen"
+    id="fontColorScreen"
+    style="display: none;"
+>
+    <button
+        class="back-button"
+        id="fontColorBack"
+    >
+        ← Voltar
+    </button>
+
+    <h3>Cor da Letra do Console</h3>
+
+    <div class="rgb-picker">
+
+        <div
+            class="color-gradient"
+            id="fontColorGradient"
+        >
+            <div
+                class="color-gradient-cursor"
+                id="fontColorGradientCursor"
+            ></div>
+        </div>
+
+        <div
+            class="hue-slider"
+            id="fontHueSlider"
+        >
+            <div
+                class="hue-slider-cursor"
+                id="fontHueSliderCursor"
+            ></div>
+        </div>
+
+        <div class="rgb-values">
+            <label>
+                R
+                <input
+                    type="number"
+                    id="fontRedValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                G
+                <input
+                    type="number"
+                    id="fontGreenValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                B
+                <input
+                    type="number"
+                    id="fontBlueValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+        </div>
+
+        <div class="hex-color-row">
+            <label for="fontHexColorInput">
+                Código HEX
+            </label>
+
+            <input
+                type="text"
+                id="fontHexColorInput"
+                class="hex-color-input"
+                value="#FFFFFF"
+                placeholder="#FF5733"
+                maxlength="7"
+                spellcheck="false"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="recent-colors-title">
+            Últimas 3 cores usadas
+        </div>
+
+        <div
+            class="recent-colors"
+            id="fontRecentColors"
+        >
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+        </div>
+
+        <div
+            class="selected-color"
+            id="fontSelectedColor"
+        >
+            #FFFFFF
+        </div>
+
+    </div>
+</div>
+        
+        <!-- TELA DA FONTE -->
+
+        <div
+            class="settings-screen"
+            id="fontScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="fontBack"
+            >
+                ← Voltar
+            </button>
+
+            
+<h3>Fonte do Console</h3>
+
+<div class="font-size-control">
+    <div class="font-size-header">
+        <label for="consoleFontSize">Tamanho da fonte</label>
+        <span id="consoleFontSizeValue">14 px</span>
+    </div>
+
+    <input
+        type="range"
+        id="consoleFontSize"
+        min="8"
+        max="40"
+        step="1"
+        value="14"
+    >
+</div>
+
+<div class="font-list">
+
+    <button data-font="monospace">
+        Monospace
+    </button>
+
+    <button data-font="Arial, Helvetica, sans-serif">
+        Arial
+    </button>
+
+    <button data-font="'Courier New', monospace">
+        Courier New
+    </button>
+
+    <button data-font="Consolas, monospace">
+        Consolas
+    </button>
+
+    <button data-font="'Lucida Console', monospace">
+        Lucida Console
+    </button>
+
+    <button data-font="Georgia, serif">
+        Georgia
+    </button>
+
+    <div class="custom-fonts-section">
+        <h4>Fontes personalizadas</h4>
+
+        <button type="button" id="uploadFontButton"
+                class="font-upload-button">
+            + Adicionar fonte (.zip)
+        </button>
+
+        <input
+            type="file"
+            id="customFontUpload"
+            accept=".zip,application/zip"
+            hidden
+        >
+
+        <p class="font-upload-info">
+            Arquivo ZIP de até 500 KB.
+        </p>
+
+        <div id="customFontList"></div>
+
+        <p id="customFontMessage" role="status"></p>
+    </div>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+  
+<script>
+
+    /* ==================================================
+       EDITOR DE TRECHOS
+       ================================================== */
+
+    const addButton =
+        document.getElementById("addButton");
+  
+    const removeAllButton =
+    document.getElementById("removeAllButton");
+
+    const lyricList =
+        document.getElementById("lyricList");
+
+/* ==================================================
+   ROLAGEM PERSONALIZADA
+   ================================================== */
+
+const popupArea =
+    document.getElementById("popupArea");
+
+const customScrollbar =
+    document.getElementById("customScrollbar");
+
+const customScrollbarThumb =
+    document.getElementById("customScrollbarThumb");
+
+
+/* ==================================================
+   ATUALIZA SCROLLBAR
+   ================================================== */
+
+function atualizarScrollbar() {
+
+    const alturaVisivel = popupArea.clientHeight;
+    const alturaTotal = popupArea.scrollHeight;
+    const alturaBarra = customScrollbar.clientHeight;
+
+    console.log({
+        alturaVisivel,
+        alturaTotal,
+        alturaBarra
+    });
+
+    if (
+        alturaBarra <= 0 ||
+        alturaTotal <= alturaVisivel
+    ) {
+        customScrollbar.style.visibility = "hidden";
+        return;
+    }
+
+    customScrollbar.style.visibility = "visible";
+
+    const proporcao =
+        alturaVisivel / alturaTotal;
+
+    const alturaThumb =
+        Math.max(
+            38,
+            alturaBarra * proporcao
+        );
+
+    customScrollbarThumb.style.height =
+        `${alturaThumb}px`;
+
+    const maxScroll =
+        alturaTotal - alturaVisivel;
+
+    const maxThumb =
+        alturaBarra - alturaThumb;
+
+    const porcentagem =
+        maxScroll > 0
+            ? popupArea.scrollTop / maxScroll
+            : 0;
+
+    customScrollbarThumb.style.transform =
+        `translateY(${maxThumb * porcentagem}px)`;
+}
+
+
+/* ==================================================
+   SCROLL
+   ================================================== */
+
+popupArea.addEventListener(
+    "scroll",
+    atualizarScrollbar
+);
+
+
+/* ==================================================
+   RESIZE DA JANELA
+   ================================================== */
+
+window.addEventListener(
+    "resize",
+    atualizarScrollbar
+);
+
+
+const observer = new ResizeObserver(() => {
+    requestAnimationFrame(atualizarScrollbar);
+});
+
+observer.observe(popupArea);
+observer.observe(lyricList);
+
+/* ==================================================
+   INICIALIZA
+   ================================================== */
+
+requestAnimationFrame(
+    atualizarScrollbar
+);
+
+
+/* ==================================================
+   ARRASTAR THUMB
+   ================================================== */
+
+let arrastandoScrollbar = false;
+
+let inicioMouseY = 0;
+
+let inicioScroll = 0;
+
+
+/*
+    Começou o arraste
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointerdown",
+    (event) => {
+
+        arrastandoScrollbar = true;
+
+        inicioMouseY =
+            event.clientY;
+
+        inicioScroll =
+            popupArea.scrollTop;
+
+
+        event.preventDefault();
+
+
+        customScrollbarThumb.setPointerCapture(
+            event.pointerId
+        );
+
+
+        customScrollbarThumb.style.cursor =
+            "grabbing";
+    }
+);
+
+
+/*
+    Movimento
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointermove",
+    (event) => {
+
+        if (!arrastandoScrollbar) {
+            return;
+        }
+
+
+        const deslocamento =
+            event.clientY -
+            inicioMouseY;
+
+
+        const alturaVisivel =
+            popupArea.clientHeight;
+
+        const alturaTotal =
+            popupArea.scrollHeight;
+
+        const alturaBarra =
+            customScrollbar.clientHeight;
+
+        const alturaThumb =
+            customScrollbarThumb.offsetHeight;
+
+
+        const maxScroll =
+            alturaTotal -
+            alturaVisivel;
+
+
+        const maxThumb =
+            alturaBarra -
+            alturaThumb;
+
+
+        if (
+            maxScroll <= 0 ||
+            maxThumb <= 0
+        ) {
+            return;
+        }
+
+
+        /*
+            Conversão:
+
+            movimento do mouse
+            ↓
+            movimento do thumb
+            ↓
+            movimento do conteúdo
+        */
+
+        const novoScroll =
+            inicioScroll +
+            (
+                deslocamento /
+                maxThumb
+            ) *
+            maxScroll;
+
+
+        popupArea.scrollTop =
+            Math.max(
+                0,
+                Math.min(
+                    maxScroll,
+                    novoScroll
+                )
+            );
+    }
+);
+
+
+/*
+    Terminou o arraste
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointerup",
+    (event) => {
+
+        arrastandoScrollbar = false;
+
+        customScrollbarThumb.style.cursor =
+            "grab";
+
+
+        try {
+
+            customScrollbarThumb.releasePointerCapture(
+                event.pointerId
+            );
+
+        } catch {
+
+        }
+    }
+);
+
+
+/*
+    Cancelamento
+*/
+
+customScrollbarThumb.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoScrollbar = false;
+
+        customScrollbarThumb.style.cursor =
+            "grab";
+    }
+);
+
+
+/* ==================================================
+   INICIALIZA
+   ================================================== */
+
+atualizarScrollbar();
+
+
+    /*
+        Cria um novo retângulo de trecho.
+    */
+
+    function criarTrecho() {
+
+        const item =
+            document.createElement("div");
+
+        item.className = "lyric-item";
+
+
+        /* =========================================
+           BOTÃO X
+           ========================================= */
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "delete-button";
+
+        deleteButton.textContent = "×";
+
+        deleteButton.title =
+            "Excluir trecho";
+
+
+       deleteButton.addEventListener(
+    "click",
+    () => {
+
+        item.remove();
+
+        atualizarScrollbar();
+
+    }
+);
+
+        /* =========================================
+           ÁREA DE TEXTO
+           ========================================= */
+
+        const textArea =
+            document.createElement("textarea");
+
+        textArea.className =
+            "lyric-text";
+
+        textArea.placeholder =
+            "Digite o trecho que será falado...";
+
+textArea.addEventListener(
+    "input",
+    () => {
+
+        textArea.style.height = "auto";
+
+        textArea.style.height =
+            textArea.scrollHeight + "px";
+
+        atualizarScrollbar();
+    }
+);
+
+        /* =========================================
+           BLOQUINHOS NUMÉRICOS
+           ========================================= */
+
+        const numberFields =
+            document.createElement("div");
+
+        numberFields.className =
+            "number-fields";
+
+
+        for (let i = 0; i < 4; i++) {
+
+            const input =
+                document.createElement("input");
+
+            input.type = "text";
+            input.inputMode = "decimal";
+
+            input.className =
+                "number-field";
+
+            input.placeholder =
+                "0";
+
+            input.min = "0";
+
+            /*
+                Impede números muito grandes
+                de ocuparem o bloquinho.
+            */
+
+input.addEventListener("input", () => {
+    input.value = input.value
+        .replace(/-/g, "")
+        .replace(/,/g, ".");
+
+    const primeiroPonto = input.value.indexOf(".");
+
+    if (primeiroPonto !== -1) {
+        input.value =
+            input.value.slice(0, primeiroPonto + 1) +
+            input.value
+                .slice(primeiroPonto + 1)
+                .replace(/\./g, "");
+    }
+
+    if (input.value.length > 4) {
+        input.value = input.value.slice(0, 4);
+    }
+});
+          
+            numberFields.appendChild(input);
+        }
+
+
+        /* =========================================
+           MONTA O RETÂNGULO
+           ========================================= */
+
+        item.appendChild(deleteButton);
+
+        item.appendChild(textArea);
+
+        item.appendChild(numberFields);
+
+      lyricList.appendChild(item);
+
+
+/*
+    Atualiza a barra sem alterar
+    a posição atual da tela.
+*/
+
+atualizarScrollbar();
+
+    }
+
+
+    /*
+        Clique no +
+    */
+
+    addButton.addEventListener(
+        "click",
+        criarTrecho
+    );
+
+removeAllButton.addEventListener(
+    "click",
+    () => {
+
+        lyricList.innerHTML = "";
+
+        atualizarScrollbar();
+
+    }
+);
+
+    /* ==================================================
+       CONSOLE VISUAL
+       ================================================== */
+
+    const output =
+        document.getElementById("console");
+
+  /* ==================================================
+   GRAVAÇÃO DO CONSOLE
+   ================================================== */
+
+let gravandoConsole = false;
+let exportacaoAtiva = false;
+let mediaRecorder = null;
+
+let partesGravacao = [];
+
+let canvasGravacao = null;
+
+let contextoGravacao = null;
+
+let animationGravacao = null;
+
+
+let streamGravacao = null;
+let escalaGravacao = 2;
+    
+/* ==================================================
+   DESENHA O CONSOLE NO CANVAS
+   ================================================== */
+
+
+function desenharConsoleNoCanvas() {
+    if (!gravandoConsole || !canvasGravacao || !contextoGravacao) {
+        return;
+    }
+
+    const largura = output.clientWidth;
+    const altura = output.clientHeight;
+
+    if (largura <= 0 || altura <= 0) {
+        animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+        return;
+    }
+
+    // Não altere canvas.width/height aqui.
+    // Redimensionar o canvas a cada frame consome recursos.
+    contextoGravacao.clearRect(0, 0, largura, altura);
+
+    const estilo = getComputedStyle(output);
+
+    contextoGravacao.fillStyle = estilo.backgroundColor;
+    contextoGravacao.fillRect(0, 0, largura, altura);
+
+    const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
+    const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
+
+    contextoGravacao.font = `${tamanhoFonte}px ${estilo.fontFamily}`;
+    contextoGravacao.textAlign = "center";
+    contextoGravacao.textBaseline = "middle";
+
+    const linhasArray = Array.from(
+        output.querySelectorAll(".console-line")
+    );
+
+    if (linhasArray.length > 0) {
+        const espaco = alturaLinha + 3;
+        const alturaTotal = linhasArray.length * espaco;
+        let y = (altura - alturaTotal) / 2 + espaco / 2;
+
+        for (const linha of linhasArray) {
+            const estiloLinha = getComputedStyle(linha);
+
+            contextoGravacao.fillStyle = estiloLinha.color;
+            contextoGravacao.fillText(
+                linha.textContent || "",
+                largura / 2,
+                y
+            );
+
+            y += espaco;
+        }
+    }
+
+    animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+}
+
+
+/* ==================================================
+   INICIA GRAVAÇÃO
+   ================================================== */
+
+
+async function iniciarGravacaoConsole() {
+    if (!window.MediaRecorder) {
+        throw new Error("Este navegador não suporta gravação de vídeo.");
+    }
+
+    // Evita manter recursos de uma gravação anterior.
+    if (streamGravacao) {
+        streamGravacao.getTracks().forEach(track => track.stop());
+        streamGravacao = null;
+    }
+
+    if (animationGravacao !== null) {
+        cancelAnimationFrame(animationGravacao);
+        animationGravacao = null;
+    }
+
+    gravandoConsole = false;
+    partesGravacao = [];
+
+    canvasGravacao = document.createElement("canvas");
+
+    const largura = Math.max(1, output.clientWidth);
+    const altura = Math.max(1, output.clientHeight);
+
+    // Limita a escala para controlar o consumo de memória.
+    escalaGravacao = Math.min(
+        2,
+        Math.max(1, window.devicePixelRatio || 1)
+    );
+
+    // O tamanho físico é definido apenas uma vez por gravação.
+    canvasGravacao.width = Math.round(largura * escalaGravacao);
+    canvasGravacao.height = Math.round(altura * escalaGravacao);
+
+    contextoGravacao = canvasGravacao.getContext("2d", {
+        alpha: false
+    });
+
+    if (!contextoGravacao) {
+        throw new Error("Não foi possível criar o canvas da gravação.");
+    }
+
+    contextoGravacao.setTransform(
+        escalaGravacao, 0,
+        0, escalaGravacao,
+        0, 0
+    );
+
+    streamGravacao = canvasGravacao.captureStream(30);
+
+    const formatos = [
+        "video/mp4",
+        "video/webm;codecs=vp8",
+        "video/webm"
+    ];
+
+    const formato = formatos.find(tipo =>
+        MediaRecorder.isTypeSupported(tipo)
+    );
+
+    if (!formato) {
+        streamGravacao.getTracks().forEach(track => track.stop());
+        streamGravacao = null;
+        throw new Error("Nenhum formato de vídeo compatível foi encontrado.");
+    }
+
+    try {
+        mediaRecorder = new MediaRecorder(streamGravacao, {
+            mimeType: formato
+        });
+
+        mediaRecorder.ondataavailable = event => {
+            if (event.data && event.data.size > 0) {
+                partesGravacao.push(event.data);
+            }
+        };
+
+        mediaRecorder.onerror = event => {
+            console.error("Erro durante a gravação:", event.error || event);
+        };
+
+        gravandoConsole = true;
+
+        // Desenha o primeiro frame antes de iniciar a captura.
+        desenharConsoleNoCanvas();
+
+        mediaRecorder.start(100);
+    } catch (erro) {
+        gravandoConsole = false;
+
+        if (animationGravacao !== null) {
+            cancelAnimationFrame(animationGravacao);
+            animationGravacao = null;
+        }
+
+        if (streamGravacao) {
+            streamGravacao.getTracks().forEach(track => track.stop());
+            streamGravacao = null;
+        }
+
+        mediaRecorder = null;
+        canvasGravacao = null;
+        contextoGravacao = null;
+
+        throw erro;
+    }
+}
+
+/* ==================================================
+   PARA GRAVAÇÃO
+   ================================================== */
+
+
+function pararGravacaoConsole(descartar = false) {
+    return new Promise((resolve, reject) => {
+        const recorder = mediaRecorder;
+
+        if (animationGravacao !== null) {
+            cancelAnimationFrame(animationGravacao);
+            animationGravacao = null;
+        }
+
+        gravandoConsole = false;
+
+        const liberarRecursos = () => {
+            if (streamGravacao) {
+                streamGravacao.getTracks().forEach(track => {
+                    try {
+                        track.stop();
+                    } catch (_) {}
+                });
+                streamGravacao = null;
+            }
+
+            if (canvasGravacao) {
+                canvasGravacao.width = 1;
+                canvasGravacao.height = 1;
+            }
+
+            canvasGravacao = null;
+            contextoGravacao = null;
+
+            if (mediaRecorder === recorder) {
+                mediaRecorder = null;
+            }
+        };
+
+        const limparPartes = () => {
+            partesGravacao.length = 0;
+            partesGravacao = [];
+        };
+
+        if (!recorder) {
+            limparPartes();
+            liberarRecursos();
+            resolve(null);
+            return;
+        }
+
+        let finalizado = false;
+
+        const finalizar = (erro = null) => {
+            if (finalizado) return;
+            finalizado = true;
+
+            let blob = null;
+
+            if (!descartar && !erro) {
+                blob = new Blob(partesGravacao, {
+                    type: recorder.mimeType || "video/webm"
+                });
+            }
+
+            limparPartes();
+            liberarRecursos();
+
+            if (erro) {
+                reject(erro);
+            } else if (!blob || blob.size === 0) {
+                resolve(null);
+            } else {
+                resolve(blob);
+            }
+        };
+
+        recorder.ondataavailable = event => {
+            if (
+                !descartar &&
+                event.data &&
+                event.data.size > 0
+            ) {
+                partesGravacao.push(event.data);
+            }
+        };
+
+        recorder.onerror = event => {
+            finalizar(
+                event.error || new Error("Falha durante a gravação.")
+            );
+        };
+
+        recorder.onstop = () => finalizar();
+
+        try {
+            if (recorder.state !== "inactive") {
+                recorder.stop();
+            } else {
+                finalizar();
+            }
+        } catch (erro) {
+            finalizar(erro);
+        }
+    });
+}
+
+/* ==================================================
+   CONVERTE WEBM → MP4
+   ================================================== */
+let ffmpeg = null;
+let ffmpegCarregado = false;
+
+
+async function converterParaMP4(webmBlob, idExecucao) {
+    if (conversaoEmAndamento) {
+        throw new Error("Já existe uma conversão em andamento.");
+    }
+
+    conversaoEmAndamento = true;
+
+    const arquivosTemporarios = ["entrada.webm", "saida.mp4"];
+
+    async function limparArquivosTemporarios() {
+        if (!ffmpegCarregado || !ffmpeg) return;
+
+        for (const nome of arquivosTemporarios) {
+            try {
+                await ffmpeg.deleteFile(nome);
+            } catch (_) {
+                // O arquivo pode já ter sido removido.
+            }
+        }
+    }
+
+    try {
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        if (!ffmpegCarregado) {
+            if (!window.FFmpegWASM) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    script.src = "./ffmpeg/ffmpeg.js";
+                    script.onload = resolve;
+                    script.onerror = () => reject(
+                        new Error("Não foi possível carregar ffmpeg.js")
+                    );
+                    document.head.appendChild(script);
+                });
+            }
+
+            if (!window.FFmpegWASM) {
+                throw new Error("FFmpegWASM não foi encontrado.");
+            }
+
+            ffmpeg = new FFmpegWASM.FFmpeg();
+
+            ffmpeg.on("log", ({ message }) => {
+                console.log("[FFmpeg]", message);
+            });
+
+            await ffmpeg.load({
+                coreURL: new URL(
+                    "ffmpeg/ffmpeg-core.js",
+                    document.baseURI
+                ).href,
+                wasmURL: new URL(
+                    "ffmpeg/ffmpeg-core.wasm",
+                    document.baseURI
+                ).href
+            });
+
+            ffmpegCarregado = true;
+        }
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        await limparArquivosTemporarios();
+
+        await ffmpeg.writeFile(
+            "entrada.webm",
+            new Uint8Array(await webmBlob.arrayBuffer())
+        );
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        await ffmpeg.exec([
+            "-i", "entrada.webm",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+            "saida.mp4"
+        ]);
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        const arquivo = await ffmpeg.readFile("saida.mp4");
+
+        if (idExecucao !== execucaoAtual || cancelamentoGravacao) {
+            return null;
+        }
+
+        return new Blob([arquivo], { type: "video/mp4" });
+    } finally {
+        try {
+            await limparArquivosTemporarios();
+        } finally {
+            conversaoEmAndamento = false;
+        }
+    }
+}
+
+/* ==================================================
+   BAIXA ARQUIVO
+   ================================================== */
+
+function baixarMP4(blob) {
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.download =
+        "GeLetra.mp4";
+
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    link.remove();
+
+
+    setTimeout(
+        () => URL.revokeObjectURL(url),
+        1000
+    );
+}
+
+    function addConsoleLine(
+        text,
+        type = "log"
+    ) {
+
+        const line =
+            document.createElement("div");
+
+        line.classList.add(
+            "console-line"
+        );
+
+        line.classList.add(
+            "console-" + type
+        );
+
+        line.textContent = text;
+
+        output.appendChild(line);
+
+        output.scrollTop =
+            output.scrollHeight;
+    }
+
+
+    function formatConsoleValue(value) {
+
+        if (typeof value === "string") {
+            return value;
+        }
+
+        if (typeof value === "undefined") {
+            return "undefined";
+        }
+
+        if (value === null) {
+            return "null";
+        }
+
+        if (typeof value === "object") {
+
+            try {
+
+                return JSON.stringify(
+                    value,
+                    null,
+                    2
+                );
+
+            }
+
+            catch {
+
+                return String(value);
+
+            }
+        }
+
+        return String(value);
+    }
+
+
+    /* ==================================================
+       CONSOLE CUSTOMIZADO
+       ================================================== */
+
+    const customConsole = {
+
+        log: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "log"
+            );
+        },
+
+
+        info: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "info"
+            );
+        },
+
+
+        warn: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "warn"
+            );
+        },
+
+
+        error: function (...args) {
+
+            const text =
+                args
+                    .map(formatConsoleValue)
+                    .join(" ");
+
+            addConsoleLine(
+                text,
+                "error"
+            );
+        },
+
+
+        clear: function () {
+
+            output.innerHTML = "";
+
+        }
+    };
+
+
+    /* ==================================================
+       EXECUTOR
+       ================================================== */
+let execucaoAtual = 0;
+let cancelamentoGravacao = false;
+let conversaoEmAndamento = false;
+
+async function executarCodigo(
+    codigo,
+    idExecucao,
+    gravar = false
+) {
+
+    const executar =
+        new Function(
+            "console",
+            "estaExecutando",
+            `
+            "use strict";
+
+            return (async () => {
+
+                ${codigo}
+
+            })();
+            `
+        );
+
+
+    try {
+
+        await executar(
+            customConsole,
+            () => idExecucao === execucaoAtual
+        );
+
+
+    } catch (erro) {
+
+        if (
+            idExecucao !== execucaoAtual
+        ) {
+            return;
+        }
+
+
+        customConsole.error(
+            erro.stack ||
+            erro.message
+        );
+
+
+    } finally {
+
+        if (
+            idExecucao !== execucaoAtual
+        ) {
+            return;
+        }
+
+
+        /*
+            Durante uma gravação,
+            NÃO limpa o console.
+
+            Assim o último texto
+            continua aparecendo no
+            último frame do vídeo.
+        */
+
+        
+if (!gravar) {
+    customConsole.clear();
+
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+}
+    }
+}
+
+    /* ==================================================
+       SEU JSS
+       ================================================== */
+
+    const codigoJSS = `
+
+const lyric = [];
+
+let memoria = "";
+
+function sepletra () {
+
+  for (let i = 0; i < lyric.length; i++){
+
+    lyric[i][0] = lyric[i][0].split(" ");
+
+  };
+
+  return;
+};
+
+
+function timer (t) {
+  return new Promise ((resolve) => {
+
+    const inicio = performance.now();
+
+    function verificar() {
+
+      if (!estaExecutando()) {
+        resolve();
+        return;
+      }
+
+      const passou =
+        performance.now() - inicio;
+
+      if (passou >= t) {
+        resolve();
+        return;
+      }
+
+      setTimeout(
+        verificar,
+        Math.min(10, t - passou)
+      );
+
+    }
+
+    verificar();
+
+  });
+};
+
+
+async function falante (t, q, l) {
+
+  let memorypad = "";
+
+  if (memoria !== "") {
+
+    memorypad = memoria;
+
+  };
+
+
+  for (let i = 0; i < q; i++) {
+
+    for (
+      let y = 0;
+      y < lyric[l][0][i].length;
+      y++
+    ) {
+
+      console.clear();
+
+      console.log(
+        memorypad +
+        lyric[l][0][i][y]
+      );
+
+      memorypad =
+        memorypad +
+        lyric[l][0][i][y];
+
+      await timer(t);
+
+    };
+
+  };
+
+
+  if (lyric[l][lyric[l].length - 4] > 0) {
+
+    memoria = "";
+    memorypad = "";
+
+  };
+
+
+  if (lyric[l][lyric[l].length - 1] > 0) {
+
+    if (
+      lyric[l][lyric[l].length - 4] <= 0
+    ) {
+
+      memoria = memorypad + " ";
+
+    } else {
+
+      memoria = "";
+      memorypad = "";
+
+    };
+
+  };
+
+  return;
+
+};
+
+
+async function escrita (l) {
+
+  let quantia =
+    lyric[l][0].length;
+
+  let espaco =
+    quantia - 1;
+
+
+  for (let i = 0; i < quantia; i++) {
+
+    lyric[l][0][i] =
+      lyric[l][0][i].split("");
+
+
+    if (espaco > 0) {
+
+      lyric[l][0][i].push(" ");
+
+      espaco--;
+
+    };
+
+  };
+
+
+  let total = 0;
+
+
+  for (let i = 0; i < quantia; i++) {
+
+    total =
+      total +
+      lyric[l][0][i].length;
+
+  };
+
+
+  let tempo =
+    (
+      lyric[l][lyric[l].length - 3]
+      / total
+    ) * 1000;
+
+
+  await falante(
+    tempo,
+    quantia,
+    l
+  );
+
+
+  if (
+    lyric[l][lyric[l].length - 2] > 0
+  ) {
+
+    await timer(
+      lyric[l][lyric[l].length - 2] * 1000
+    );
+
+  };
+
+  return;
+
+};
+
+
+async function song () {
+
+  await sepletra();
+
+  for (
+    let i = 0;
+    i < lyric.length;
+    i++
+  ) {
+
+    await escrita(i);
+
+  };
+
+};
+
+
+await song();
+
+`;
+
+/* ==================================================
+   MONTA O LYRIC A PARTIR DOS RETÂNGULOS
+   ================================================== */
+
+function gerarLyric() {
+
+    const trechos =
+        document.querySelectorAll(".lyric-item");
+
+    const lyric =
+        Array.from(trechos).map(item => {
+
+            const texto =
+                item.querySelector(".lyric-text").value;
+
+            const numeros =
+                Array.from(
+                    item.querySelectorAll(".number-field")
+                ).map(input => {
+
+                    return Number(input.value) || 0;
+
+                });
+
+            return [
+                texto,
+                ...numeros
+            ];
+
+        });
+
+    return lyric;
+}
+  
+/* ==================================================
+   EXECUTAR LETRA
+   ================================================== */
+
+
+async function executarLetra(gravar = false) {
+    execucaoAtual++;
+
+    const idExecucao = execucaoAtual;
+    let webm = null;
+
+    if (gravar) {
+        cancelamentoGravacao = false;
+        exportacaoAtiva = true;
+    }
+
+    try {
+        const dadosLyric = gerarLyric();
+
+        const codigo = codigoJSS.replace(
+            "const lyric = [];",
+            `const lyric = ${JSON.stringify(dadosLyric)};`
+        );
+
+        if (gravar) {
+            customConsole.clear();
+            await iniciarGravacaoConsole();
+        }
+
+        // Se foi cancelado durante a inicialização, não executa a letra.
+        if (
+            idExecucao !== execucaoAtual ||
+            (gravar && cancelamentoGravacao)
+        ) {
+            return;
+        }
+
+        await executarCodigo(codigo, idExecucao, gravar);
+
+        if (!gravar) return;
+
+        // Não exporta um vídeo incompleto após o cancelamento.
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            return;
+        }
+
+        // Dá tempo para o último frame e os dados finais serem registrados.
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setTimeout(resolve, 250);
+                });
+            });
+        });
+
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            return;
+        }
+
+        webm = await pararGravacaoConsole(false);
+
+        if (!webm) {
+            throw new Error("Não foi possível finalizar o vídeo.");
+        }
+
+        if (
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            webm = null;
+            return;
+        }
+
+        let mp4;
+
+        if (webm.type.includes("mp4")) {
+            mp4 = webm;
+        } else {
+            mp4 = await converterParaMP4(webm, idExecucao);
+        }
+
+        if (
+            !mp4 ||
+            idExecucao !== execucaoAtual ||
+            cancelamentoGravacao
+        ) {
+            mp4 = null;
+            return;
+        }
+
+        baixarMP4(mp4);
+} finally {
+    webm = null;
+
+    if (gravar) {
+        if (gravandoConsole || mediaRecorder) {
+            await pararGravacaoConsole(true).catch(() => {});
+        }
+
+        // Descarta qualquer parte que ainda tenha ficado na memória.
+        partesGravacao.length = 0;
+        partesGravacao = [];
+    }
+
+    
+const foiCancelada = gravar && cancelamentoGravacao;
+
+if (idExecucao === execucaoAtual || foiCancelada) {
+    customConsole.clear();
+
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+}
+
+    if (gravar) {
+        exportacaoAtiva = false;
+        cancelamentoGravacao = false;
+    }
+}
+}
+    
+
+const playButton = document.getElementById("playButton");
+
+const downloadButton = document.getElementById("downloadButton");
+
+// Estilo do botão durante a gravação/exportação.
+const estiloGravacao = document.createElement("style");
+estiloGravacao.textContent = `
+    #downloadButton.gravando {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #b91c1c !important;
+        cursor: pointer !important;
+    }
+
+    #downloadButton.gravando:hover {
+        background-color: #b91c1c !important;
+    }
+
+    #playButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed !important;
+    }
+`;
+document.head.appendChild(estiloGravacao);
+
+playButton.addEventListener("click", () => {
+    if (exportacaoAtiva) return;
+    executarLetra(false);
+});
+
+downloadButton.addEventListener("click", async () => {
+// Se já estiver gravando ou exportando, cancela o processo.
+if (exportacaoAtiva) {
+cancelamentoGravacao = true;
+execucaoAtual++;
+
+    // Atualiza imediatamente o console.
+    customConsole.clear();
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+
+    downloadButton.textContent = "Cancelando...";
+    downloadButton.disabled = true;
+
+    partesGravacao.length = 0;
+    partesGravacao = [];
+
+
+    downloadButton.disabled = false;
+    downloadButton.classList.remove("gravando");
+    downloadButton.textContent = "Download";
+    playButton.disabled = false;
+
+    // Garante que a mensagem inicial permaneça visível.
+    customConsole.clear();
+    customConsole.log("Bem-vindo ao GeLetra!");
+    customConsole.log("");
+    customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+
+    return;
+}
+
+if (downloadButton.disabled) return;
+
+playButton.disabled = true;
+downloadButton.classList.add("gravando");
+downloadButton.textContent = "Parar gravação";
+
+try {
+    await executarLetra(true);
+} catch (erro) {
+    console.error("Erro ao gerar vídeo:", erro);
+
+    if (!cancelamentoGravacao) {
+        alert(
+            "Erro ao gerar vídeo:\n\n" +
+            (erro.message || String(erro))
+        );
+    }
+} finally {
+    playButton.disabled = false;
+    downloadButton.disabled = false;
+    downloadButton.classList.remove("gravando");
+    downloadButton.textContent = "Download";
+
+    // Restaura a mensagem apenas quando não há outra execução ativa.
+    if (!exportacaoAtiva) {
+        customConsole.clear();
+        customConsole.log("Bem-vindo ao GeLetra!");
+        customConsole.log("");
+        customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+    }
+}
+});
+
+  
+    /* ==================================================
+       MENSAGEM INICIAL
+       ================================================== */
+
+    
+customConsole.log("Bem-vindo ao GeLetra!");
+customConsole.log("");
+customConsole.log("Clique em Executar para começar ou em Download para criar seu vídeo.");
+
+ /* ==================================================
+   CONFIGURAÇÕES DO CONSOLE
+   ================================================== */
+
+const editSettingsButton =
+    document.getElementById("editSettingsButton");
+
+const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+const settingsClose =
+    document.getElementById("settingsClose");
+
+const settingsMain =
+    document.getElementById("settingsMain");
+
+const colorScreen =
+    document.getElementById("colorScreen");
+
+const fontScreen =
+    document.getElementById("fontScreen");
+
+const colorPreview =
+    document.getElementById("colorPreview");
+
+const colorBack =
+    document.getElementById("colorBack");
+
+const fontOption =
+    document.getElementById("fontOption");
+
+const fontBack =
+    document.getElementById("fontBack");
+
+const status =
+    document.querySelector(".status");
+
+
+/* ==================================================
+   SELETOR RGB
+   ================================================== */
+
+const colorGradient =
+    document.getElementById("colorGradient");
+
+const colorGradientCursor =
+    document.getElementById("colorGradientCursor");
+
+const hueSlider =
+    document.getElementById("hueSlider");
+
+const hueSliderCursor =
+    document.getElementById("hueSliderCursor");
+
+const redValue =
+    document.getElementById("redValue");
+
+const greenValue =
+    document.getElementById("greenValue");
+
+const blueValue =
+    document.getElementById("blueValue");
+
+const selectedColor =
+    document.getElementById("selectedColor");
+
+
+const hexColorInput =
+    document.getElementById("hexColorInput");
+
+const recentColors =
+    document.getElementById("recentColors");
+
+const fontColorPreview =
+    document.getElementById("fontColorPreview");
+
+const fontColorScreen =
+    document.getElementById("fontColorScreen");
+
+const fontColorBack =
+    document.getElementById("fontColorBack");
+
+const fontColorGradient =
+    document.getElementById("fontColorGradient");
+
+const fontColorGradientCursor =
+    document.getElementById("fontColorGradientCursor");
+
+const fontHueSlider =
+    document.getElementById("fontHueSlider");
+
+const fontHueSliderCursor =
+    document.getElementById("fontHueSliderCursor");
+
+const fontRedValue =
+    document.getElementById("fontRedValue");
+
+const fontGreenValue =
+    document.getElementById("fontGreenValue");
+
+const fontBlueValue =
+    document.getElementById("fontBlueValue");
+
+const fontHexColorInput =
+    document.getElementById("fontHexColorInput");
+
+const fontRecentColors =
+    document.getElementById("fontRecentColors");
+
+const fontSelectedColor =
+    document.getElementById("fontSelectedColor");
+    
+/* ==================================================
+   COR ATUAL
+   ================================================== */
+
+let corConsole =
+    localStorage.getItem("jssConsoleCor")
+    || "#050505";
+
+output.style.background =
+    corConsole;
+
+colorPreview.style.background =
+    corConsole;
+
+status.style.background =
+    corConsole;
+
+/* ==================================================
+   SELETOR COMPLETO DA COR DA LETRA
+   ================================================== */
+
+let corTextoConsole =
+    localStorage.getItem("jssConsoleTextoCor") || "#ffffff";
+
+output.style.setProperty(
+    "--console-text-color",
+    corTextoConsole
+);
+
+fontColorPreview.style.backgroundColor = corTextoConsole;
+
+let hsvTextoAtual = rgbToHsv(
+    ...Object.values(hexToRgb(corTextoConsole))
+);
+
+function aplicarCorTextoRGB(r, g, b) {
+    r = Math.max(0, Math.min(255, Math.round(r)));
+    g = Math.max(0, Math.min(255, Math.round(g)));
+    b = Math.max(0, Math.min(255, Math.round(b)));
+
+    corTextoConsole = rgbToHex(r, g, b);
+
+    output.style.setProperty(
+        "--console-text-color",
+        corTextoConsole
+    );
+
+    fontColorPreview.style.backgroundColor = corTextoConsole;
+
+    fontRedValue.value = r;
+    fontGreenValue.value = g;
+    fontBlueValue.value = b;
+
+    fontHexColorInput.value = corTextoConsole.toUpperCase();
+    fontSelectedColor.textContent = corTextoConsole.toUpperCase();
+
+    localStorage.setItem(
+        "jssConsoleTextoCor",
+        corTextoConsole
+    );
+}
+
+function atualizarGradienteTexto() {
+    fontColorGradient.style.background = `
+        linear-gradient(to bottom, transparent, #000000),
+        linear-gradient(to right, #ffffff, hsl(${hsvTextoAtual.h}, 100%, 50%))
+    `;
+
+    fontColorGradientCursor.style.left =
+        `${hsvTextoAtual.s * 100}%`;
+
+    fontColorGradientCursor.style.top =
+        `${(1 - hsvTextoAtual.v) * 100}%`;
+
+    fontHueSliderCursor.style.left =
+        `${(hsvTextoAtual.h / 360) * 100}%`;
+}
+
+function sincronizarSeletorTexto() {
+    const rgb = hexToRgb(corTextoConsole);
+
+    hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    fontRedValue.value = rgb.r;
+    fontGreenValue.value = rgb.g;
+    fontBlueValue.value = rgb.b;
+
+    fontHexColorInput.value = corTextoConsole.toUpperCase();
+    fontSelectedColor.textContent = corTextoConsole.toUpperCase();
+
+    atualizarGradienteTexto();
+}
+
+/* Histórico independente das 3 últimas cores */
+
+let coresRecentesTexto = [];
+
+try {
+    const salvas = JSON.parse(
+        localStorage.getItem("jssConsoleTextoCoresRecentes") || "[]"
+    );
+
+    if (Array.isArray(salvas)) {
+        coresRecentesTexto = salvas
+            .filter(cor => /^#[0-9a-f]{6}$/i.test(cor))
+            .slice(0, 3);
+    }
+} catch {
+    coresRecentesTexto = [];
+}
+
+function desenharCoresRecentesTexto() {
+    fontRecentColors.innerHTML = "";
+
+    for (let i = 0; i < 3; i++) {
+        const cor = coresRecentesTexto[i];
+
+        if (cor) {
+            const botao = document.createElement("button");
+
+            botao.type = "button";
+            botao.className = "recent-color";
+            botao.style.backgroundColor = cor;
+            botao.title = `Usar ${cor.toUpperCase()}`;
+            botao.setAttribute(
+                "aria-label",
+                `Usar cor ${cor.toUpperCase()}`
+            );
+
+            botao.addEventListener("click", () => {
+                const rgb = hexToRgb(cor);
+
+                hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+                aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+                atualizarGradienteTexto();
+                registrarCorRecenteTexto(cor);
+            });
+
+            fontRecentColors.appendChild(botao);
+        } else {
+            const vazio = document.createElement("div");
+            vazio.className = "recent-color-empty";
+            fontRecentColors.appendChild(vazio);
+        }
+    }
+}
+
+function registrarCorRecenteTexto(cor) {
+    cor = cor.toLowerCase();
+
+    coresRecentesTexto = [
+        cor,
+        ...coresRecentesTexto.filter(item => item !== cor)
+    ].slice(0, 3);
+
+    localStorage.setItem(
+        "jssConsoleTextoCoresRecentes",
+        JSON.stringify(coresRecentesTexto)
+    );
+
+    desenharCoresRecentesTexto();
+}
+
+/* Clique e arraste no gradiente */
+
+function atualizarPeloGradienteTexto(event) {
+    const rect = fontColorGradient.getBoundingClientRect();
+
+    const x = Math.max(
+        0,
+        Math.min(1, (event.clientX - rect.left) / rect.width)
+    );
+
+    const y = Math.max(
+        0,
+        Math.min(1, (event.clientY - rect.top) / rect.height)
+    );
+
+    hsvTextoAtual.s = x;
+    hsvTextoAtual.v = 1 - y;
+
+    const rgb = hsvToRgb(
+        hsvTextoAtual.h,
+        hsvTextoAtual.s,
+        hsvTextoAtual.v
+    );
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+}
+
+let arrastandoGradienteTexto = false;
+
+fontColorGradient.addEventListener("pointerdown", event => {
+    arrastandoGradienteTexto = true;
+
+    fontColorGradient.setPointerCapture(event.pointerId);
+    atualizarPeloGradienteTexto(event);
+});
+
+fontColorGradient.addEventListener("pointermove", event => {
+    if (arrastandoGradienteTexto) {
+        atualizarPeloGradienteTexto(event);
+    }
+});
+
+fontColorGradient.addEventListener("pointerup", () => {
+    if (arrastandoGradienteTexto) {
+        registrarCorRecenteTexto(corTextoConsole);
+    }
+
+    arrastandoGradienteTexto = false;
+});
+
+fontColorGradient.addEventListener("pointercancel", () => {
+    arrastandoGradienteTexto = false;
+});
+
+/* Barra de matiz */
+
+function atualizarPelaMatizTexto(event) {
+    const rect = fontHueSlider.getBoundingClientRect();
+
+    const x = Math.max(
+        0,
+        Math.min(1, (event.clientX - rect.left) / rect.width)
+    );
+
+    hsvTextoAtual.h = x * 360;
+
+    const rgb = hsvToRgb(
+        hsvTextoAtual.h,
+        hsvTextoAtual.s,
+        hsvTextoAtual.v
+    );
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+}
+
+let arrastandoMatizTexto = false;
+
+fontHueSlider.addEventListener("pointerdown", event => {
+    arrastandoMatizTexto = true;
+
+    fontHueSlider.setPointerCapture(event.pointerId);
+    atualizarPelaMatizTexto(event);
+});
+
+fontHueSlider.addEventListener("pointermove", event => {
+    if (arrastandoMatizTexto) {
+        atualizarPelaMatizTexto(event);
+    }
+});
+
+fontHueSlider.addEventListener("pointerup", () => {
+    if (arrastandoMatizTexto) {
+        registrarCorRecenteTexto(corTextoConsole);
+    }
+
+    arrastandoMatizTexto = false;
+});
+
+fontHueSlider.addEventListener("pointercancel", () => {
+    arrastandoMatizTexto = false;
+});
+
+/* Campos RGB */
+
+function atualizarPelosCamposTexto() {
+    let r = Number(fontRedValue.value);
+    let g = Number(fontGreenValue.value);
+    let b = Number(fontBlueValue.value);
+
+    if (Number.isNaN(r)) r = 0;
+    if (Number.isNaN(g)) g = 0;
+    if (Number.isNaN(b)) b = 0;
+
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+
+    hsvTextoAtual = rgbToHsv(r, g, b);
+
+    aplicarCorTextoRGB(r, g, b);
+    atualizarGradienteTexto();
+}
+
+[fontRedValue, fontGreenValue, fontBlueValue].forEach(input => {
+    input.addEventListener("change", () => {
+        atualizarPelosCamposTexto();
+        registrarCorRecenteTexto(corTextoConsole);
+    });
+
+    input.addEventListener("input", atualizarPelosCamposTexto);
+});
+
+/* Campo HEX */
+
+fontHexColorInput.addEventListener("change", () => {
+    let hex = fontHexColorInput.value.trim();
+
+    if (!hex.startsWith("#")) {
+        hex = "#" + hex;
+    }
+
+    if (/^#[0-9a-f]{3}$/i.test(hex)) {
+        hex = "#" + hex[1] + hex[1]
+                   + hex[2] + hex[2]
+                   + hex[3] + hex[3];
+    }
+
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) {
+        fontHexColorInput.value = corTextoConsole.toUpperCase();
+        return;
+    }
+
+    const rgb = hexToRgb(hex);
+
+    hsvTextoAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    aplicarCorTextoRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradienteTexto();
+    registrarCorRecenteTexto(corTextoConsole);
+});
+
+desenharCoresRecentesTexto();
+sincronizarSeletorTexto();
+    
+/* ==================================================
+   CONVERSÃO RGB → HSV
+   ================================================== */
+
+function rgbToHsv(r, g, b) {
+
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    const maior =
+        Math.max(r, g, b);
+
+    const menor =
+        Math.min(r, g, b);
+
+    const diferenca =
+        maior - menor;
+
+    let h = 0;
+    let s = 0;
+
+    const v = maior;
+
+    if (diferenca !== 0) {
+
+        s =
+            diferenca / maior;
+
+        if (maior === r) {
+
+            h =
+                60 *
+                (
+                    ((g - b) / diferenca) % 6
+                );
+
+        } else if (maior === g) {
+
+            h =
+                60 *
+                (
+                    ((b - r) / diferenca) + 2
+                );
+
+        } else {
+
+            h =
+                60 *
+                (
+                    ((r - g) / diferenca) + 4
+                );
+
+        }
+
+    }
+
+    if (h < 0) {
+        h += 360;
+    }
+
+    return {
+        h,
+        s,
+        v
+    };
+}
+
+
+/* ==================================================
+   CONVERSÃO HSV → RGB
+   ================================================== */
+
+function hsvToRgb(h, s, v) {
+
+    const c =
+        v * s;
+
+    const x =
+        c *
+        (
+            1 -
+            Math.abs(
+                ((h / 60) % 2) - 1
+            )
+        );
+
+    const m =
+        v - c;
+
+    let r = 0;
+    let g = 0;
+    let b = 0;
+
+    if (h < 60) {
+
+        r = c;
+        g = x;
+
+    } else if (h < 120) {
+
+        r = x;
+        g = c;
+
+    } else if (h < 180) {
+
+        g = c;
+        b = x;
+
+    } else if (h < 240) {
+
+        g = x;
+        b = c;
+
+    } else if (h < 300) {
+
+        r = x;
+        b = c;
+
+    } else {
+
+        r = c;
+        b = x;
+
+    }
+
+    return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+    };
+}
+
+
+/* ==================================================
+   HEX → RGB
+   ================================================== */
+
+function hexToRgb(hex) {
+
+    hex =
+        hex.replace("#", "");
+
+    return {
+        r: parseInt(
+            hex.slice(0, 2),
+            16
+        ),
+
+        g: parseInt(
+            hex.slice(2, 4),
+            16
+        ),
+
+        b: parseInt(
+            hex.slice(4, 6),
+            16
+        )
+    };
+}
+
+
+/* ==================================================
+   RGB → HEX
+   ================================================== */
+
+function rgbToHex(r, g, b) {
+
+    return "#" +
+        [r, g, b]
+            .map(valor =>
+                valor
+                    .toString(16)
+                    .padStart(2, "0")
+            )
+            .join("");
+}
+
+
+/* ==================================================
+   MATIZ ATUAL
+   ================================================== */
+
+let hsvAtual =
+    rgbToHsv(
+        ...Object.values(
+            hexToRgb(corConsole)
+        )
+    );
+
+
+/* ==================================================
+   ATUALIZA VISUAL DO GRADIENTE
+   ================================================== */
+
+function atualizarGradiente() {
+
+    colorGradient.style.background =
+        `
+        linear-gradient(
+            to bottom,
+            transparent,
+            #000000
+        ),
+        linear-gradient(
+            to right,
+            #ffffff,
+            hsl(${hsvAtual.h}, 100%, 50%)
+        )
+        `;
+
+
+    colorGradientCursor.style.left =
+        `${hsvAtual.s * 100}%`;
+
+    colorGradientCursor.style.top =
+        `${(1 - hsvAtual.v) * 100}%`;
+
+
+    hueSliderCursor.style.left =
+        `${(hsvAtual.h / 360) * 100}%`;
+}
+
+
+/* ==================================================
+   ATUALIZA COR
+   ================================================== */
+
+function aplicarCorRGB(r, g, b) {
+
+    r =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(r)
+            )
+        );
+
+    g =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(g)
+            )
+        );
+
+    b =
+        Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(b)
+            )
+        );
+
+
+    corConsole =
+        rgbToHex(
+            r,
+            g,
+            b
+        );
+
+
+    output.style.background =
+        corConsole;
+
+    colorPreview.style.background =
+        corConsole;
+
+    status.style.background =
+        corConsole;
+
+
+    redValue.value = r;
+    greenValue.value = g;
+    blueValue.value = b;
+
+
+    
+selectedColor.textContent = corConsole;
+
+hexColorInput.value = corConsole.toUpperCase();
+
+
+    localStorage.setItem(
+        "jssConsoleCor",
+        corConsole
+    );
+}
+
+
+/* ==================================================
+   SINCRONIZA SELETOR
+   ================================================== */
+
+function sincronizarSeletor() {
+
+    const rgb =
+        hexToRgb(corConsole);
+
+    hsvAtual =
+        rgbToHsv(
+            rgb.r,
+            rgb.g,
+            rgb.b
+        );
+
+
+    redValue.value =
+        rgb.r;
+
+    greenValue.value =
+        rgb.g;
+
+    blueValue.value =
+        rgb.b;
+
+
+    selectedColor.textContent =
+        corConsole;
+
+
+    atualizarGradiente();
+}
+
+
+/* ==================================================
+   HISTÓRICO DAS 3 ÚLTIMAS CORES DE FUNDO
+   ================================================== */
+
+let coresRecentes = [];
+
+try {
+    const salvas = JSON.parse(
+        localStorage.getItem("jssConsoleCoresRecentes") || "[]"
+    );
+
+    if (Array.isArray(salvas)) {
+        coresRecentes = salvas
+            .filter(cor => /^#[0-9a-f]{6}$/i.test(cor))
+            .slice(0, 3);
+    }
+} catch {
+    coresRecentes = [];
+}
+
+function desenharCoresRecentes() {
+    recentColors.innerHTML = "";
+
+    for (let i = 0; i < 3; i++) {
+        const cor = coresRecentes[i];
+
+        if (cor) {
+            const botao = document.createElement("button");
+
+            botao.type = "button";
+            botao.className = "recent-color";
+            botao.style.backgroundColor = cor;
+            botao.title = `Usar ${cor.toUpperCase()}`;
+            botao.setAttribute(
+                "aria-label",
+                `Usar cor ${cor.toUpperCase()}`
+            );
+
+            botao.addEventListener("click", () => {
+                const rgb = hexToRgb(cor);
+
+                aplicarCorRGB(rgb.r, rgb.g, rgb.b);
+                sincronizarSeletor();
+                registrarCorRecente(cor);
+            });
+
+            recentColors.appendChild(botao);
+        } else {
+            const vazio = document.createElement("div");
+            vazio.className = "recent-color-empty";
+            recentColors.appendChild(vazio);
+        }
+    }
+}
+
+function registrarCorRecente(cor) {
+    cor = cor.toLowerCase();
+
+    coresRecentes = [
+        cor,
+        ...coresRecentes.filter(item => item !== cor)
+    ].slice(0, 3);
+
+    localStorage.setItem(
+        "jssConsoleCoresRecentes",
+        JSON.stringify(coresRecentes)
+    );
+
+    desenharCoresRecentes();
+}
+
+hexColorInput.addEventListener("change", () => {
+    let hex = hexColorInput.value.trim();
+
+    if (!hex.startsWith("#")) {
+        hex = "#" + hex;
+    }
+
+    // Aceita #RGB e converte para #RRGGBB.
+    if (/^#[0-9a-f]{3}$/i.test(hex)) {
+        hex = "#" + hex[1] + hex[1]
+                   + hex[2] + hex[2]
+                   + hex[3] + hex[3];
+    }
+
+    if (!/^#[0-9a-f]{6}$/i.test(hex)) {
+        hexColorInput.value = corConsole.toUpperCase();
+        return;
+    }
+
+    const rgb = hexToRgb(hex);
+
+    hsvAtual = rgbToHsv(rgb.r, rgb.g, rgb.b);
+
+    aplicarCorRGB(rgb.r, rgb.g, rgb.b);
+    atualizarGradiente();
+    registrarCorRecente(corConsole);
+});
+
+// Registra a cor escolhida quando a pessoa termina de arrastar.
+colorGradient.addEventListener("pointerup", () => {
+    registrarCorRecente(corConsole);
+});
+
+hueSlider.addEventListener("pointerup", () => {
+    registrarCorRecente(corConsole);
+});
+
+// Registra a cor final digitada nos campos RGB.
+[redValue, greenValue, blueValue].forEach(input => {
+    input.addEventListener("change", () => {
+        registrarCorRecente(corConsole);
+    });
+});
+
+desenharCoresRecentes();
+    
+/* ==================================================
+   CLICAR / ARRASTAR NO GRADIENTE
+   ================================================== */
+
+function atualizarPeloGradiente(event) {
+
+    const rect =
+        colorGradient.getBoundingClientRect();
+
+    let x =
+        (event.clientX - rect.left)
+        / rect.width;
+
+    let y =
+        (event.clientY - rect.top)
+        / rect.height;
+
+
+    x =
+        Math.max(
+            0,
+            Math.min(1, x)
+        );
+
+    y =
+        Math.max(
+            0,
+            Math.min(1, y)
+        );
+
+
+    hsvAtual.s = x;
+    hsvAtual.v = 1 - y;
+
+
+    const rgb =
+        hsvToRgb(
+            hsvAtual.h,
+            hsvAtual.s,
+            hsvAtual.v
+        );
+
+
+    aplicarCorRGB(
+        rgb.r,
+        rgb.g,
+        rgb.b
+    );
+
+    atualizarGradiente();
+}
+
+
+let arrastandoGradiente = false;
+
+
+colorGradient.addEventListener(
+    "pointerdown",
+    event => {
+
+        arrastandoGradiente = true;
+
+        colorGradient.setPointerCapture(
+            event.pointerId
+        );
+
+        atualizarPeloGradiente(event);
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointermove",
+    event => {
+
+        if (!arrastandoGradiente) {
+            return;
+        }
+
+        atualizarPeloGradiente(event);
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointerup",
+    () => {
+
+        arrastandoGradiente = false;
+    }
+);
+
+
+colorGradient.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoGradiente = false;
+    }
+);
+
+
+/* ==================================================
+   CLICAR / ARRASTAR NA MATIZ
+   ================================================== */
+
+function atualizarPelaMatiz(event) {
+
+    const rect =
+        hueSlider.getBoundingClientRect();
+
+    let x =
+        (event.clientX - rect.left)
+        / rect.width;
+
+
+    x =
+        Math.max(
+            0,
+            Math.min(1, x)
+        );
+
+
+    hsvAtual.h =
+        x * 360;
+
+
+    atualizarGradiente();
+
+
+    const rgb =
+        hsvToRgb(
+            hsvAtual.h,
+            hsvAtual.s,
+            hsvAtual.v
+        );
+
+
+    aplicarCorRGB(
+        rgb.r,
+        rgb.g,
+        rgb.b
+    );
+
+    atualizarGradiente();
+}
+
+
+let arrastandoMatiz = false;
+
+
+hueSlider.addEventListener(
+    "pointerdown",
+    event => {
+
+        arrastandoMatiz = true;
+
+        hueSlider.setPointerCapture(
+            event.pointerId
+        );
+
+        atualizarPelaMatiz(event);
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointermove",
+    event => {
+
+        if (!arrastandoMatiz) {
+            return;
+        }
+
+        atualizarPelaMatiz(event);
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointerup",
+    () => {
+
+        arrastandoMatiz = false;
+    }
+);
+
+
+hueSlider.addEventListener(
+    "pointercancel",
+    () => {
+
+        arrastandoMatiz = false;
+    }
+);
+
+
+/* ==================================================
+   CAMPOS RGB
+   ================================================== */
+
+function atualizarPelosCampos() {
+
+    let r =
+        Number(redValue.value);
+
+    let g =
+        Number(greenValue.value);
+
+    let b =
+        Number(blueValue.value);
+
+
+    if (Number.isNaN(r)) r = 0;
+    if (Number.isNaN(g)) g = 0;
+    if (Number.isNaN(b)) b = 0;
+
+
+    r =
+        Math.max(
+            0,
+            Math.min(255, r)
+        );
+
+    g =
+        Math.max(
+            0,
+            Math.min(255, g)
+        );
+
+    b =
+        Math.max(
+            0,
+            Math.min(255, b)
+        );
+
+
+    hsvAtual =
+        rgbToHsv(
+            r,
+            g,
+            b
+        );
+
+
+    aplicarCorRGB(
+        r,
+        g,
+        b
+    );
+
+    atualizarGradiente();
+}
+
+
+[
+    redValue,
+    greenValue,
+    blueValue
+]
+.forEach(input => {
+
+    input.addEventListener(
+        "input",
+        atualizarPelosCampos
+    );
+
+});
+
+
+/* ==================================================
+   FONTE ATUAL
+   ================================================== */
+
+let fonteConsole =
+    localStorage.getItem("jssConsoleFonte")
+    || '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
+
+
+output.style.fontFamily =
+    fonteConsole;
+
+
+/* ==================================================
+   TAMANHO DA FONTE DO CONSOLE
+   ================================================== */
+
+const consoleFontSize =
+    document.getElementById("consoleFontSize");
+
+const consoleFontSizeValue =
+    document.getElementById("consoleFontSizeValue");
+
+let tamanhoFonteConsole = Number(
+    localStorage.getItem("jssConsoleTamanhoFonte") || 14
+);
+
+tamanhoFonteConsole = Math.max(
+    8,
+    Math.min(40, tamanhoFonteConsole)
+);
+
+function aplicarTamanhoFonteConsole() {
+    output.style.fontSize = tamanhoFonteConsole + "px";
+
+    consoleFontSize.value = tamanhoFonteConsole;
+
+    consoleFontSizeValue.textContent =
+        tamanhoFonteConsole + " px";
+}
+
+aplicarTamanhoFonteConsole();
+
+consoleFontSize.addEventListener("input", () => {
+    tamanhoFonteConsole = Number(consoleFontSize.value);
+
+    aplicarTamanhoFonteConsole();
+
+    localStorage.setItem(
+        "jssConsoleTamanhoFonte",
+        tamanhoFonteConsole
+    );
+});
+    
+/* ==================================================
+   ABRIR CONFIGURAÇÕES
+   ================================================== */
+
+editSettingsButton.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.style.display =
+            "flex";
+
+        settingsMain.style.display =
+            "block";
+
+        colorScreen.style.display =
+            "none";
+
+        fontScreen.style.display =
+            "none";
+
+        fontColorScreen.style.display = "none";
+    }
+);
+
+
+/* ==================================================
+   FECHAR
+   ================================================== */
+
+settingsClose.addEventListener(
+    "click",
+    () => {
+
+        settingsOverlay.style.display =
+            "none";
+    }
+);
+
+
+/* ==================================================
+   ABRIR COR
+   ================================================== */
+
+colorPreview.addEventListener(
+    "click",
+    () => {
+
+        settingsMain.style.display =
+            "none";
+
+        colorScreen.style.display =
+            "block";
+
+        fontColorScreen.style.display = "none";
+        
+        sincronizarSeletor();
+    }
+);
+
+
+/* ==================================================
+   VOLTAR DA COR
+   ================================================== */
+
+colorBack.addEventListener(
+    "click",
+    () => {
+
+        colorScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+
+/* ==================================================
+   ABRIR SELETOR DA COR DA LETRA
+   ================================================== */
+
+fontColorPreview.addEventListener("click", () => {
+    settingsMain.style.display = "none";
+    colorScreen.style.display = "none";
+    fontScreen.style.display = "none";
+    fontColorScreen.style.display = "block";
+
+    sincronizarSeletorTexto();
+});
+
+/* ==================================================
+   VOLTAR DO SELETOR DA COR DA LETRA
+   ================================================== */
+
+fontColorBack.addEventListener("click", () => {
+    fontColorScreen.style.display = "none";
+    settingsMain.style.display = "block";
+});
+
+/* ==================================================
+   ABRIR FONTES
+   ================================================== */
+
+fontOption.addEventListener(
+    "click",
+    () => {
+
+        settingsMain.style.display =
+            "none";
+
+        fontScreen.style.display =
+            "block";
+    }
+);
+
+
+/* ==================================================
+   ESCOLHER FONTE
+   ================================================== */
+
+
+/* ==================================================
+   FONTES PADRÃO E PERSONALIZADAS
+   ================================================== */
+
+const uploadFontButton =
+    document.getElementById("uploadFontButton");
+
+const customFontUpload =
+    document.getElementById("customFontUpload");
+
+const customFontList =
+    document.getElementById("customFontList");
+
+const customFontMessage =
+    document.getElementById("customFontMessage");
+
+const FONT_DB_NAME = "GeLetraFontesDB";
+const FONT_STORE_NAME = "fontes";
+
+const FONT_MAX_SIZE = 500 * 1024;
+
+const fontePadraoConsole =
+    '"SFMono-Regular", Consolas, "Liberation Mono", monospace';
+
+
+/* ABRIR BANCO LOCAL */
+
+function abrirBancoFontes() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(FONT_DB_NAME, 1);
+
+        request.onupgradeneeded = () => {
+            const db = request.result;
+
+            if (!db.objectStoreNames.contains(FONT_STORE_NAME)) {
+                db.createObjectStore(FONT_STORE_NAME, {
+                    keyPath: "id"
+                });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+
+/* OPERAÇÕES NO BANCO */
+
+async function salvarRegistroFonte(fonte) {
+    const db = await abrirBancoFontes();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE_NAME, "readwrite");
+
+        tx.objectStore(FONT_STORE_NAME).put(fonte);
+
+        tx.oncomplete = () => {
+            db.close();
+            resolve();
+        };
+
+        tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+        };
+
+        tx.onabort = () => {
+            db.close();
+            reject(tx.error);
+        };
+    });
+}
+
+async function listarRegistrosFontes() {
+    const db = await abrirBancoFontes();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE_NAME, "readonly");
+        const request = tx.objectStore(FONT_STORE_NAME).getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+
+        tx.oncomplete = () => db.close();
+        tx.onerror = () => db.close();
+    });
+}
+
+async function excluirRegistroFonte(id) {
+    const db = await abrirBancoFontes();
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(FONT_STORE_NAME, "readwrite");
+
+        tx.objectStore(FONT_STORE_NAME).delete(id);
+
+        tx.oncomplete = () => {
+            db.close();
+            resolve();
+        };
+
+        tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+        };
+
+        tx.onabort = () => {
+            db.close();
+            reject(tx.error);
+        };
+    });
+}
+
+
+/* CARREGAR UMA FONTE NO NAVEGADOR */
+
+async function carregarFonteNoNavegador(fonte) {
+    const dados = await fonte.blob.arrayBuffer();
+
+    const face = new FontFace(
+        fonte.family,
+        dados
+    );
+
+    await face.load();
+
+    document.fonts.add(face);
+
+    return face;
+}
+
+
+/* APLICAR UMA FONTE PERSONALIZADA */
+
+async function selecionarFontePersonalizada(fonte) {
+    try {
+        await carregarFonteNoNavegador(fonte);
+
+        fonteConsole = `"${fonte.family}"`;
+
+        output.style.fontFamily = fonteConsole;
+
+        localStorage.setItem(
+            "jssConsoleFonte",
+            fonteConsole
+        );
+
+        customFontMessage.textContent =
+            `Fonte "${fonte.name}" selecionada.`;
+
+    } catch (erro) {
+        console.error(erro);
+
+        customFontMessage.textContent =
+            "Não foi possível carregar essa fonte.";
+    }
+}
+
+
+/* EXIBIR AS FONTES PERSONALIZADAS */
+
+async function atualizarListaFontesPersonalizadas() {
+    const fontes = await listarRegistrosFontes();
+
+    customFontList.replaceChildren();
+
+    fontes.sort((a, b) =>
+        a.name.localeCompare(b.name, "pt-BR")
+    );
+
+    for (const fonte of fontes) {
+        const linha = document.createElement("div");
+        linha.className = "custom-font-row";
+
+        const selecionar = document.createElement("button");
+        selecionar.type = "button";
+        selecionar.className = "custom-font-select";
+        selecionar.textContent = fonte.name;
+        selecionar.title = `Usar a fonte ${fonte.name}`;
+
+        selecionar.addEventListener("click", async () => {
+            await selecionarFontePersonalizada(fonte);
+        });
+
+        const excluir = document.createElement("button");
+        excluir.type = "button";
+        excluir.className = "custom-font-delete";
+        excluir.textContent = "×";
+        excluir.title = `Excluir a fonte ${fonte.name}`;
+        excluir.setAttribute(
+            "aria-label",
+            `Excluir a fonte ${fonte.name}`
+        );
+
+        excluir.addEventListener("click", async () => {
+            try {
+                const fonteAtualEstaSelecionada =
+                    fonteConsole.includes(fonte.family);
+
+                await excluirRegistroFonte(fonte.id);
+
+                if (fonteAtualEstaSelecionada) {
+                    fonteConsole = fontePadraoConsole;
+                    output.style.fontFamily = fonteConsole;
+
+                    localStorage.setItem(
+                        "jssConsoleFonte",
+                        fonteConsole
+                    );
+                }
+
+                document.fonts.forEach(face => {
+                    if (face.family === fonte.family) {
+                        document.fonts.delete(face);
+                    }
+                });
+
+                await atualizarListaFontesPersonalizadas();
+
+                customFontMessage.textContent =
+                    `Fonte "${fonte.name}" excluída.`;
+
+            } catch (erro) {
+                console.error(erro);
+
+                customFontMessage.textContent =
+                    "Não foi possível excluir a fonte.";
+            }
+        });
+
+        linha.append(selecionar, excluir);
+        customFontList.appendChild(linha);
+    }
+}
+
+
+/* ABRIR O SELETOR DE ARQUIVOS */
+
+uploadFontButton.addEventListener("click", () => {
+    customFontUpload.click();
+});
+
+
+/* IMPORTAR UMA FONTE DE UM ZIP */
+
+customFontUpload.addEventListener("change", async () => {
+    const arquivo = customFontUpload.files[0];
+
+    // Permite selecionar novamente o mesmo arquivo.
+    customFontUpload.value = "";
+
+    if (!arquivo) return;
+
+    if (!arquivo.name.toLowerCase().endsWith(".zip")) {
+        customFontMessage.textContent =
+            "Selecione um arquivo ZIP.";
+        return;
+    }
+
+    if (arquivo.size > FONT_MAX_SIZE) {
+        customFontMessage.textContent =
+            "O ZIP ultrapassa o limite de 500 KB.";
+        return;
+    }
+
+    if (typeof JSZip === "undefined") {
+        customFontMessage.textContent =
+            "Não foi possível carregar o leitor de ZIP.";
+        return;
+    }
+
+    uploadFontButton.disabled = true;
+    customFontMessage.textContent =
+        "Verificando o arquivo...";
+
+    try {
+        const zip = await JSZip.loadAsync(arquivo);
+
+        const extensoesPermitidas =
+            /\.(ttf|otf|woff2?|TTF|OTF|WOFF2?)$/i;
+
+        const entradas = Object.values(zip.files)
+            .filter(item =>
+                !item.dir &&
+                extensoesPermitidas.test(item.name) &&
+                !item.name.split("/").some(parte =>
+                    parte.startsWith(".")
+                )
+            );
+
+        if (entradas.length === 0) {
+            throw new Error(
+                "O ZIP não contém arquivos de fonte compatíveis."
+            );
+        }
+
+        // Um arquivo ZIP pode conter PDFs, textos e outros
+        // arquivos. Usamos a primeira fonte encontrada.
+        const entrada = entradas[0];
+
+        const blob = await entrada.async("blob");
+
+        if (blob.size === 0) {
+            throw new Error("O arquivo de fonte está vazio.");
+        }
+
+        const nomeArquivo =
+            entrada.name.split("/").pop();
+
+        const nomeFonte =
+            nomeArquivo.replace(/\.(ttf|otf|woff2?)$/i, "");
+
+        const id =
+            typeof crypto.randomUUID === "function"
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+        const fonte = {
+            id,
+            name: nomeFonte,
+            family: `GeLetraCustom_${id.replace(/-/g, "_")}`,
+            blob
+        };
+
+        // Testa a fonte antes de salvá-la.
+        await carregarFonteNoNavegador(fonte);
+
+        await salvarRegistroFonte(fonte);
+
+        await atualizarListaFontesPersonalizadas();
+
+        await selecionarFontePersonalizada(fonte);
+
+        customFontMessage.textContent =
+            `Fonte "${nomeFonte}" adicionada com sucesso.`;
+
+    } catch (erro) {
+        console.error(erro);
+
+        customFontMessage.textContent =
+            erro.message?.includes("ZIP não contém")
+                ? erro.message
+                : "Não foi possível importar esse ZIP. Verifique se ele contém uma fonte válida.";
+    } finally {
+        uploadFontButton.disabled = false;
+    }
+});
+
+
+/* RESTAURAR AS FONTES SALVAS AO ABRIR O SITE */
+
+async function restaurarFontesPersonalizadas() {
+    try {
+        const fontes = await listarRegistrosFontes();
+
+        for (const fonte of fontes) {
+            try {
+                await carregarFonteNoNavegador(fonte);
+            } catch (erro) {
+                console.warn(
+                    `Não foi possível carregar ${fonte.name}:`,
+                    erro
+                );
+            }
+        }
+
+        await atualizarListaFontesPersonalizadas();
+
+        // Reaplica a preferência salva depois de carregar
+        // as fontes personalizadas no navegador.
+        output.style.fontFamily = fonteConsole;
+
+    } catch (erro) {
+        console.error(erro);
+
+        customFontMessage.textContent =
+            "Não foi possível acessar as fontes salvas neste navegador.";
+    }
+}
+
+
+/* FONTES PADRÃO */
+
+document
+    .querySelectorAll('.font-list button[data-font]')
+    .forEach(button => {
+        button.addEventListener("click", () => {
+            fonteConsole = button.dataset.font;
+
+            output.style.fontFamily = fonteConsole;
+
+            localStorage.setItem(
+                "jssConsoleFonte",
+                fonteConsole
+            );
+        });
+    });
+
+
+restaurarFontesPersonalizadas();
+
+/* ==================================================
+   VOLTAR DAS FONTES
+   ================================================== */
+
+fontBack.addEventListener(
+    "click",
+    () => {
+
+        fontScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+
+
+/* ==================================================
+   INICIALIZA SELETOR
+   ================================================== */
+
+sincronizarSeletor();
+/* ==================================================
+   VOLTAR DAS FONTES
+   ================================================== */
+
+fontBack.addEventListener(
+    "click",
+    () => {
+
+        fontScreen.style.display =
+            "none";
+
+        settingsMain.style.display =
+            "block";
+    }
+);
+  
+</script>
+
+</body>
+</html>

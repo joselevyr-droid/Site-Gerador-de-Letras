@@ -596,16 +596,16 @@
         }
 
         
+
 .console-line {
     margin-bottom: 3px;
     max-width: 100%;
+    text-align: center;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
-    transform: none;
     transform-origin: center;
 }
-
 .text-mode-option {
     display: flex;
     flex-direction: column;

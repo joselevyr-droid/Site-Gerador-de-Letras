@@ -497,8 +497,6 @@ function desenharConsoleNoCanvas() {
         return;
     }
 
-    // Não altere canvas.width/height aqui.
-    // Redimensionar o canvas a cada frame consome recursos.
     contextoGravacao.clearRect(0, 0, largura, altura);
 
     const estilo = getComputedStyle(output);
@@ -509,31 +507,119 @@ function desenharConsoleNoCanvas() {
     const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
     const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
 
-    contextoGravacao.font = `${tamanhoFonte}px ${estilo.fontFamily}`;
+    contextoGravacao.font =
+        `${estilo.fontWeight} ${tamanhoFonte}px ${estilo.fontFamily}`;
+
     contextoGravacao.textAlign = "center";
     contextoGravacao.textBaseline = "middle";
+
+    // Calcula a largura disponível, respeitando o padding do console.
+    const paddingEsquerda = parseFloat(estilo.paddingLeft) || 0;
+    const paddingDireita = parseFloat(estilo.paddingRight) || 0;
+
+    const larguraUtil = Math.max(
+        1,
+        largura - paddingEsquerda - paddingDireita
+    );
+
+    // Margem de segurança para evitar que o texto encoste nas bordas.
+    const margemSeguranca = tamanhoFonte * 0.5;
+    const larguraMaxima = Math.max(
+        1,
+        larguraUtil - margemSeguranca * 2
+    );
 
     const linhasArray = Array.from(
         output.querySelectorAll(".console-line")
     );
 
-    if (linhasArray.length > 0) {
-        const espaco = alturaLinha + 3;
-        const alturaTotal = linhasArray.length * espaco;
-        let y = (altura - alturaTotal) / 2 + espaco / 2;
+    // Divide o texto em linhas, usando a largura real de cada trecho.
+    function quebrarTexto(texto) {
+        const linhasFinais = [];
+        const paragrafos = String(texto).split("\n");
 
-        for (const linha of linhasArray) {
-            const estiloLinha = getComputedStyle(linha);
+        for (const paragrafo of paragrafos) {
+            const palavras = paragrafo.split(/(\s+)/);
+            let linhaAtual = "";
 
-            contextoGravacao.fillStyle = estiloLinha.color;
-            contextoGravacao.fillText(
-                linha.textContent || "",
-                largura / 2,
-                y
-            );
+            for (const palavra of palavras) {
+                const tentativa = linhaAtual + palavra;
 
-            y += espaco;
+                if (
+                    linhaAtual &&
+                    contextoGravacao.measureText(tentativa).width > larguraMaxima
+                ) {
+                    linhasFinais.push(linhaAtual.trimEnd());
+                    linhaAtual = palavra.trimStart();
+
+                    // Se uma palavra isolada for muito comprida,
+                    // quebra também a própria palavra.
+                    while (
+                        linhaAtual &&
+                        contextoGravacao.measureText(linhaAtual).width > larguraMaxima
+                    ) {
+                        let parte = "";
+
+                        for (const caractere of linhaAtual) {
+                            const teste = parte + caractere;
+
+                            if (
+                                parte &&
+                                contextoGravacao.measureText(teste).width > larguraMaxima
+                            ) {
+                                linhasFinais.push(parte);
+                                parte = caractere;
+                            } else {
+                                parte = teste;
+                            }
+                        }
+
+                        linhaAtual = parte;
+                    }
+                } else {
+                    linhaAtual = tentativa;
+                }
+            }
+
+            linhasFinais.push(linhaAtual);
         }
+
+        return linhasFinais;
+    }
+
+    // Primeiro calcula todas as linhas, incluindo as que foram quebradas.
+    const linhasDesenhadas = [];
+
+    for (const elemento of linhasArray) {
+        const estiloLinha = getComputedStyle(elemento);
+        const texto = elemento.textContent || "";
+        const linhas = quebrarTexto(texto);
+
+        for (const textoLinha of linhas) {
+            linhasDesenhadas.push({
+                texto: textoLinha,
+                cor: estiloLinha.color
+            });
+        }
+    }
+
+    // Mantém o conjunto de linhas centralizado verticalmente.
+    const espaco = alturaLinha + 3;
+    const alturaTotal = linhasDesenhadas.length * espaco;
+
+    let y = (altura - alturaTotal) / 2 + espaco / 2;
+
+    for (const linha of linhasDesenhadas) {
+        contextoGravacao.fillStyle = linha.cor;
+
+        contextoGravacao.fillText(
+            linha.texto,
+            largura / 2,
+            y,
+            larguraMaxima
+        );
+
+        y += espaco;
     }
 
     animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);

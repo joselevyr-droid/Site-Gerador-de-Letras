@@ -537,32 +537,66 @@ function desenharConsoleNoCanvas() {
         linhasRenderizadas.push({ texto, cor });
     }
 
-    function quebrarLinha(texto, cor) {
-        if (texto === "") {
-            adicionarLinha("", cor);
-            return;
+    
+function quebrarLinha(texto, cor) {
+    if (texto === "") {
+        adicionarLinha("", cor);
+        return;
+    }
+
+    const palavras = texto.split(/(\s+)/);
+    let linhaAtual = "";
+
+    for (const palavra of palavras) {
+        const tentativa = linhaAtual + palavra;
+
+        if (ctx.measureText(tentativa).width <= larguraTexto) {
+            linhaAtual = tentativa;
+            continue;
         }
 
-        let linhaAtual = "";
+        // Se a palavra couber numa linha vazia,
+        // move a palavra inteira para a linha seguinte.
+        if (ctx.measureText(palavra).width <= larguraTexto) {
+            if (linhaAtual.trim() !== "") {
+                adicionarLinha(linhaAtual.trimEnd(), cor);
+                linhaAtual = linhaAtual.trimStart();
+            }
 
-        for (const caractere of texto) {
-            const tentativa = linhaAtual + caractere;
+            if (linhaAtual && !/^\s+$/.test(linhaAtual)) {
+                adicionarLinha(linhaAtual, cor);
+            }
+
+            linhaAtual = palavra.trimStart();
+            continue;
+        }
+
+        // Palavra maior que a largura total:
+        // divide caractere por caractere.
+        if (linhaAtual.trim() !== "") {
+            adicionarLinha(linhaAtual.trimEnd(), cor);
+            linhaAtual = "";
+        }
+
+        for (const caractere of palavra) {
+            const tentativaCaractere = linhaAtual + caractere;
 
             if (
                 linhaAtual &&
-                ctx.measureText(tentativa).width > larguraTexto
+                ctx.measureText(tentativaCaractere).width > larguraTexto
             ) {
                 adicionarLinha(linhaAtual, cor);
-                linhaAtual = caractere;
+                linhaAtual = caractere.trimStart();
             } else {
-                linhaAtual = tentativa;
+                linhaAtual = tentativaCaractere;
             }
         }
-
-        if (linhaAtual) {
-            adicionarLinha(linhaAtual, cor);
-        }
     }
+
+    if (linhaAtual.trim() !== "" || linhasRenderizadas.length === 0) {
+        adicionarLinha(linhaAtual.trimEnd(), cor);
+    }
+}
 
     for (const linha of linhasArray) {
         const estiloLinha = getComputedStyle(linha);
@@ -1022,12 +1056,14 @@ async function baixarMP4(blob) {
             "console-" + type
         );
 
-        line.textContent = text;
+        
+line.textContent = text;
 
-        output.appendChild(line);
+output.appendChild(line);
 
-        output.scrollTop =
-            output.scrollHeight;
+aplicarModoTextoConsole();
+
+output.scrollTop = output.scrollHeight;
     }
 
 
@@ -2926,37 +2962,43 @@ if (!["wrap", "shrink"].includes(modoTextoConsole)) {
 
 consoleTextMode.value = modoTextoConsole;
 
+
 function aplicarModoTextoConsole() {
     const estiloOutput = getComputedStyle(output);
 
-    const larguraDisponivel =
+    const larguraDisponivel = Math.max(
+        1,
         output.clientWidth -
         parseFloat(estiloOutput.paddingLeft || 0) -
-        parseFloat(estiloOutput.paddingRight || 0);
+        parseFloat(estiloOutput.paddingRight || 0)
+    );
 
-    const linhas = output.querySelectorAll(".console-line");
-
-    linhas.forEach(linha => {
+    output.querySelectorAll(".console-line").forEach(linha => {
         linha.style.maxWidth = larguraDisponivel + "px";
+        linha.style.boxSizing = "border-box";
+        linha.style.transformOrigin = "center";
+        linha.style.display = "block";
 
         if (modoTextoConsole === "shrink") {
+            linha.style.width = "max-content";
+            linha.style.maxWidth = "100%";
             linha.style.whiteSpace = "pre";
             linha.style.overflowWrap = "normal";
             linha.style.wordBreak = "normal";
-            linha.style.width = "max-content";
+
+            // Mede a largura real do texto sem transformações.
             linha.style.transform = "none";
 
             const larguraTexto = linha.scrollWidth;
-
             const escala = larguraTexto > larguraDisponivel
                 ? larguraDisponivel / larguraTexto
                 : 1;
 
             linha.style.transform = `scaleX(${escala})`;
         } else {
-            linha.style.width = "auto";
+            linha.style.width = "100%";
             linha.style.whiteSpace = "pre-wrap";
-            linha.style.overflowWrap = "anywhere";
+            linha.style.overflowWrap = "break-word";
             linha.style.wordBreak = "normal";
             linha.style.transform = "none";
         }

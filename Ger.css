@@ -1304,3 +1304,40 @@ padding: 22px 24px;
     color: #555;
     overflow-wrap: anywhere;
 }
+
+/* =========================================
+   QUADRO REAL DO CONSOLE
+   Igual na execução e na gravação
+   ========================================= */
+
+.console-container {
+    aspect-ratio: auto !important;
+    height: auto !important;
+    min-height: 0;
+}
+
+#console {
+    flex: 0 0 auto !important;
+
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+
+    aspect-ratio: 1 / 1;
+
+    box-sizing: border-box;
+}
+
+/* Mantém o quadro quadrado em celulares */
+@media (max-width: 800px), (orientation: portrait) {
+    .console-container {
+        height: auto !important;
+        min-height: 0;
+    }
+
+    #console {
+        width: 100%;
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+    }
+}

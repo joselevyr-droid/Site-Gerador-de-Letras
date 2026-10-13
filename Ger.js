@@ -493,138 +493,128 @@ function desenharConsoleNoCanvas() {
     const altura = output.clientHeight;
 
     if (largura <= 0 || altura <= 0) {
-        animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+        animationGravacao = requestAnimationFrame(
+            desenharConsoleNoCanvas
+        );
         return;
     }
 
-    contextoGravacao.clearRect(0, 0, largura, altura);
+    const ctx = contextoGravacao;
+
+    ctx.clearRect(0, 0, largura, altura);
 
     const estilo = getComputedStyle(output);
 
-    contextoGravacao.fillStyle = estilo.backgroundColor;
-    contextoGravacao.fillRect(0, 0, largura, altura);
+    ctx.fillStyle = estilo.backgroundColor;
+    ctx.fillRect(0, 0, largura, altura);
 
     const tamanhoFonte = parseFloat(estilo.fontSize) || 16;
-    const alturaLinha = parseFloat(estilo.lineHeight) || tamanhoFonte * 1.2;
+    const alturaLinha =
+        parseFloat(estilo.lineHeight) || tamanhoFonte * 1.5;
 
-    contextoGravacao.font =
-        `${estilo.fontWeight} ${tamanhoFonte}px ${estilo.fontFamily}`;
+    const paddingEsquerda =
+        parseFloat(estilo.paddingLeft) || 0;
 
-    contextoGravacao.textAlign = "center";
-    contextoGravacao.textBaseline = "middle";
+    const paddingDireita =
+        parseFloat(estilo.paddingRight) || 0;
 
-    // Calcula a largura disponível, respeitando o padding do console.
-    const paddingEsquerda = parseFloat(estilo.paddingLeft) || 0;
-    const paddingDireita = parseFloat(estilo.paddingRight) || 0;
-
-    const larguraUtil = Math.max(
+    const larguraTexto = Math.max(
         1,
         largura - paddingEsquerda - paddingDireita
     );
 
-    // Margem de segurança para evitar que o texto encoste nas bordas.
-    const margemSeguranca = tamanhoFonte * 0.5;
-    const larguraMaxima = Math.max(
-        1,
-        larguraUtil - margemSeguranca * 2
-    );
+    ctx.font = `${estilo.fontWeight} ${tamanhoFonte}px ${estilo.fontFamily}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     const linhasArray = Array.from(
         output.querySelectorAll(".console-line")
     );
 
-    // Divide o texto em linhas, usando a largura real de cada trecho.
-    function quebrarTexto(texto) {
-        const linhasFinais = [];
-        const paragrafos = String(texto).split("\n");
+    const linhasRenderizadas = [];
 
-        for (const paragrafo of paragrafos) {
-            const palavras = paragrafo.split(/(\s+)/);
-            let linhaAtual = "";
+    function adicionarLinha(texto, cor) {
+        linhasRenderizadas.push({ texto, cor });
+    }
 
-            for (const palavra of palavras) {
-                const tentativa = linhaAtual + palavra;
+    function quebrarLinha(texto, cor) {
+        if (texto === "") {
+            adicionarLinha("", cor);
+            return;
+        }
 
-                if (
-                    linhaAtual &&
-                    contextoGravacao.measureText(tentativa).width > larguraMaxima
-                ) {
-                    linhasFinais.push(linhaAtual.trimEnd());
-                    linhaAtual = palavra.trimStart();
+        let linhaAtual = "";
 
-                    // Se uma palavra isolada for muito comprida,
-                    // quebra também a própria palavra.
-                    while (
-                        linhaAtual &&
-                        contextoGravacao.measureText(linhaAtual).width > larguraMaxima
-                    ) {
-                        let parte = "";
+        for (const caractere of texto) {
+            const tentativa = linhaAtual + caractere;
 
-                        for (const caractere of linhaAtual) {
-                            const teste = parte + caractere;
-
-                            if (
-                                parte &&
-                                contextoGravacao.measureText(teste).width > larguraMaxima
-                            ) {
-                                linhasFinais.push(parte);
-                                parte = caractere;
-                            } else {
-                                parte = teste;
-                            }
-                        }
-
-                        linhaAtual = parte;
-                    }
-                } else {
-                    linhaAtual = tentativa;
-                }
+            if (
+                linhaAtual &&
+                ctx.measureText(tentativa).width > larguraTexto
+            ) {
+                adicionarLinha(linhaAtual, cor);
+                linhaAtual = caractere;
+            } else {
+                linhaAtual = tentativa;
             }
-
-            linhasFinais.push(linhaAtual);
         }
 
-        return linhasFinais;
-    }
-
-    // Primeiro calcula todas as linhas, incluindo as que foram quebradas.
-    const linhasDesenhadas = [];
-
-    for (const elemento of linhasArray) {
-        const estiloLinha = getComputedStyle(elemento);
-        const texto = elemento.textContent || "";
-        const linhas = quebrarTexto(texto);
-
-        for (const textoLinha of linhas) {
-            linhasDesenhadas.push({
-                texto: textoLinha,
-                cor: estiloLinha.color
-            });
+        if (linhaAtual) {
+            adicionarLinha(linhaAtual, cor);
         }
     }
 
-    // Mantém o conjunto de linhas centralizado verticalmente.
+    for (const linha of linhasArray) {
+        const estiloLinha = getComputedStyle(linha);
+        const texto = linha.textContent || "";
+        const cor = estiloLinha.color;
+
+        if (modoTextoConsole === "shrink") {
+            adicionarLinha(texto, cor);
+        } else {
+            quebrarLinha(texto, cor);
+        }
+    }
+
     const espaco = alturaLinha + 3;
-    const alturaTotal = linhasDesenhadas.length * espaco;
+    const alturaTotal = linhasRenderizadas.length * espaco;
 
     let y = (altura - alturaTotal) / 2 + espaco / 2;
 
-    for (const linha of linhasDesenhadas) {
-        contextoGravacao.fillStyle = linha.cor;
+    for (const linha of linhasRenderizadas) {
+        ctx.fillStyle = linha.cor;
 
-        contextoGravacao.fillText(
-            linha.texto,
-            largura / 2,
-            y,
-            larguraMaxima
-        );
+        if (modoTextoConsole === "shrink") {
+            ctx.save();
+
+            const larguraOriginal =
+                ctx.measureText(linha.texto).width;
+
+            const escala = larguraOriginal > larguraTexto
+                ? larguraTexto / larguraOriginal
+                : 1;
+
+            ctx.translate(largura / 2, y);
+            ctx.scale(escala, 1);
+
+            ctx.fillText(linha.texto, 0, 0);
+
+            ctx.restore();
+        } else {
+            ctx.fillText(
+                linha.texto,
+                largura / 2,
+                y
+            );
+        }
 
         y += espaco;
     }
 
-    animationGravacao = requestAnimationFrame(desenharConsoleNoCanvas);
+    animationGravacao = requestAnimationFrame(
+        desenharConsoleNoCanvas
+    );
 }
-
 
 /* ==================================================
    INICIA GRAVAÇÃO
@@ -2919,7 +2909,75 @@ consoleFontSize.addEventListener("input", () => {
         tamanhoFonteConsole
     );
 });
-    
+
+
+/* ==================================================
+   MODO DE EXIBIÇÃO DE TEXTOS LONGOS
+   ================================================== */
+
+const consoleTextMode = document.getElementById("consoleTextMode");
+
+let modoTextoConsole =
+    localStorage.getItem("jssConsoleModoTexto") || "wrap";
+
+if (!["wrap", "shrink"].includes(modoTextoConsole)) {
+    modoTextoConsole = "wrap";
+}
+
+consoleTextMode.value = modoTextoConsole;
+
+function aplicarModoTextoConsole() {
+    const estiloOutput = getComputedStyle(output);
+
+    const larguraDisponivel =
+        output.clientWidth -
+        parseFloat(estiloOutput.paddingLeft || 0) -
+        parseFloat(estiloOutput.paddingRight || 0);
+
+    const linhas = output.querySelectorAll(".console-line");
+
+    linhas.forEach(linha => {
+        linha.style.maxWidth = larguraDisponivel + "px";
+
+        if (modoTextoConsole === "shrink") {
+            linha.style.whiteSpace = "pre";
+            linha.style.overflowWrap = "normal";
+            linha.style.wordBreak = "normal";
+            linha.style.width = "max-content";
+            linha.style.transform = "none";
+
+            const larguraTexto = linha.scrollWidth;
+
+            const escala = larguraTexto > larguraDisponivel
+                ? larguraDisponivel / larguraTexto
+                : 1;
+
+            linha.style.transform = `scaleX(${escala})`;
+        } else {
+            linha.style.width = "auto";
+            linha.style.whiteSpace = "pre-wrap";
+            linha.style.overflowWrap = "anywhere";
+            linha.style.wordBreak = "normal";
+            linha.style.transform = "none";
+        }
+    });
+}
+
+consoleTextMode.addEventListener("change", () => {
+    modoTextoConsole = consoleTextMode.value;
+
+    localStorage.setItem(
+        "jssConsoleModoTexto",
+        modoTextoConsole
+    );
+
+    aplicarModoTextoConsole();
+});
+
+new ResizeObserver(() => {
+    aplicarModoTextoConsole();
+}).observe(output);
+
 /* ==================================================
    ABRIR CONFIGURAÇÕES
    ================================================== */

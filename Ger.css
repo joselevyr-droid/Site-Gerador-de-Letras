@@ -1445,7 +1445,7 @@ padding: 22px 24px;
 
 /* =========================================
    CELULAR DEITADO
-   MANTÉM OS PAINÉIS LADO A LADO
+   CARTÃO ALINHADO COM O CONSOLE
    ========================================= */
 
 @media (orientation: landscape) and (max-width: 800px) {
@@ -1460,7 +1460,6 @@ padding: 22px 24px;
     body {
         display: flex;
         flex-direction: row;
-
         overflow: hidden;
     }
 
@@ -1468,32 +1467,40 @@ padding: 22px 24px;
         order: 1;
 
         width: 35%;
-        height: 100vh;
+        height: 100%;
         min-width: 0;
         min-height: 0;
 
         padding: 12px;
+        box-sizing: border-box;
 
-        flex: 0 1 35%;
+        flex: 0 0 35%;
     }
 
     .right-panel {
         order: 2;
 
         width: 65%;
-        height: 100vh;
+        height: 100%;
         min-width: 0;
         min-height: 0;
 
-        padding: 10px;
+        padding: 8px;
+        box-sizing: border-box;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         flex: 1 1 65%;
         overflow: hidden;
     }
 
     .console-container {
-        width: auto;
+        /* O cartão deixa de ocupar toda a largura */
+        width: fit-content;
         max-width: 100%;
+        min-width: 0;
 
         height: auto;
         max-height: 100%;
@@ -1501,27 +1508,52 @@ padding: 22px 24px;
         padding: 8px;
         gap: 6px;
 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        box-sizing: border-box;
         flex: 0 1 auto;
+
+        aspect-ratio: auto !important;
     }
 
     .console-header {
         width: 100%;
+        min-width: 0;
         min-height: 32px;
+
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+
         gap: 5px;
+        flex: 0 0 auto;
     }
 
     .console-header .buttons {
+        display: flex;
+        flex-wrap: wrap;
         gap: 4px;
     }
 
     #console {
-        width: min(100%, calc(100vh - 100px));
+        /* Mantém o console quadrado e centralizado */
+        width: min(100%, calc(100vh - 90px));
         max-width: 100%;
 
         height: auto;
+        min-width: 0;
+        min-height: 0;
         max-height: none;
 
         aspect-ratio: 1 / 1;
+
         flex: 0 1 auto;
+        align-self: center;
+
+        box-sizing: border-box;
+        overflow-y: auto;
     }
 }

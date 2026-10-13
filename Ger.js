@@ -536,34 +536,72 @@ function desenharConsoleNoCanvas() {
     function adicionarLinha(texto, cor) {
         linhasRenderizadas.push({ texto, cor });
     }
-
-    function quebrarLinha(texto, cor) {
-        if (texto === "") {
-            adicionarLinha("", cor);
-            return;
-        }
-
-        let linhaAtual = "";
-
-        for (const caractere of texto) {
-            const tentativa = linhaAtual + caractere;
-
-            if (
-                linhaAtual &&
-                ctx.measureText(tentativa).width > larguraTexto
-            ) {
-                adicionarLinha(linhaAtual, cor);
-                linhaAtual = caractere;
-            } else {
-                linhaAtual = tentativa;
-            }
-        }
-
-        if (linhaAtual) {
-            adicionarLinha(linhaAtual, cor);
-        }
+    
+function quebrarLinha(texto, cor) {
+    if (texto === "") {
+        adicionarLinha("", cor);
+        return;
     }
 
+    let linhaAtual = "";
+    const partes = texto.match(/\S+|\s+/g) || [];
+
+    for (const parte of partes) {
+        // Mantém os espaços entre as palavras.
+        if (/^\s+$/.test(parte)) {
+            linhaAtual += parte;
+            continue;
+        }
+
+        const palavra = parte.trimStart();
+        const tentativa = linhaAtual + palavra;
+
+        // Se a palavra não couber no espaço restante,
+        // mas couber em uma linha inteira, passa inteira para baixo.
+        if (
+            linhaAtual.trim() !== "" &&
+            ctx.measureText(tentativa).width > larguraTexto &&
+            ctx.measureText(palavra).width <= larguraTexto
+        ) {
+            adicionarLinha(linhaAtual.trimEnd(), cor);
+            linhaAtual = palavra;
+            continue;
+        }
+
+        // Se a palavra for maior que uma linha inteira,
+        // permite dividi-la caractere por caractere.
+        if (ctx.measureText(palavra).width > larguraTexto) {
+            if (linhaAtual.trim() !== "") {
+                adicionarLinha(linhaAtual.trimEnd(), cor);
+                linhaAtual = "";
+            }
+
+            for (const caractere of palavra) {
+                const tentativaCaractere = linhaAtual + caractere;
+
+                if (
+                    linhaAtual !== "" &&
+                    ctx.measureText(tentativaCaractere).width > larguraTexto
+                ) {
+                    adicionarLinha(linhaAtual, cor);
+                    linhaAtual = caractere;
+                } else {
+                    linhaAtual = tentativaCaractere;
+                }
+            }
+
+            continue;
+        }
+
+        // Se couber normalmente, mantém a palavra inteira.
+        linhaAtual += palavra;
+    }
+
+    if (linhaAtual.trim() !== "") {
+        adicionarLinha(linhaAtual.trimEnd(), cor);
+    }
+}
+    
     for (const linha of linhasArray) {
         const estiloLinha = getComputedStyle(linha);
         const texto = linha.textContent || "";

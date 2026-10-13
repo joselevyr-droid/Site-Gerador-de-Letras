@@ -1497,12 +1497,15 @@ padding: 22px 24px;
     }
 
     .console-container {
-    width: max-content;
-    max-width: 100%;
-    min-width: 0;
+    --console-size: min( calc(100vh - 100px), calc(65vw - 32px) );
 
+    width: calc(var(--console-size) + 16px);
     height: auto;
+
+    max-width: 100%;
     max-height: 100%;
+    min-width: 0;
+    min-height: 0;
 
     padding: 8px;
     gap: 6px;
@@ -1512,7 +1515,7 @@ padding: 22px 24px;
     align-items: center;
 
     box-sizing: border-box;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
 
     aspect-ratio: auto !important;
 }
@@ -1537,13 +1540,14 @@ padding: 22px 24px;
         gap: 4px;
     }
 
-    #console {
-    width: min(100%, calc(100vh - 90px));
-    max-width: 100%;
+   #console {
+    width: var(--console-size);
+    height: var(--console-size);
 
-    height: auto;
     min-width: 0;
     min-height: 0;
+
+    max-width: 100%;
     max-height: none;
 
     aspect-ratio: 1 / 1;

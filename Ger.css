@@ -595,9 +595,40 @@
             text-align: center;
         }
 
-        .console-line {
-            margin-bottom: 3px;
-        }
+        
+.console-line {
+    margin-bottom: 3px;
+    max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    transform: none;
+    transform-origin: center;
+}
+
+.text-mode-option {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 0;
+}
+
+.text-mode-option label {
+    font-size: 14px;
+    color: inherit;
+}
+
+#consoleTextMode {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    color: #111;
+    font-size: 14px;
+    cursor: pointer;
+}
 
         
 .console-log {

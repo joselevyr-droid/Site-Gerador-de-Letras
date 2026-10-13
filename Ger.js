@@ -537,66 +537,32 @@ function desenharConsoleNoCanvas() {
         linhasRenderizadas.push({ texto, cor });
     }
 
-    
-function quebrarLinha(texto, cor) {
-    if (texto === "") {
-        adicionarLinha("", cor);
-        return;
-    }
-
-    const palavras = texto.split(/(\s+)/);
-    let linhaAtual = "";
-
-    for (const palavra of palavras) {
-        const tentativa = linhaAtual + palavra;
-
-        if (ctx.measureText(tentativa).width <= larguraTexto) {
-            linhaAtual = tentativa;
-            continue;
+    function quebrarLinha(texto, cor) {
+        if (texto === "") {
+            adicionarLinha("", cor);
+            return;
         }
 
-        // Se a palavra couber numa linha vazia,
-        // move a palavra inteira para a linha seguinte.
-        if (ctx.measureText(palavra).width <= larguraTexto) {
-            if (linhaAtual.trim() !== "") {
-                adicionarLinha(linhaAtual.trimEnd(), cor);
-                linhaAtual = linhaAtual.trimStart();
-            }
+        let linhaAtual = "";
 
-            if (linhaAtual && !/^\s+$/.test(linhaAtual)) {
-                adicionarLinha(linhaAtual, cor);
-            }
-
-            linhaAtual = palavra.trimStart();
-            continue;
-        }
-
-        // Palavra maior que a largura total:
-        // divide caractere por caractere.
-        if (linhaAtual.trim() !== "") {
-            adicionarLinha(linhaAtual.trimEnd(), cor);
-            linhaAtual = "";
-        }
-
-        for (const caractere of palavra) {
-            const tentativaCaractere = linhaAtual + caractere;
+        for (const caractere of texto) {
+            const tentativa = linhaAtual + caractere;
 
             if (
                 linhaAtual &&
-                ctx.measureText(tentativaCaractere).width > larguraTexto
+                ctx.measureText(tentativa).width > larguraTexto
             ) {
                 adicionarLinha(linhaAtual, cor);
-                linhaAtual = caractere.trimStart();
+                linhaAtual = caractere;
             } else {
-                linhaAtual = tentativaCaractere;
+                linhaAtual = tentativa;
             }
         }
-    }
 
-    if (linhaAtual.trim() !== "" || linhasRenderizadas.length === 0) {
-        adicionarLinha(linhaAtual.trimEnd(), cor);
+        if (linhaAtual) {
+            adicionarLinha(linhaAtual, cor);
+        }
     }
-}
 
     for (const linha of linhasArray) {
         const estiloLinha = getComputedStyle(linha);
@@ -1056,14 +1022,12 @@ async function baixarMP4(blob) {
             "console-" + type
         );
 
-        
-line.textContent = text;
+        line.textContent = text;
 
-output.appendChild(line);
+        output.appendChild(line);
 
-aplicarModoTextoConsole();
-
-output.scrollTop = output.scrollHeight;
+        output.scrollTop =
+            output.scrollHeight;
     }
 
 
@@ -2953,15 +2917,6 @@ consoleFontSize.addEventListener("input", () => {
 
 const consoleTextMode = document.getElementById("consoleTextMode");
 
-if (!consoleTextMode) {
-    console.warn(
-        "Seletor de aparência do console não encontrado no HTML."
-    );
-} else {
-    consoleTextMode.value =
-        localStorage.getItem("jssConsoleModoTexto") || "wrap";
-}
-
 let modoTextoConsole =
     localStorage.getItem("jssConsoleModoTexto") || "wrap";
 
@@ -2971,43 +2926,37 @@ if (!["wrap", "shrink"].includes(modoTextoConsole)) {
 
 consoleTextMode.value = modoTextoConsole;
 
-
 function aplicarModoTextoConsole() {
     const estiloOutput = getComputedStyle(output);
 
-    const larguraDisponivel = Math.max(
-        1,
+    const larguraDisponivel =
         output.clientWidth -
         parseFloat(estiloOutput.paddingLeft || 0) -
-        parseFloat(estiloOutput.paddingRight || 0)
-    );
+        parseFloat(estiloOutput.paddingRight || 0);
 
-    output.querySelectorAll(".console-line").forEach(linha => {
+    const linhas = output.querySelectorAll(".console-line");
+
+    linhas.forEach(linha => {
         linha.style.maxWidth = larguraDisponivel + "px";
-        linha.style.boxSizing = "border-box";
-        linha.style.transformOrigin = "center";
-        linha.style.display = "block";
 
         if (modoTextoConsole === "shrink") {
-            linha.style.width = "max-content";
-            linha.style.maxWidth = "100%";
             linha.style.whiteSpace = "pre";
             linha.style.overflowWrap = "normal";
             linha.style.wordBreak = "normal";
-
-            // Mede a largura real do texto sem transformações.
+            linha.style.width = "max-content";
             linha.style.transform = "none";
 
             const larguraTexto = linha.scrollWidth;
+
             const escala = larguraTexto > larguraDisponivel
                 ? larguraDisponivel / larguraTexto
                 : 1;
 
             linha.style.transform = `scaleX(${escala})`;
         } else {
-            linha.style.width = "100%";
+            linha.style.width = "auto";
             linha.style.whiteSpace = "pre-wrap";
-            linha.style.overflowWrap = "break-word";
+            linha.style.overflowWrap = "anywhere";
             linha.style.wordBreak = "normal";
             linha.style.transform = "none";
         }

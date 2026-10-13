@@ -2953,6 +2953,15 @@ consoleFontSize.addEventListener("input", () => {
 
 const consoleTextMode = document.getElementById("consoleTextMode");
 
+if (!consoleTextMode) {
+    console.warn(
+        "Seletor de aparência do console não encontrado no HTML."
+    );
+} else {
+    consoleTextMode.value =
+        localStorage.getItem("jssConsoleModoTexto") || "wrap";
+}
+
 let modoTextoConsole =
     localStorage.getItem("jssConsoleModoTexto") || "wrap";
 

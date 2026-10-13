@@ -581,10 +581,10 @@
             line-height: 1.5;
 
             overflow-y: auto;
-
+           overflow-wrap: anywhere;
             white-space: pre-wrap;
 
-            word-break: break-word;
+            word-break: normal;
 
             display: flex;
             flex-direction: column;

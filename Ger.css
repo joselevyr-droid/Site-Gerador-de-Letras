@@ -1306,38 +1306,98 @@ padding: 22px 24px;
 }
 
 /* =========================================
-   QUADRO REAL DO CONSOLE
-   Igual na execução e na gravação
+   QUADRO DO CONSOLE RESPONSIVO
    ========================================= */
 
 .console-container {
+    width: min(700px, 100%);
+    height: 100%;
+    max-height: 100%;
+    min-width: 0;
+    min-height: 0;
+
     aspect-ratio: auto !important;
-    height: auto !important;
-    min-height: 0;
-}
 
-#console {
-    flex: 0 0 auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-    width: 100%;
-    height: auto !important;
-    min-height: 0;
-
-    aspect-ratio: 1 / 1;
-
+    padding: 12px;
+    gap: 8px;
     box-sizing: border-box;
 }
 
-/* Mantém o quadro quadrado em celulares */
+.console-header {
+    width: 100%;
+    flex: 0 0 auto;
+    min-height: 38px;
+}
+
+#console {
+    flex: 0 1 auto !important;
+
+    width: min(100%, calc(100vh - 110px));
+    max-width: 100%;
+    max-height: calc(100% - 62px);
+    min-width: 0;
+    min-height: 0;
+
+    height: auto !important;
+    aspect-ratio: 1 / 1;
+
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+/* =========================================
+   AJUSTES PARA TELAS VERTICAIS
+   ========================================= */
+
 @media (max-width: 800px), (orientation: portrait) {
+
+    .right-panel {
+        width: 100%;
+        height: 60vh;
+        min-height: 350px;
+
+        padding: 12px;
+        box-sizing: border-box;
+
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
     .console-container {
-        height: auto !important;
-        min-height: 0;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+
+        padding: 8px;
+        gap: 6px;
+    }
+
+    .console-header {
+        min-height: 38px;
+        gap: 6px;
     }
 
     #console {
-        width: 100%;
-        height: auto !important;
+        width: min(100%, calc(100vh - 110px));
+        max-width: 100%;
+        max-height: calc(100% - 62px);
+
+        flex: 0 1 auto !important;
         aspect-ratio: 1 / 1;
+    }
+
+    .left-panel {
+        position: relative;
+
+        width: 100%;
+        height: 40vh;
+        min-height: 260px;
+
+        flex-shrink: 0;
     }
 }

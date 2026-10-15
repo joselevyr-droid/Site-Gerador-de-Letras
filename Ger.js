@@ -2979,25 +2979,31 @@ function aplicarModoTextoConsole() {
     const linhas = output.querySelectorAll(".console-line");
 
     linhas.forEach(linha => {
-        linha.style.maxWidth = larguraDisponivel + "px";
-
         if (modoTextoConsole === "shrink") {
+            linha.style.maxWidth = "none";
             linha.style.whiteSpace = "pre";
             linha.style.overflowWrap = "normal";
             linha.style.wordBreak = "normal";
             linha.style.width = "max-content";
-            linha.style.transform = `scaleX(${escala})`;
-linha.style.transformOrigin = "center center";
-linha.style.fontStyle = "normal";
+            linha.style.transform = "none";
+            linha.style.transformOrigin = "center center";
+            linha.style.fontStyle = "normal";
 
             const larguraTexto = linha.scrollWidth;
 
-            const escala = larguraTexto > larguraDisponivel
-                ? larguraDisponivel / larguraTexto
+            const margemSeguranca = 16;
+            const larguraLimite = Math.max(
+                1,
+                larguraDisponivel - margemSeguranca
+            );
+
+            const escala = larguraTexto > larguraLimite
+                ? larguraLimite / larguraTexto
                 : 1;
 
             linha.style.transform = `scaleX(${escala})`;
         } else {
+            linha.style.maxWidth = larguraDisponivel + "px";
             linha.style.width = "auto";
             linha.style.whiteSpace = "pre-wrap";
             linha.style.overflowWrap = "anywhere";

@@ -3007,6 +3007,16 @@ linha.style.fontStyle = "normal";
     });
 }
 
+const observadorTextoConsole = new MutationObserver(() => {
+    aplicarModoTextoConsole();
+});
+
+observadorTextoConsole.observe(output, {
+    childList: true,
+    subtree: true,
+    characterData: true
+});
+
 consoleTextMode.addEventListener("change", () => {
     modoTextoConsole = consoleTextMode.value;
 

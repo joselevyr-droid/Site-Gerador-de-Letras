@@ -2964,6 +2964,10 @@ if (!["wrap", "shrink"].includes(modoTextoConsole)) {
 
 consoleTextMode.value = modoTextoConsole;
 
+requestAnimationFrame(() => {
+    aplicarModoTextoConsole();
+});
+
 function aplicarModoTextoConsole() {
     const estiloOutput = getComputedStyle(output);
 
@@ -2982,7 +2986,9 @@ function aplicarModoTextoConsole() {
             linha.style.overflowWrap = "normal";
             linha.style.wordBreak = "normal";
             linha.style.width = "max-content";
-            linha.style.transform = "none";
+            linha.style.transform = `scaleX(${escala})`;
+linha.style.transformOrigin = "center center";
+linha.style.fontStyle = "normal";
 
             const larguraTexto = linha.scrollWidth;
 

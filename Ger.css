@@ -1595,30 +1595,29 @@ padding: 22px 24px;
    BOTÃO DISCRETO PARA EDITAR A APARÊNCIA DO TRECHO
    ================================================== */
 
+
 .edit-segment-button {
-    position: absolute;
-    top: 10px;
-    right: 42px;
-    padding: 3px 7px;
-    border: 1px solid #343434;
-    border-radius: 5px;
-    background: #202020;
-    color: #8f8f8f;
-    font: 11px Arial, Helvetica, sans-serif;
+    background: transparent;
+    background-color: transparent;
+    color: #888888;
+    border: none;
+    box-shadow: none;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: 400;
     cursor: pointer;
-    opacity: 0.72;
-    transition: color 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
+    opacity: 0.8;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-.edit-segment-button:hover,
-.edit-segment-button:focus-visible {
+.edit-segment-button:hover {
+    background: transparent;
+    background-color: transparent;
+    color: #555555;
     opacity: 1;
-    color: #eeeeee;
-    background: #2b2b2b;
-    border-color: #5a5a5a;
-    outline: none;
+    box-shadow: none;
 }
-
+            
 .lyric-item.has-custom-visual-settings .edit-segment-button {
     color: #c5c5c5;
     border-color: #555555;

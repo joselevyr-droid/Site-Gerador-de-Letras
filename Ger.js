@@ -523,9 +523,20 @@ function desenharConsoleNoCanvas() {
         largura - paddingEsquerda - paddingDireita
     );
 
-    ctx.font = `${estilo.fontWeight} ${tamanhoFonte}px ${estilo.fontFamily}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    
+ctx.font = estilo.font ||
+    `${estilo.fontStyle} ${estilo.fontWeight} ${tamanhoFonte}px ${estilo.fontFamily}`;
+
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
+if ("fontKerning" in ctx) {
+    ctx.fontKerning = "normal";
+}
+
+if ("textRendering" in ctx) {
+    ctx.textRendering = "optimizeLegibility";
+}
 
     const linhasArray = Array.from(
         output.querySelectorAll(".console-line")
@@ -685,8 +696,8 @@ async function iniciarGravacaoConsole() {
 
     // Limita a escala para controlar o consumo de memória.
     escalaGravacao = Math.min(
-        2,
-        Math.max(1, window.devicePixelRatio || 1)
+        3,
+        Math.max(2, window.devicePixelRatio || 1)
     );
 
     // O tamanho físico é definido apenas uma vez por gravação.
@@ -727,7 +738,8 @@ async function iniciarGravacaoConsole() {
 
     try {
         mediaRecorder = new MediaRecorder(streamGravacao, {
-            mimeType: formato
+            mimeType: formato,
+            videoBitsPerSecond: 8000000
         });
 
         mediaRecorder.ondataavailable = event => {
@@ -962,6 +974,8 @@ async function converterParaMP4(webmBlob, idExecucao) {
         await ffmpeg.exec([
             "-i", "entrada.webm",
             "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "16",
             "-pix_fmt", "yuv420p",
             "-movflags", "+faststart",
             "saida.mp4"

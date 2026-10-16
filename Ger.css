@@ -1677,3 +1677,48 @@ padding: 22px 24px;
     color: #ffffff;
     border-color: #5a5a5a;
 }
+
+
+/* Corrige o botão Editar no celular, em pé ou deitado */
+.lyric-item button.edit-segment-button,
+.lyric-item .edit-segment-button {
+    position: absolute !important;
+    top: 8px !important;
+    right: 38px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+    height: 25px !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
+
+    color: #929292 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.lyric-item button.edit-segment-button:hover,
+.lyric-item button.edit-segment-button:focus,
+.lyric-item button.edit-segment-button:active {
+    color: #d0d0d0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}

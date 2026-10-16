@@ -351,10 +351,22 @@ atualizarScrollbar();
             item.classList.add("has-custom-visual-settings");
         }
 
-        const editSegmentButton = document.createElement("button");
-        editSegmentButton.type = "button";
-        editSegmentButton.className = "edit-segment-button";
-        editSegmentButton.textContent = "Editar";
+        
+const editSegmentButton = document.createElement("button");
+editSegmentButton.type = "button";
+editSegmentButton.className = "edit-segment-button";
+
+editSegmentButton.style.setProperty("appearance", "none", "important");
+editSegmentButton.style.setProperty("-webkit-appearance", "none", "important");
+editSegmentButton.style.setProperty("background", "transparent", "important");
+editSegmentButton.style.setProperty("background-color", "transparent", "important");
+editSegmentButton.style.setProperty("background-image", "none", "important");
+editSegmentButton.style.setProperty("border", "none", "important");
+editSegmentButton.style.setProperty("box-shadow", "none", "important");
+editSegmentButton.style.setProperty("color", "#929292", "important");
+editSegmentButton.style.setProperty("-webkit-text-fill-color", "#929292", "important");
+
+editSegmentButton.textContent = "Editar";
         editSegmentButton.title = "Editar a aparência deste trecho";
         editSegmentButton.addEventListener("click", () => {
             abrirConfiguracoesTrecho(item);

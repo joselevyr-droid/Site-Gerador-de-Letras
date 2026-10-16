@@ -1718,12 +1718,19 @@ padding: 22px 24px;
     cursor: pointer !important;
 }
 
-.lyric-item > button.edit-segment-button:hover,
-.lyric-item > button.edit-segment-button:focus,
-.lyric-item > button.edit-segment-button:active {
-    color: #d0d0d0 !important;
-    background: transparent !important;
-    border: none !important;
+
+.lyric-item button.edit-segment-button,
+.lyric-item button.edit-segment-button:hover,
+.lyric-item button.edit-segment-button:focus,
+.lyric-item button.edit-segment-button:active,
+.lyric-item button.edit-segment-button:visited {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #929292 !important;
+    border: 0 !important;
     box-shadow: none !important;
     outline: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    -webkit-text-fill-color: #929292 !important;
 }

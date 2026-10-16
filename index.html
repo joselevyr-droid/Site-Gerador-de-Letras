@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeLetra</title>
+
+<link rel="stylesheet" href="Ger.css">
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+
+<body>
+
+    <!-- =========================================
+         ESQUERDA
+         ========================================= -->
+
+    <section class="left-panel">
+
+<div class="popup-wrapper">
+
+    <button
+        class="add-button"
+        id="addButton"
+        title="Adicionar trecho"
+    >
+        +
+    </button>
+  
+<button
+    class="remove-all-button"
+    id="removeAllButton"
+    title="Excluir todos os trechos"
+>
+    −
+</button>
+  
+    <div class="popup-area" id="popupArea">
+
+        <div id="lyricList"></div>
+
+    </div>
+
+    <div
+        class="custom-scrollbar"
+        id="customScrollbar"
+    >
+        <div
+            class="custom-scrollbar-thumb"
+            id="customScrollbarThumb"
+        ></div>
+    </div>
+
+</div>
+
+    </section>
+
+
+    <!-- =========================================
+         DIREITA
+         ========================================= -->
+
+    <section class="right-panel">
+
+        <div class="console-container">
+
+           <div class="console-header">
+
+<div class="console-title" id="editSettingsButton">
+
+    <span class="status"></span>
+
+    <span>Editar Letra</span>
+
+</div>
+
+    <div class="buttons">
+
+        <button id="downloadButton">
+            Download
+        </button>
+
+        <button
+            id="playButton"
+            title="Executar"
+            aria-label="Executar"
+        >
+            ▶
+        </button>
+
+    </div>
+
+</div>
+
+            <div id="console"></div>
+
+        </div>
+
+    </section>
+
+<!-- ==================================================
+     POPUP DE CONFIGURAÇÕES
+     ================================================== -->
+
+<div class="settings-overlay" id="settingsOverlay">
+
+    <div class="settings-popup">
+
+        <button
+            class="settings-close"
+            id="settingsClose"
+        >
+            ×
+        </button>
+
+
+        <!-- TELA PRINCIPAL -->
+
+        <div
+            class="settings-screen"
+            id="settingsMain"
+        >
+
+            <div class="settings-option">
+
+                <span>
+                    Cor de Fundo Padrão
+                </span>
+
+                <button
+                    class="color-preview"
+                    id="colorPreview"
+                    title="Alterar cor"
+                ></button>
+
+            </div>
+
+<div class="settings-option">
+    <span>Cor da letra do console</span>
+
+    <button
+        class="color-preview"
+        id="fontColorPreview"
+        title="Alterar cor da letra"
+        aria-label="Alterar cor da letra do console"
+    ></button>
+</div>
+            
+            <button
+                class="settings-option font-option"
+                id="fontOption"
+            >
+
+                <span>
+                    Fonte do Console
+                </span>
+
+            </button>
+            
+        <div class="settings-option text-mode-option">
+            <label for="consoleTextMode">
+                Aparência de textos longos
+            </label>
+
+            <select id="consoleTextMode">
+                <option value="wrap">Quebrar linha</option>
+                <option value="shrink">Encolher para caber</option>
+            </select>
+        </div>
+
+        <button
+            type="button"
+            class="reset-segment-settings"
+            id="resetSegmentSettings"
+            style="display: none;"
+        >
+            Usar padrão neste trecho
+        </button>
+
+        </div>
+
+
+        <!-- TELA DA COR -->
+
+        <div
+            class="settings-screen"
+            id="colorScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="colorBack"
+            >
+                ← Voltar
+            </button>
+
+            <h3>Cor de Fundo Padrão</h3>
+
+  <div class="rgb-picker">
+
+    <div
+        class="color-gradient"
+        id="colorGradient"
+    >
+        <div
+            class="color-gradient-cursor"
+            id="colorGradientCursor"
+        ></div>
+    </div>
+
+    <div
+        class="hue-slider"
+        id="hueSlider"
+    >
+        <div
+            class="hue-slider-cursor"
+            id="hueSliderCursor"
+        ></div>
+    </div>
+
+    <div class="rgb-values">
+
+        <label>
+            R
+            <input
+                type="number"
+                id="redValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            G
+            <input
+                type="number"
+                id="greenValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+        <label>
+            B
+            <input
+                type="number"
+                id="blueValue"
+                min="0"
+                max="255"
+                value="5"
+            >
+        </label>
+
+    </div>
+
+
+<div class="hex-color-row">
+    <label for="hexColorInput">Código HEX</label>
+
+    <input
+        type="text"
+        id="hexColorInput"
+        class="hex-color-input"
+        value="#050505"
+        placeholder="#FF5733"
+        maxlength="7"
+        spellcheck="false"
+        autocomplete="off"
+        aria-label="Código hexadecimal da cor de fundo"
+    >
+</div>
+
+<div class="recent-colors-title">
+    Últimas 3 cores usadas
+</div>
+
+<div
+    class="recent-colors"
+    id="recentColors"
+>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+    <div class="recent-color-empty"></div>
+</div>
+
+<div class="selected-color" id="selectedColor">
+    #050505
+</div>
+
+</div>
+
+        </div>
+
+<!-- TELA DA COR DA LETRA -->
+
+<div
+    class="settings-screen"
+    id="fontColorScreen"
+    style="display: none;"
+>
+    <button
+        class="back-button"
+        id="fontColorBack"
+    >
+        ← Voltar
+    </button>
+
+    <h3>Cor da Letra do Console</h3>
+
+    <div class="rgb-picker">
+
+        <div
+            class="color-gradient"
+            id="fontColorGradient"
+        >
+            <div
+                class="color-gradient-cursor"
+                id="fontColorGradientCursor"
+            ></div>
+        </div>
+
+        <div
+            class="hue-slider"
+            id="fontHueSlider"
+        >
+            <div
+                class="hue-slider-cursor"
+                id="fontHueSliderCursor"
+            ></div>
+        </div>
+
+        <div class="rgb-values">
+            <label>
+                R
+                <input
+                    type="number"
+                    id="fontRedValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                G
+                <input
+                    type="number"
+                    id="fontGreenValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+
+            <label>
+                B
+                <input
+                    type="number"
+                    id="fontBlueValue"
+                    min="0"
+                    max="255"
+                    value="255"
+                >
+            </label>
+        </div>
+
+        <div class="hex-color-row">
+            <label for="fontHexColorInput">
+                Código HEX
+            </label>
+
+            <input
+                type="text"
+                id="fontHexColorInput"
+                class="hex-color-input"
+                value="#FFFFFF"
+                placeholder="#FF5733"
+                maxlength="7"
+                spellcheck="false"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="recent-colors-title">
+            Últimas 3 cores usadas
+        </div>
+
+        <div
+            class="recent-colors"
+            id="fontRecentColors"
+        >
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+            <div class="recent-color-empty"></div>
+        </div>
+
+        <div
+            class="selected-color"
+            id="fontSelectedColor"
+        >
+            #FFFFFF
+        </div>
+
+    </div>
+</div>
+        
+        <!-- TELA DA FONTE -->
+
+        <div
+            class="settings-screen"
+            id="fontScreen"
+            style="display: none;"
+        >
+
+            <button
+                class="back-button"
+                id="fontBack"
+            >
+                ← Voltar
+            </button>
+
+            
+<h3>Fonte do Console</h3>
+
+<div class="font-size-control">
+    <div class="font-size-header">
+        <label for="consoleFontSize">Tamanho da fonte</label>
+        <span id="consoleFontSizeValue">14 px</span>
+    </div>
+
+    <input
+        type="range"
+        id="consoleFontSize"
+        min="8"
+        max="40"
+        step="1"
+        value="14"
+    >
+</div>
+
+<div class="font-list">
+
+    <button data-font="monospace">
+        Monospace
+    </button>
+
+    <button data-font="Arial, Helvetica, sans-serif">
+        Arial
+    </button>
+
+    <button data-font="'Courier New', monospace">
+        Courier New
+    </button>
+
+    <button data-font="Consolas, monospace">
+        Consolas
+    </button>
+
+    <button data-font="'Lucida Console', monospace">
+        Lucida Console
+    </button>
+
+    <button data-font="Georgia, serif">
+        Georgia
+    </button>
+
+    <div class="custom-fonts-section">
+        <h4>Fontes personalizadas</h4>
+
+        <button type="button" id="uploadFontButton"
+                class="font-upload-button">
+            + Adicionar fonte (.zip)
+        </button>
+
+        <input
+            type="file"
+            id="customFontUpload"
+            accept=".zip,application/zip"
+            hidden
+        >
+
+        <p class="font-upload-info">
+            Arquivo ZIP de até 500 KB.
+        </p>
+
+        <div id="customFontList"></div>
+
+        <p id="customFontMessage" role="status"></p>
+    </div>
+
+</div>
+
+        </div>
+
+    </div>
+
+</div>
+  
+<script src="Ger.js"></script>
+
+</body>
+</html>

@@ -1679,14 +1679,17 @@ padding: 22px 24px;
 }
 
 
-/* Corrige o botão Editar no celular, em pé ou deitado */
-.lyric-item button.edit-segment-button,
-.lyric-item .edit-segment-button {
+/* BOTÃO EDITAR: ESTILO FIXO EM TODAS AS ORIENTAÇÕES */
+.lyric-item > button.edit-segment-button {
+    all: unset !important;
+    box-sizing: border-box !important;
+
     position: absolute !important;
     top: 8px !important;
     right: 38px !important;
+    z-index: 20 !important;
 
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 
@@ -1698,24 +1701,26 @@ padding: 22px 24px;
 
     color: #929292 !important;
     background: transparent !important;
+
     border: none !important;
     border-radius: 4px !important;
     box-shadow: none !important;
+    outline: none !important;
 
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 12px !important;
-    font-weight: normal !important;
+    font: normal 12px Arial, Helvetica, sans-serif !important;
     line-height: 1 !important;
     text-decoration: none !important;
+    text-align: center !important;
 
-    appearance: none !important;
     -webkit-appearance: none !important;
+    appearance: none !important;
     -webkit-tap-highlight-color: transparent !important;
+    cursor: pointer !important;
 }
 
-.lyric-item button.edit-segment-button:hover,
-.lyric-item button.edit-segment-button:focus,
-.lyric-item button.edit-segment-button:active {
+.lyric-item > button.edit-segment-button:hover,
+.lyric-item > button.edit-segment-button:focus,
+.lyric-item > button.edit-segment-button:active {
     color: #d0d0d0 !important;
     background: transparent !important;
     border: none !important;

@@ -1734,3 +1734,20 @@ padding: 22px 24px;
     appearance: none !important;
     -webkit-text-fill-color: #929292 !important;
 }
+
+            /* =========================================
+   CONSOLE FIXO NO CELULAR DEITADO
+   ========================================= */
+
+@media (max-width: 1000px) and (orientation: landscape) {
+    #console {
+        overflow: hidden !important;
+        touch-action: none;
+        overscroll-behavior: none;
+        transform: none !important;
+    }
+
+    #console .console-line {
+        touch-action: none;
+    }
+}

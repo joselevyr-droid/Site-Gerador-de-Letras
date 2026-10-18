@@ -1765,3 +1765,23 @@ padding: 22px 24px;
         font-size: 16px !important;
     }
 }
+
+            
+/* =========================================
+   EVITA ZOOM AUTOMÁTICO NOS CAMPOS
+   EM CELULARES
+   ========================================= */
+
+@media screen and (max-width: 800px) {
+    input,
+    textarea,
+    select,
+    .lyric-text,
+    .number-field,
+    .hex-color-input,
+    .rgb-values input,
+    .settings-popup input,
+    .settings-popup select {
+        font-size: 16px !important;
+    }
+}

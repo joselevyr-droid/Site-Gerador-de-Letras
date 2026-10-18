@@ -13,6 +13,59 @@
         document.getElementById("lyricList");
 
 /* ==================================================
+   CONFIGURAÇÕES VISUAIS INDIVIDUAIS DOS TRECHOS
+   ================================================== */
+
+
+const CHAVE_CONFIG_TRECHOS = "geLetraConfiguracoesVisuaisTrechos";
+const CHAVE_TRECHOS = "geLetraTrechosSalvos";
+
+let configuracoesVisuaisTrechos = {};
+let trechoEditando = null;
+
+function salvarTrechos() {
+    const trechos = Array.from(
+        lyricList.querySelectorAll(".lyric-item")
+    ).map(item => ({
+        id: item.dataset.segmentId,
+        texto: item.querySelector(".lyric-text").value,
+        numeros: Array.from(
+            item.querySelectorAll(".number-field")
+        ).map(input => input.value)
+    }));
+
+    try {
+        localStorage.setItem(
+            CHAVE_TRECHOS,
+            JSON.stringify(trechos)
+        );
+    } catch (erro) {
+        console.error("Não foi possível salvar os trechos:", erro);
+    }
+}
+let configuracaoPadraoAntesEdicao = null;
+let indiceTrechoAtivo = -1;
+let modoTextoTrechoAtivo = null;
+
+try {
+    const salvas = JSON.parse(
+        localStorage.getItem(CHAVE_CONFIG_TRECHOS) || "{}"
+    );
+    if (salvas && typeof salvas === "object" && !Array.isArray(salvas)) {
+        configuracoesVisuaisTrechos = salvas;
+    }
+} catch {
+    configuracoesVisuaisTrechos = {};
+}
+
+function salvarConfiguracoesVisuaisTrechos() {
+    localStorage.setItem(
+        CHAVE_CONFIG_TRECHOS,
+        JSON.stringify(configuracoesVisuaisTrechos)
+    );
+}
+
+/* ==================================================
    ROLAGEM PERSONALIZADA
    ================================================== */
 
@@ -292,7 +345,7 @@ atualizarScrollbar();
         Cria um novo retângulo de trecho.
     */
 
-    function criarTrecho() {
+    function criarTrecho(dadosSalvos = null) {
 
         const item =
             document.createElement("div");
@@ -315,13 +368,45 @@ atualizarScrollbar();
         deleteButton.title =
             "Excluir trecho";
 
+        item.dataset.segmentId = dadosSalvos?.id ||
+    "trecho-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
+        if (configuracoesVisuaisTrechos[item.dataset.segmentId]) {
+            item.classList.add("has-custom-visual-settings");
+        }
+
+        
+const editSegmentButton = document.createElement("button");
+editSegmentButton.type = "button";
+editSegmentButton.className = "edit-segment-button";
+
+editSegmentButton.style.setProperty("appearance", "none", "important");
+editSegmentButton.style.setProperty("-webkit-appearance", "none", "important");
+editSegmentButton.style.setProperty("background", "transparent", "important");
+editSegmentButton.style.setProperty("background-color", "transparent", "important");
+editSegmentButton.style.setProperty("background-image", "none", "important");
+editSegmentButton.style.setProperty("border", "none", "important");
+editSegmentButton.style.setProperty("box-shadow", "none", "important");
+editSegmentButton.style.setProperty("color", "#929292", "important");
+editSegmentButton.style.setProperty("-webkit-text-fill-color", "#929292", "important");
+
+editSegmentButton.textContent = "Editar";
+        editSegmentButton.title = "Editar a aparência deste trecho";
+        editSegmentButton.addEventListener("click", () => {
+            abrirConfiguracoesTrecho(item);
+        });
 
        deleteButton.addEventListener(
     "click",
     () => {
 
+        if (trechoEditando === item) {
+            fecharConfiguracoes();
+        }
+        delete configuracoesVisuaisTrechos[item.dataset.segmentId];
+        salvarConfiguracoesVisuaisTrechos();
         item.remove();
-
+salvarTrechos();
         atualizarScrollbar();
 
     }
@@ -340,18 +425,20 @@ atualizarScrollbar();
         textArea.placeholder =
             "Digite o trecho que será falado...";
 
-textArea.addEventListener(
-    "input",
-    () => {
 
-        textArea.style.height = "auto";
+textArea.addEventListener("input", () => {
+    textArea.style.height = "auto";
+    textArea.style.height = textArea.scrollHeight + "px";
 
-        textArea.style.height =
-            textArea.scrollHeight + "px";
+    salvarTrechos();
+    atualizarScrollbar();
+});
 
-        atualizarScrollbar();
-    }
-);
+if (dadosSalvos) {
+    textArea.value = dadosSalvos.texto || "";
+    textArea.style.height = "auto";
+    textArea.style.height = textArea.scrollHeight + "px";
+}
 
         /* =========================================
            BLOQUINHOS NUMÉRICOS
@@ -400,12 +487,19 @@ input.addEventListener("input", () => {
                 .replace(/\./g, "");
     }
 
+    
     if (input.value.length > 4) {
         input.value = input.value.slice(0, 4);
     }
+
+    salvarTrechos();
 });
-          
-            numberFields.appendChild(input);
+
+if (dadosSalvos?.numeros) {
+    input.value = dadosSalvos.numeros[i] || "";
+}
+
+numberFields.appendChild(input);
         }
 
 
@@ -414,13 +508,16 @@ input.addEventListener("input", () => {
            ========================================= */
 
         item.appendChild(deleteButton);
+        item.appendChild(editSegmentButton);
 
         item.appendChild(textArea);
 
         item.appendChild(numberFields);
 
       lyricList.appendChild(item);
-
+if (!dadosSalvos) {
+    salvarTrechos();
+}
 
 /*
     Atualiza a barra sem alterar
@@ -445,12 +542,45 @@ removeAllButton.addEventListener(
     "click",
     () => {
 
+        if (trechoEditando) {
+            fecharConfiguracoes();
+        }
+        configuracoesVisuaisTrechos = {};
+        salvarConfiguracoesVisuaisTrechos();
         lyricList.innerHTML = "";
-
+salvarTrechos();
         atualizarScrollbar();
 
     }
 );
+
+
+/* ==================================================
+   RESTAURA OS TRECHOS SALVOS
+   ================================================== */
+
+function restaurarTrechos() {
+    try {
+        const trechos = JSON.parse(
+            localStorage.getItem(CHAVE_TRECHOS) || "[]"
+        );
+
+        if (!Array.isArray(trechos)) return;
+
+        for (const dados of trechos) {
+            criarTrecho(dados);
+        }
+
+        atualizarScrollbar();
+    } catch (erro) {
+        console.error(
+            "Não foi possível restaurar os trechos:",
+            erro
+        );
+    }
+}
+
+restaurarTrechos();
 
     /* ==================================================
        CONSOLE VISUAL
@@ -618,7 +748,7 @@ function quebrarLinha(texto, cor) {
         const texto = linha.textContent || "";
         const cor = estiloLinha.color;
 
-        if (modoTextoConsole === "shrink") {
+        if ((modoTextoTrechoAtivo || modoTextoConsole) === "shrink") {
             adicionarLinha(texto, cor);
         } else {
             quebrarLinha(texto, cor);
@@ -633,7 +763,7 @@ function quebrarLinha(texto, cor) {
     for (const linha of linhasRenderizadas) {
         ctx.fillStyle = linha.cor;
 
-        if (modoTextoConsole === "shrink") {
+        if ((modoTextoTrechoAtivo || modoTextoConsole) === "shrink") {
             ctx.save();
 
             const larguraOriginal =
@@ -1207,6 +1337,7 @@ async function executarCodigo(
         new Function(
             "console",
             "estaExecutando",
+            "definirTrechoAtivo",
             `
             "use strict";
 
@@ -1223,7 +1354,8 @@ async function executarCodigo(
 
         await executar(
             customConsole,
-            () => idExecucao === execucaoAtual
+            () => idExecucao === execucaoAtual,
+            definirTrechoAtivo
         );
 
 
@@ -1336,6 +1468,10 @@ async function falante (t, q, l) {
 
   };
 
+  // Usa um cronograma absoluto para que o processamento do console
+  // não some milissegundos extras a cada caractere.
+  const inicioFalante = performance.now();
+  let caracteresProcessados = 0;
 
   for (let i = 0; i < q; i++) {
 
@@ -1356,7 +1492,15 @@ async function falante (t, q, l) {
         memorypad +
         lyric[l][0][i][y];
 
-      await timer(t);
+      caracteresProcessados++;
+
+      const prazoCaractere =
+        inicioFalante + caracteresProcessados * t;
+
+      const tempoRestante =
+        prazoCaractere - performance.now();
+
+      await timer(Math.max(0, tempoRestante));
 
     };
 
@@ -1470,6 +1614,7 @@ async function song () {
     i++
   ) {
 
+    await definirTrechoAtivo(i);
     await escrita(i);
 
   };
@@ -1629,6 +1774,7 @@ async function executarLetra(gravar = false) {
 const foiCancelada = gravar && cancelamentoGravacao;
 
 if (idExecucao === execucaoAtual || foiCancelada) {
+    restaurarVisualPadrao();
     customConsole.clear();
 
     customConsole.log("Bem-vindo ao GeLetra!");
@@ -1762,6 +1908,9 @@ const settingsOverlay =
 
 const settingsClose =
     document.getElementById("settingsClose");
+
+const resetSegmentSettings =
+    document.getElementById("resetSegmentSettings");
 
 const settingsMain =
     document.getElementById("settingsMain");
@@ -1918,10 +2067,14 @@ function aplicarCorTextoRGB(r, g, b) {
     fontHexColorInput.value = corTextoConsole.toUpperCase();
     fontSelectedColor.textContent = corTextoConsole.toUpperCase();
 
-    localStorage.setItem(
-        "jssConsoleTextoCor",
-        corTextoConsole
-    );
+    if (trechoEditando) {
+        salvarConfiguracaoDoTrechoEditado();
+    } else {
+        localStorage.setItem(
+            "jssConsoleTextoCor",
+            corTextoConsole
+        );
+    }
 }
 
 function atualizarGradienteTexto() {
@@ -2479,10 +2632,14 @@ selectedColor.textContent = corConsole;
 hexColorInput.value = corConsole.toUpperCase();
 
 
-    localStorage.setItem(
-        "jssConsoleCor",
-        corConsole
-    );
+    if (trechoEditando) {
+        salvarConfiguracaoDoTrechoEditado();
+    } else {
+        localStorage.setItem(
+            "jssConsoleCor",
+            corConsole
+        );
+    }
 }
 
 
@@ -2956,12 +3113,168 @@ consoleFontSize.addEventListener("input", () => {
 
     aplicarTamanhoFonteConsole();
 
-    localStorage.setItem(
-        "jssConsoleTamanhoFonte",
-        tamanhoFonteConsole
-    );
+    if (trechoEditando) {
+        salvarConfiguracaoDoTrechoEditado();
+    } else {
+        localStorage.setItem(
+            "jssConsoleTamanhoFonte",
+            tamanhoFonteConsole
+        );
+    }
 });
 
+
+/* ==================================================
+   APLICA CONFIGURAÇÕES VISUAIS DE UM TRECHO
+   ================================================== */
+
+function obterConfiguracaoVisualPadrao() {
+    return {
+        background: corConsole,
+        textColor: corTextoConsole,
+        font: fonteConsole,
+        fontSize: tamanhoFonteConsole,
+        textMode: modoTextoConsole
+    };
+}
+
+function aplicarConfiguracaoVisual(config, aplicarModoDoTrecho = false) {
+    output.style.background = config.background || corConsole;
+    colorPreview.style.background = config.background || corConsole;
+    status.style.background = config.background || corConsole;
+    fontColorPreview.style.backgroundColor = config.textColor || corTextoConsole;
+    output.style.setProperty(
+        "--console-text-color",
+        config.textColor || corTextoConsole
+    );
+    output.style.color = config.textColor || corTextoConsole;
+    output.style.fontFamily = config.font || fonteConsole;
+    output.style.fontSize = (Number(config.fontSize) || tamanhoFonteConsole) + "px";
+    if (aplicarModoDoTrecho) {
+        modoTextoTrechoAtivo = ["wrap", "shrink"].includes(config.textMode)
+            ? config.textMode
+            : "wrap";
+    } else {
+        modoTextoTrechoAtivo = null;
+        modoTextoConsole = ["wrap", "shrink"].includes(config.textMode)
+            ? config.textMode
+            : "wrap";
+    }
+    aplicarModoTextoConsole();
+}
+
+function salvarConfiguracaoDoTrechoEditado() {
+    if (!trechoEditando) return;
+
+    configuracoesVisuaisTrechos[trechoEditando.dataset.segmentId] = {
+        background: corConsole,
+        textColor: corTextoConsole,
+        font: fonteConsole,
+        fontSize: tamanhoFonteConsole,
+        textMode: modoTextoConsole
+    };
+
+    salvarConfiguracoesVisuaisTrechos();
+    aplicarConfiguracaoVisual(
+        configuracoesVisuaisTrechos[trechoEditando.dataset.segmentId]
+    );
+    trechoEditando.classList.add("has-custom-visual-settings");
+}
+
+function sincronizarControlesComConfiguracaoAtual() {
+    sincronizarSeletor();
+    sincronizarSeletorTexto();
+    aplicarTamanhoFonteConsole();
+    consoleTextMode.value = modoTextoConsole;
+    aplicarModoTextoConsole();
+}
+
+function abrirConfiguracoesTrecho(item) {
+    configuracaoPadraoAntesEdicao = obterConfiguracaoVisualPadrao();
+    trechoEditando = item;
+
+    const salva = configuracoesVisuaisTrechos[item.dataset.segmentId];
+    const config = salva || configuracaoPadraoAntesEdicao;
+    resetSegmentSettings.style.display = "block";
+    item.classList.toggle("has-custom-visual-settings", Boolean(salva));
+
+    corConsole = config.background;
+    corTextoConsole = config.textColor;
+    fonteConsole = config.font;
+    tamanhoFonteConsole = Number(config.fontSize) || 14;
+    modoTextoConsole = config.textMode || "wrap";
+
+    aplicarConfiguracaoVisual(config);
+    sincronizarControlesComConfiguracaoAtual();
+
+    settingsMain.style.display = "block";
+    colorScreen.style.display = "none";
+    fontScreen.style.display = "none";
+    fontColorScreen.style.display = "none";
+    settingsOverlay.style.display = "flex";
+}
+
+function abrirConfiguracoesPadrao() {
+    if (trechoEditando) {
+        fecharConfiguracoes();
+    }
+    trechoEditando = null;
+    configuracaoPadraoAntesEdicao = null;
+    resetSegmentSettings.style.display = "none";
+    aplicarConfiguracaoVisual(obterConfiguracaoVisualPadrao());
+    sincronizarControlesComConfiguracaoAtual();
+
+    settingsMain.style.display = "block";
+    colorScreen.style.display = "none";
+    fontScreen.style.display = "none";
+    fontColorScreen.style.display = "none";
+    settingsOverlay.style.display = "flex";
+}
+
+function fecharConfiguracoes() {
+    settingsOverlay.style.display = "none";
+    resetSegmentSettings.style.display = "none";
+
+    if (trechoEditando && configuracaoPadraoAntesEdicao) {
+        corConsole = configuracaoPadraoAntesEdicao.background;
+        corTextoConsole = configuracaoPadraoAntesEdicao.textColor;
+        fonteConsole = configuracaoPadraoAntesEdicao.font;
+        tamanhoFonteConsole = configuracaoPadraoAntesEdicao.fontSize;
+        modoTextoConsole = configuracaoPadraoAntesEdicao.textMode;
+        aplicarConfiguracaoVisual(configuracaoPadraoAntesEdicao);
+        sincronizarControlesComConfiguracaoAtual();
+    }
+
+    trechoEditando = null;
+    configuracaoPadraoAntesEdicao = null;
+}
+
+resetSegmentSettings.addEventListener("click", () => {
+    if (!trechoEditando) return;
+
+    delete configuracoesVisuaisTrechos[trechoEditando.dataset.segmentId];
+    salvarConfiguracoesVisuaisTrechos();
+    trechoEditando.classList.remove("has-custom-visual-settings");
+    fecharConfiguracoes();
+});
+
+function definirTrechoAtivo(indice) {
+    indiceTrechoAtivo = indice;
+    const itens = Array.from(document.querySelectorAll(".lyric-item"));
+    const item = itens[indice];
+    const config = item
+        ? configuracoesVisuaisTrechos[item.dataset.segmentId]
+        : null;
+    aplicarConfiguracaoVisual(
+        config || obterConfiguracaoVisualPadrao(),
+        Boolean(config)
+    );
+}
+
+function restaurarVisualPadrao() {
+    indiceTrechoAtivo = -1;
+    aplicarConfiguracaoVisual(obterConfiguracaoVisualPadrao());
+}
 
 /* ==================================================
    MODO DE EXIBIÇÃO DE TEXTOS LONGOS
@@ -2983,6 +3296,7 @@ requestAnimationFrame(() => {
 });
 
 function aplicarModoTextoConsole() {
+    const modoAplicado = modoTextoTrechoAtivo || modoTextoConsole;
     const estiloOutput = getComputedStyle(output);
 
     const larguraDisponivel =
@@ -2993,7 +3307,7 @@ function aplicarModoTextoConsole() {
     const linhas = output.querySelectorAll(".console-line");
 
     linhas.forEach(linha => {
-        if (modoTextoConsole === "shrink") {
+        if (modoAplicado === "shrink") {
             linha.style.maxWidth = "none";
             linha.style.whiteSpace = "pre";
             linha.style.overflowWrap = "normal";
@@ -3040,10 +3354,14 @@ observadorTextoConsole.observe(output, {
 consoleTextMode.addEventListener("change", () => {
     modoTextoConsole = consoleTextMode.value;
 
-    localStorage.setItem(
-        "jssConsoleModoTexto",
-        modoTextoConsole
-    );
+    if (trechoEditando) {
+        salvarConfiguracaoDoTrechoEditado();
+    } else {
+        localStorage.setItem(
+            "jssConsoleModoTexto",
+            modoTextoConsole
+        );
+    }
 
     aplicarModoTextoConsole();
 });
@@ -3058,22 +3376,7 @@ new ResizeObserver(() => {
 
 editSettingsButton.addEventListener(
     "click",
-    () => {
-
-        settingsOverlay.style.display =
-            "flex";
-
-        settingsMain.style.display =
-            "block";
-
-        colorScreen.style.display =
-            "none";
-
-        fontScreen.style.display =
-            "none";
-
-        fontColorScreen.style.display = "none";
-    }
+    abrirConfiguracoesPadrao
 );
 
 
@@ -3083,11 +3386,7 @@ editSettingsButton.addEventListener(
 
 settingsClose.addEventListener(
     "click",
-    () => {
-
-        settingsOverlay.style.display =
-            "none";
-    }
+    fecharConfiguracoes
 );
 
 
@@ -3564,10 +3863,14 @@ document
 
             output.style.fontFamily = fonteConsole;
 
-            localStorage.setItem(
-                "jssConsoleFonte",
-                fonteConsole
-            );
+            if (trechoEditando) {
+                salvarConfiguracaoDoTrechoEditado();
+            } else {
+                localStorage.setItem(
+                    "jssConsoleFonte",
+                    fonteConsole
+                );
+            }
         });
     });
 

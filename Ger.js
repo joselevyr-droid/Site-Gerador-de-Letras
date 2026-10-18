@@ -3914,3 +3914,94 @@ fontBack.addEventListener(
             "block";
     }
 );
+
+
+/* =========================================
+   AJUSTE AUTOMÁTICO AO TECLADO VIRTUAL
+   ========================================= */
+
+(() => {
+    const viewport = window.visualViewport;
+
+    if (!viewport) return;
+
+    let tecladoAberto = false;
+    let posicaoAnterior = 0;
+    let temporizadorFechamento;
+
+    function campoEditavel(elemento) {
+        return elemento instanceof HTMLElement &&
+            elemento.matches(
+                'input, textarea, select, [contenteditable="true"]'
+            );
+    }
+
+    function ajustarCampoVisivel() {
+        const campo = document.activeElement;
+
+        if (!campoEditavel(campo)) return;
+
+        const rect = campo.getBoundingClientRect();
+
+        const limiteInferior =
+            viewport.offsetTop + viewport.height - 20;
+
+        if (rect.bottom > limiteInferior) {
+            window.scrollBy({
+                top: rect.bottom - limiteInferior,
+                behavior: "smooth"
+            });
+        } else if (rect.top < viewport.offsetTop + 10) {
+            window.scrollBy({
+                top: rect.top - viewport.offsetTop - 10,
+                behavior: "smooth"
+            });
+        }
+    }
+
+    function verificarTeclado() {
+        clearTimeout(temporizadorFechamento);
+
+        const campo = document.activeElement;
+        const campoAtivo = campoEditavel(campo);
+
+        const tecladoVisivel =
+            campoAtivo &&
+            viewport.height < window.innerHeight * 0.75;
+
+        if (tecladoVisivel) {
+            tecladoAberto = true;
+            ajustarCampoVisivel();
+            return;
+        }
+
+        if (tecladoAberto && !campoAtivo) {
+            temporizadorFechamento = setTimeout(() => {
+                window.scrollTo({
+                    top: posicaoAnterior,
+                    behavior: "smooth"
+                });
+
+                tecladoAberto = false;
+            }, 150);
+        }
+    }
+
+    document.addEventListener("focusin", evento => {
+        if (!campoEditavel(evento.target)) return;
+
+        if (!tecladoAberto) {
+            posicaoAnterior = window.scrollY;
+        }
+
+        setTimeout(ajustarCampoVisivel, 100);
+        setTimeout(ajustarCampoVisivel, 350);
+    });
+
+    document.addEventListener("focusout", () => {
+        setTimeout(verificarTeclado, 200);
+    });
+
+    viewport.addEventListener("resize", verificarTeclado);
+    viewport.addEventListener("scroll", verificarTeclado);
+})();

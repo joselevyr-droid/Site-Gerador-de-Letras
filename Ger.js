@@ -16,9 +16,33 @@
    CONFIGURAÇÕES VISUAIS INDIVIDUAIS DOS TRECHOS
    ================================================== */
 
+
 const CHAVE_CONFIG_TRECHOS = "geLetraConfiguracoesVisuaisTrechos";
+const CHAVE_TRECHOS = "geLetraTrechosSalvos";
+
 let configuracoesVisuaisTrechos = {};
 let trechoEditando = null;
+
+function salvarTrechos() {
+    const trechos = Array.from(
+        lyricList.querySelectorAll(".lyric-item")
+    ).map(item => ({
+        id: item.dataset.segmentId,
+        texto: item.querySelector(".lyric-text").value,
+        numeros: Array.from(
+            item.querySelectorAll(".number-field")
+        ).map(input => input.value)
+    }));
+
+    try {
+        localStorage.setItem(
+            CHAVE_TRECHOS,
+            JSON.stringify(trechos)
+        );
+    } catch (erro) {
+        console.error("Não foi possível salvar os trechos:", erro);
+    }
+}
 let configuracaoPadraoAntesEdicao = null;
 let indiceTrechoAtivo = -1;
 let modoTextoTrechoAtivo = null;
@@ -321,7 +345,7 @@ atualizarScrollbar();
         Cria um novo retângulo de trecho.
     */
 
-    function criarTrecho() {
+    function criarTrecho(dadosSalvos = null) {
 
         const item =
             document.createElement("div");
@@ -344,8 +368,8 @@ atualizarScrollbar();
         deleteButton.title =
             "Excluir trecho";
 
-        item.dataset.segmentId =
-            "trecho-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        item.dataset.segmentId = dadosSalvos?.id ||
+    "trecho-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
         if (configuracoesVisuaisTrechos[item.dataset.segmentId]) {
             item.classList.add("has-custom-visual-settings");
@@ -382,7 +406,7 @@ editSegmentButton.textContent = "Editar";
         delete configuracoesVisuaisTrechos[item.dataset.segmentId];
         salvarConfiguracoesVisuaisTrechos();
         item.remove();
-
+salvarTrechos();
         atualizarScrollbar();
 
     }
@@ -401,18 +425,20 @@ editSegmentButton.textContent = "Editar";
         textArea.placeholder =
             "Digite o trecho que será falado...";
 
-textArea.addEventListener(
-    "input",
-    () => {
 
-        textArea.style.height = "auto";
+textArea.addEventListener("input", () => {
+    textArea.style.height = "auto";
+    textArea.style.height = textArea.scrollHeight + "px";
 
-        textArea.style.height =
-            textArea.scrollHeight + "px";
+    salvarTrechos();
+    atualizarScrollbar();
+});
 
-        atualizarScrollbar();
-    }
-);
+if (dadosSalvos) {
+    textArea.value = dadosSalvos.texto || "";
+    textArea.style.height = "auto";
+    textArea.style.height = textArea.scrollHeight + "px";
+}
 
         /* =========================================
            BLOQUINHOS NUMÉRICOS
@@ -461,12 +487,19 @@ input.addEventListener("input", () => {
                 .replace(/\./g, "");
     }
 
+    
     if (input.value.length > 4) {
         input.value = input.value.slice(0, 4);
     }
+
+    salvarTrechos();
 });
-          
-            numberFields.appendChild(input);
+
+if (dadosSalvos?.numeros) {
+    input.value = dadosSalvos.numeros[i] || "";
+}
+
+numberFields.appendChild(input);
         }
 
 
@@ -482,7 +515,9 @@ input.addEventListener("input", () => {
         item.appendChild(numberFields);
 
       lyricList.appendChild(item);
-
+if (!dadosSalvos) {
+    salvarTrechos();
+}
 
 /*
     Atualiza a barra sem alterar
@@ -513,11 +548,39 @@ removeAllButton.addEventListener(
         configuracoesVisuaisTrechos = {};
         salvarConfiguracoesVisuaisTrechos();
         lyricList.innerHTML = "";
-
+salvarTrechos();
         atualizarScrollbar();
 
     }
 );
+
+
+/* ==================================================
+   RESTAURA OS TRECHOS SALVOS
+   ================================================== */
+
+function restaurarTrechos() {
+    try {
+        const trechos = JSON.parse(
+            localStorage.getItem(CHAVE_TRECHOS) || "[]"
+        );
+
+        if (!Array.isArray(trechos)) return;
+
+        for (const dados of trechos) {
+            criarTrecho(dados);
+        }
+
+        atualizarScrollbar();
+    } catch (erro) {
+        console.error(
+            "Não foi possível restaurar os trechos:",
+            erro
+        );
+    }
+}
+
+restaurarTrechos();
 
     /* ==================================================
        CONSOLE VISUAL

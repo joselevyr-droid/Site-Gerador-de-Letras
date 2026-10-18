@@ -1751,3 +1751,17 @@ padding: 22px 24px;
         touch-action: none;
     }
 }
+
+            /* =========================================
+   CAMPOS DE TEXTO EM CELULARES
+   Evita o zoom automático ao abrir o teclado
+   ========================================= */
+
+@media (max-width: 800px) {
+    .lyric-text,
+    .number-field,
+    .settings-popup input,
+    .settings-popup select {
+        font-size: 16px !important;
+    }
+}
